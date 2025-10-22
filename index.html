@@ -159,6 +159,7 @@
             font-size: 14px;
             text-align: center;
             color: #856404;
+            transition: all 0.3s ease;
         }
         
         .config-section {
@@ -224,6 +225,77 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* 通知弹窗样式 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
+            text-align: center;
+            min-width: 300px;
+            opacity: 0;
+            transition: all 0.4s ease;
+            border-left: 5px solid #3498db;
+        }
+        
+        .notification.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        .notification.success {
+            border-left-color: #27ae60;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        }
+        
+        .notification.error {
+            border-left-color: #e74c3c;
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        }
+        
+        .notification.warning {
+            border-left-color: #f39c12;
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+        }
+        
+        .notification-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .notification-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .notification-message {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .progress-bar {
+            height: 3px;
+            background: #3498db;
+            width: 0%;
+            border-radius: 2px;
+            margin-top: 10px;
+            transition: width 3s linear;
+        }
+        
+        .notification.success .progress-bar {
+            background: #27ae60;
+        }
+        
+        .notification.error .progress-bar {
+            background: #e74c3c;
+        }
     </style>
 </head>
 <body>
@@ -266,6 +338,14 @@
                 处理中...
             </div>
         </div>
+    </div>
+
+    <!-- 通知弹窗 -->
+    <div class="notification" id="notification">
+        <div class="notification-icon" id="notificationIcon">📢</div>
+        <div class="notification-title" id="notificationTitle">通知</div>
+        <div class="notification-message" id="notificationMessage">这里是通知内容</div>
+        <div class="progress-bar" id="progressBar"></div>
     </div>
 
     <script>
@@ -350,7 +430,7 @@
             
             localStorage.setItem('homework_teacher_config', JSON.stringify(config));
             updateConfigStatus();
-            showStatus('✅ 配置已保存', 'success');
+            showNotification('配置已保存', '✅ GitHub配置已成功保存', 'success');
         }
 
         // 更新配置状态显示
@@ -377,7 +457,7 @@
         // 测试GitHub连接
         async function testConnection() {
             if (!config.githubToken) {
-                showStatus('❌ 请先输入GitHub Token', 'error');
+                showNotification('配置错误', '❌ 请先输入GitHub Token', 'error');
                 return;
             }
 
@@ -393,17 +473,18 @@
                 
                 if (response.ok) {
                     const userData = await response.json();
-                    showStatus(`✅ 连接成功！欢迎 ${userData.login}`, 'success');
                     
                     // 如果没有Gist ID，尝试创建
                     if (!config.gistId) {
                         await createGist();
+                    } else {
+                        showNotification('连接成功', `✅ 欢迎 ${userData.login}`, 'success');
                     }
                 } else {
                     throw new Error(`HTTP ${response.status}`);
                 }
             } catch (error) {
-                showStatus(`❌ 连接失败: ${error.message}`, 'error');
+                showNotification('连接失败', `❌ ${error.message}`, 'error');
             }
             
             showLoading(false);
@@ -445,12 +526,13 @@
                     config.gistId = gistData.id;
                     document.getElementById('gistId').value = gistData.id;
                     saveConfig();
-                    showStatus('✅ Gist创建成功！', 'success');
+                    showNotification('创建成功', '✅ Gist创建成功！现在可以发布作业了', 'success');
                 } else {
-                    throw new Error('Gist创建失败');
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Gist创建失败');
                 }
             } catch (error) {
-                showStatus('❌ Gist创建失败，请手动创建', 'error');
+                showNotification('创建失败', `❌ ${error.message}`, 'error');
             }
         }
 
@@ -497,8 +579,22 @@
         // 保存并上传到GitHub
         async function saveAndUpload() {
             if (!config.githubToken || !config.gistId) {
-                showStatus('❌ 请先完成GitHub配置', 'error');
+                showNotification('配置错误', '❌ 请先完成GitHub配置', 'error');
                 toggleConfig();
+                return;
+            }
+
+            // 检查是否有作业内容
+            let hasContent = false;
+            subjects.forEach(subject => {
+                const input = document.getElementById(`input-${subject.id}`);
+                if (input && input.value.trim() && input.value.trim() !== "暂无作业") {
+                    hasContent = true;
+                }
+            });
+
+            if (!hasContent) {
+                showNotification('内容为空', '📝 请先填写至少一个科目的作业内容', 'warning');
                 return;
             }
 
@@ -529,13 +625,23 @@
                 if (response.ok) {
                     config.lastSync = new Date().toLocaleString();
                     localStorage.setItem('homework_teacher_config', JSON.stringify(config));
-                    showStatus('✅ 作业发布成功！已同步到云端', 'success');
+                    
+                    // 显示成功通知
+                    showNotification('发布成功', '✅ 作业已成功发布到云端！学生端可以立即看到更新', 'success');
                     updateDisplay();
+                    
+                    // 自动收起所有科目
+                    document.querySelectorAll('.subject-content').forEach(el => {
+                        el.classList.remove('active');
+                        el.parentElement.classList.remove('active');
+                    });
+                    
                 } else {
-                    throw new Error(`上传失败: HTTP ${response.status}`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `上传失败: HTTP ${response.status}`);
                 }
             } catch (error) {
-                showStatus(`❌ 发布失败: ${error.message}`, 'error');
+                showNotification('发布失败', `❌ ${error.message}`, 'error');
             }
             
             showLoading(false);
@@ -544,7 +650,7 @@
         // 从云端同步数据
         async function syncFromCloud() {
             if (!config.githubToken || !config.gistId) {
-                showStatus('❌ 请先完成GitHub配置', 'error');
+                showNotification('配置错误', '❌ 请先完成GitHub配置', 'error');
                 toggleConfig();
                 return;
             }
@@ -575,13 +681,14 @@
                     saveLocalData();
                     config.lastSync = new Date().toLocaleString();
                     localStorage.setItem('homework_teacher_config', JSON.stringify(config));
-                    showStatus('✅ 同步成功！已获取最新作业数据', 'success');
+                    showNotification('同步成功', '✅ 已成功从云端获取最新作业数据', 'success');
                     updateDisplay();
                 } else {
-                    throw new Error(`同步失败: HTTP ${response.status}`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `同步失败: HTTP ${response.status}`);
                 }
             } catch (error) {
-                showStatus(`❌ 同步失败: ${error.message}`, 'error');
+                showNotification('同步失败', `❌ ${error.message}`, 'error');
             }
             
             showLoading(false);
@@ -606,23 +713,46 @@
             }
         }
 
-        // 显示状态消息
-        function showStatus(message, type) {
-            const statusBar = document.getElementById('statusBar');
-            statusBar.textContent = message;
+        // 显示通知弹窗
+        function showNotification(title, message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const icon = document.getElementById('notificationIcon');
+            const titleEl = document.getElementById('notificationTitle');
+            const messageEl = document.getElementById('notificationMessage');
+            const progressBar = document.getElementById('progressBar');
             
+            // 设置内容和样式
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            
+            // 设置图标和样式
+            notification.className = 'notification';
             if (type === 'success') {
-                statusBar.style.background = '#d4edda';
-                statusBar.style.borderColor = '#c3e6cb';
-                statusBar.style.color = '#155724';
+                notification.classList.add('success');
+                icon.textContent = '✅';
+            } else if (type === 'error') {
+                notification.classList.add('error');
+                icon.textContent = '❌';
+            } else if (type === 'warning') {
+                notification.classList.add('warning');
+                icon.textContent = '⚠️';
             } else {
-                statusBar.style.background = '#f8d7da';
-                statusBar.style.borderColor = '#f5c6cb';
-                statusBar.style.color = '#721c24';
+                icon.textContent = '📢';
             }
             
-            // 3秒后恢复原状态
-            setTimeout(updateDisplay, 3000);
+            // 显示通知
+            notification.classList.add('show');
+            
+            // 重置进度条
+            progressBar.style.width = '0%';
+            setTimeout(() => {
+                progressBar.style.width = '100%';
+            }, 10);
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
         }
 
         // 显示/隐藏加载动画
@@ -648,7 +778,7 @@
                 }
             });
             
-            showStatus('📝 示例数据已填充', 'success');
+            showNotification('示例数据', '📝 示例数据已填充完成', 'success');
         }
 
         // 在控制台暴露一些开发函数
