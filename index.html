@@ -296,6 +296,28 @@
         .notification.error .progress-bar {
             background: #e74c3c;
         }
+        
+        /* 自动同步提示 */
+        .auto-sync-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 999;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        
+        .auto-sync-indicator.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -307,7 +329,7 @@
         
         <div class="content">
             <div class="status-bar" id="statusBar">
-                📱 请先配置GitHub设置以启用云端同步
+                📱 正在检查云端数据...
             </div>
             
             <div id="subjectsContainer">
@@ -317,7 +339,7 @@
             <div class="button-group">
                 <button class="btn btn-primary" onclick="toggleConfig()">GitHub设置</button>
                 <button class="btn btn-success" onclick="saveAndUpload()">发布作业</button>
-                <button class="btn btn-warning" onclick="syncFromCloud()">同步云端</button>
+                <button class="btn btn-warning" onclick="syncFromCloud()">手动同步</button>
             </div>
             
             <div class="config-section" id="configSection">
@@ -330,12 +352,12 @@
             </div>
             
             <div class="last-update" id="lastUpdate">
-                最后更新: 从未同步
+                最后更新: 正在同步...
             </div>
             
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                处理中...
+                <div id="loadingText">正在同步云端数据...</div>
             </div>
         </div>
     </div>
@@ -346,6 +368,11 @@
         <div class="notification-title" id="notificationTitle">通知</div>
         <div class="notification-message" id="notificationMessage">这里是通知内容</div>
         <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- 自动同步提示 -->
+    <div class="auto-sync-indicator" id="autoSyncIndicator">
+        🔄 自动同步中...
     </div>
 
     <script>
@@ -362,14 +389,105 @@
         // 数据存储
         let homeworkData = {};
         let config = {};
+        let isAutoSyncing = false;
 
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
             loadConfig();
             renderSubjects();
             loadLocalData();
-            updateDisplay();
+            
+            // 页面加载完成后自动同步云端数据
+            setTimeout(() => {
+                autoSyncFromCloud();
+            }, 1000);
         });
+
+        // 自动同步云端数据
+        async function autoSyncFromCloud() {
+            if (isAutoSyncing) return;
+            
+            // 检查是否已配置GitHub
+            if (!config.githubToken || !config.gistId) {
+                updateDisplay();
+                showNotification('提示', '📱 请先配置GitHub设置以启用云端同步', 'warning');
+                return;
+            }
+
+            isAutoSyncing = true;
+            showAutoSyncIndicator();
+            showLoading(true, '正在从云端同步最新数据...');
+
+            try {
+                const response = await fetch(`https://api.github.com/gists/${config.gistId}`, {
+                    headers: {
+                        'Authorization': `token ${config.githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (response.ok) {
+                    const gistData = await response.json();
+                    const content = gistData.files['homework_data.json'].content;
+                    const cloudData = JSON.parse(content);
+                    
+                    // 检查数据是否有更新
+                    const localUpdated = homeworkData.last_updated;
+                    const cloudUpdated = cloudData.last_updated;
+                    
+                    if (!localUpdated || new Date(cloudUpdated) > new Date(localUpdated)) {
+                        // 云端数据更新，使用云端数据
+                        homeworkData = cloudData;
+                        
+                        // 更新输入框
+                        subjects.forEach(subject => {
+                            const input = document.getElementById(`input-${subject.id}`);
+                            if (input) {
+                                input.value = homeworkData[subject.name] || '';
+                            }
+                        });
+                        
+                        saveLocalData();
+                        showNotification('同步成功', '✅ 已从云端获取最新作业数据', 'success');
+                    } else {
+                        // 本地数据是最新的
+                        showNotification('数据最新', '📊 当前已是最新数据', 'success');
+                    }
+                    
+                    config.lastSync = new Date().toLocaleString();
+                    localStorage.setItem('homework_teacher_config', JSON.stringify(config));
+                    
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `同步失败: HTTP ${response.status}`);
+                }
+            } catch (error) {
+                console.log('自动同步失败:', error);
+                // 自动同步失败时不显示错误通知，避免干扰用户体验
+                // 只在状态栏显示提示
+                showStatus('❌ 自动同步失败，使用本地数据', 'error');
+            }
+            
+            showLoading(false);
+            hideAutoSyncIndicator();
+            updateDisplay();
+            isAutoSyncing = false;
+        }
+
+        // 显示自动同步指示器
+        function showAutoSyncIndicator() {
+            const indicator = document.getElementById('autoSyncIndicator');
+            indicator.textContent = '🔄 自动同步中...';
+            indicator.classList.add('show');
+        }
+
+        // 隐藏自动同步指示器
+        function hideAutoSyncIndicator() {
+            const indicator = document.getElementById('autoSyncIndicator');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 1000);
+        }
 
         // 渲染科目卡片
         function renderSubjects() {
@@ -431,6 +549,11 @@
             localStorage.setItem('homework_teacher_config', JSON.stringify(config));
             updateConfigStatus();
             showNotification('配置已保存', '✅ GitHub配置已成功保存', 'success');
+            
+            // 保存配置后自动同步
+            setTimeout(() => {
+                autoSyncFromCloud();
+            }, 500);
         }
 
         // 更新配置状态显示
@@ -461,7 +584,7 @@
                 return;
             }
 
-            showLoading(true);
+            showLoading(true, '正在测试连接...');
             
             try {
                 const response = await fetch('https://api.github.com/user', {
@@ -479,6 +602,8 @@
                         await createGist();
                     } else {
                         showNotification('连接成功', `✅ 欢迎 ${userData.login}`, 'success');
+                        // 连接成功后自动同步
+                        autoSyncFromCloud();
                     }
                 } else {
                     throw new Error(`HTTP ${response.status}`);
@@ -598,7 +723,7 @@
                 return;
             }
 
-            showLoading(true);
+            showLoading(true, '正在发布作业到云端...');
             
             try {
                 // 先保存到本地
@@ -647,7 +772,7 @@
             showLoading(false);
         }
 
-        // 从云端同步数据
+        // 从云端同步数据（手动）
         async function syncFromCloud() {
             if (!config.githubToken || !config.gistId) {
                 showNotification('配置错误', '❌ 请先完成GitHub配置', 'error');
@@ -655,7 +780,7 @@
                 return;
             }
 
-            showLoading(true);
+            showLoading(true, '正在从云端同步数据...');
             
             try {
                 const response = await fetch(`https://api.github.com/gists/${config.gistId}`, {
@@ -701,12 +826,32 @@
             
             const statusBar = document.getElementById('statusBar');
             if (config.githubToken && config.gistId) {
-                statusBar.innerHTML = `✅ 云端同步已就绪 | Gist: ${config.gistId.substring(0, 8)}...`;
+                statusBar.innerHTML = `✅ 云端同步已就绪 | Gist: ${config.gistId.substring(0, 8)}... | 最后同步: ${config.lastSync || '从未'}`;
                 statusBar.style.background = '#d4edda';
                 statusBar.style.borderColor = '#c3e6cb';
                 statusBar.style.color = '#155724';
             } else {
                 statusBar.innerHTML = '📱 请先配置GitHub设置以启用云端同步';
+                statusBar.style.background = '#fff3cd';
+                statusBar.style.borderColor = '#ffeaa7';
+                statusBar.style.color = '#856404';
+            }
+        }
+
+        // 显示状态消息
+        function showStatus(message, type) {
+            const statusBar = document.getElementById('statusBar');
+            statusBar.textContent = message;
+            
+            if (type === 'success') {
+                statusBar.style.background = '#d4edda';
+                statusBar.style.borderColor = '#c3e6cb';
+                statusBar.style.color = '#155724';
+            } else if (type === 'error') {
+                statusBar.style.background = '#f8d7da';
+                statusBar.style.borderColor = '#f5c6cb';
+                statusBar.style.color = '#721c24';
+            } else {
                 statusBar.style.background = '#fff3cd';
                 statusBar.style.borderColor = '#ffeaa7';
                 statusBar.style.color = '#856404';
@@ -756,8 +901,12 @@
         }
 
         // 显示/隐藏加载动画
-        function showLoading(show) {
-            document.getElementById('loading').classList.toggle('active', show);
+        function showLoading(show, text = '处理中...') {
+            const loading = document.getElementById('loading');
+            const loadingText = document.getElementById('loadingText');
+            
+            loadingText.textContent = text;
+            loading.classList.toggle('active', show);
         }
 
         // 为所有科目添加示例数据（开发用）
