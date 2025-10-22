@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>720班作业发布系统 - 教师端</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .header .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .subject-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .subject-card.active {
+            border-color: #3498db;
+            background: #e3f2fd;
+        }
+        
+        .subject-header {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+        
+        .subject-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+        
+        .subject-icon {
+            width: 30px;
+            height: 30px;
+            background: #3498db;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .subject-content {
+            padding: 0 15px 15px;
+            display: none;
+        }
+        
+        .subject-content.active {
+            display: block;
+        }
+        
+        .homework-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 14px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        .homework-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #219a52);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .status-bar {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 20px;
+            font-size: 14px;
+            text-align: center;
+            color: #856404;
+        }
+        
+        .config-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .config-section.active {
+            display: block;
+        }
+        
+        .config-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            font-family: monospace;
+        }
+        
+        .sync-status {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .last-update {
+            background: #e8f5e8;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #2e7d32;
+            text-align: center;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>720班作业发布系统</h1>
+            <div class="subtitle">教师手机端 · GitHub云端同步</div>
+        </div>
+        
+        <div class="content">
+            <div class="status-bar" id="statusBar">
+                📱 请先配置GitHub设置以启用云端同步
+            </div>
+            
+            <div id="subjectsContainer">
+                <!-- 科目卡片将通过JavaScript动态生成 -->
+            </div>
+            
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="toggleConfig()">GitHub设置</button>
+                <button class="btn btn-success" onclick="saveAndUpload()">发布作业</button>
+                <button class="btn btn-warning" onclick="syncFromCloud()">同步云端</button>
+            </div>
+            
+            <div class="config-section" id="configSection">
+                <h3 style="margin-bottom: 15px; color: #2c3e50;">GitHub配置</h3>
+                <input type="password" class="config-input" id="githubToken" placeholder="GitHub Personal Access Token">
+                <input type="text" class="config-input" id="gistId" placeholder="Gist ID (自动获取或手动输入)">
+                <button class="btn btn-primary" onclick="saveConfig()" style="width: 100%;">保存配置</button>
+                <button class="btn btn-warning" onclick="testConnection()" style="width: 100%; margin-top: 10px;">测试连接</button>
+                <div class="sync-status" id="configStatus">未配置</div>
+            </div>
+            
+            <div class="last-update" id="lastUpdate">
+                最后更新: 从未同步
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                处理中...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 科目配置
+        const subjects = [
+            { id: 'chinese', name: '语文', icon: '文' },
+            { id: 'math', name: '数学', icon: '数' },
+            { id: 'english', name: '英语', icon: '英' },
+            { id: 'science', name: '科学', icon: '科' },
+            { id: 'morality', name: '道法', icon: '德' },
+            { id: 'society', name: '社会', icon: '社' }
+        ];
+
+        // 数据存储
+        let homeworkData = {};
+        let config = {};
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadConfig();
+            renderSubjects();
+            loadLocalData();
+            updateDisplay();
+        });
+
+        // 渲染科目卡片
+        function renderSubjects() {
+            const container = document.getElementById('subjectsContainer');
+            container.innerHTML = '';
+            
+            subjects.forEach(subject => {
+                const card = document.createElement('div');
+                card.className = 'subject-card';
+                card.innerHTML = `
+                    <div class="subject-header" onclick="toggleSubject('${subject.id}')">
+                        <div class="subject-name">${subject.name}</div>
+                        <div class="subject-icon">${subject.icon}</div>
+                    </div>
+                    <div class="subject-content" id="content-${subject.id}">
+                        <textarea class="homework-input" id="input-${subject.id}" 
+                                  placeholder="请输入${subject.name}作业内容..."></textarea>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 切换科目展开/收起
+        function toggleSubject(subjectId) {
+            const content = document.getElementById(`content-${subjectId}`);
+            const card = content.parentElement;
+            
+            // 关闭其他所有科目
+            document.querySelectorAll('.subject-content').forEach(el => {
+                if (el.id !== `content-${subjectId}`) {
+                    el.classList.remove('active');
+                    el.parentElement.classList.remove('active');
+                }
+            });
+            
+            // 切换当前科目
+            content.classList.toggle('active');
+            card.classList.toggle('active');
+        }
+
+        // 加载配置
+        function loadConfig() {
+            const saved = localStorage.getItem('homework_teacher_config');
+            if (saved) {
+                config = JSON.parse(saved);
+                document.getElementById('githubToken').value = config.githubToken || '';
+                document.getElementById('gistId').value = config.gistId || '';
+                updateConfigStatus();
+            }
+        }
+
+        // 保存配置
+        function saveConfig() {
+            config.githubToken = document.getElementById('githubToken').value.trim();
+            config.gistId = document.getElementById('gistId').value.trim();
+            config.lastSync = new Date().toLocaleString();
+            
+            localStorage.setItem('homework_teacher_config', JSON.stringify(config));
+            updateConfigStatus();
+            showStatus('✅ 配置已保存', 'success');
+        }
+
+        // 更新配置状态显示
+        function updateConfigStatus() {
+            const statusEl = document.getElementById('configStatus');
+            if (config.githubToken && config.gistId) {
+                statusEl.innerHTML = `✅ 已配置 | Gist: ${config.gistId.substring(0, 8)}...`;
+                statusEl.style.color = '#27ae60';
+            } else if (config.githubToken) {
+                statusEl.innerHTML = '⚠️ 已配置Token，需要创建Gist';
+                statusEl.style.color = '#e67e22';
+            } else {
+                statusEl.innerHTML = '❌ 未配置';
+                statusEl.style.color = '#e74c3c';
+            }
+        }
+
+        // 切换配置面板
+        function toggleConfig() {
+            const configSection = document.getElementById('configSection');
+            configSection.classList.toggle('active');
+        }
+
+        // 测试GitHub连接
+        async function testConnection() {
+            if (!config.githubToken) {
+                showStatus('❌ 请先输入GitHub Token', 'error');
+                return;
+            }
+
+            showLoading(true);
+            
+            try {
+                const response = await fetch('https://api.github.com/user', {
+                    headers: {
+                        'Authorization': `token ${config.githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const userData = await response.json();
+                    showStatus(`✅ 连接成功！欢迎 ${userData.login}`, 'success');
+                    
+                    // 如果没有Gist ID，尝试创建
+                    if (!config.gistId) {
+                        await createGist();
+                    }
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                showStatus(`❌ 连接失败: ${error.message}`, 'error');
+            }
+            
+            showLoading(false);
+        }
+
+        // 创建Gist
+        async function createGist() {
+            const initialData = {
+                "语文": "暂无作业",
+                "数学": "暂无作业", 
+                "英语": "暂无作业",
+                "科学": "暂无作业",
+                "道法": "暂无作业",
+                "社会": "暂无作业",
+                "last_updated": new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch('https://api.github.com/gists', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${config.githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        description: "720班作业通知系统数据 - 教师端",
+                        public: false,
+                        files: {
+                            "homework_data.json": {
+                                content: JSON.stringify(initialData, null, 2)
+                            }
+                        }
+                    })
+                });
+
+                if (response.ok) {
+                    const gistData = await response.json();
+                    config.gistId = gistData.id;
+                    document.getElementById('gistId').value = gistData.id;
+                    saveConfig();
+                    showStatus('✅ Gist创建成功！', 'success');
+                } else {
+                    throw new Error('Gist创建失败');
+                }
+            } catch (error) {
+                showStatus('❌ Gist创建失败，请手动创建', 'error');
+            }
+        }
+
+        // 加载本地数据
+        function loadLocalData() {
+            const saved = localStorage.getItem('homework_teacher_data');
+            if (saved) {
+                homeworkData = JSON.parse(saved);
+                
+                // 填充到输入框
+                subjects.forEach(subject => {
+                    const input = document.getElementById(`input-${subject.id}`);
+                    if (input) {
+                        input.value = homeworkData[subject.name] || '';
+                    }
+                });
+                
+                updateLastUpdate();
+            }
+        }
+
+        // 保存本地数据
+        function saveLocalData() {
+            subjects.forEach(subject => {
+                const input = document.getElementById(`input-${subject.id}`);
+                if (input) {
+                    homeworkData[subject.name] = input.value.trim() || "暂无作业";
+                }
+            });
+            
+            homeworkData.last_updated = new Date().toLocaleString();
+            localStorage.setItem('homework_teacher_data', JSON.stringify(homeworkData));
+            updateLastUpdate();
+        }
+
+        // 更新最后更新时间显示
+        function updateLastUpdate() {
+            const el = document.getElementById('lastUpdate');
+            if (homeworkData.last_updated) {
+                el.textContent = `最后更新: ${homeworkData.last_updated}`;
+            }
+        }
+
+        // 保存并上传到GitHub
+        async function saveAndUpload() {
+            if (!config.githubToken || !config.gistId) {
+                showStatus('❌ 请先完成GitHub配置', 'error');
+                toggleConfig();
+                return;
+            }
+
+            showLoading(true);
+            
+            try {
+                // 先保存到本地
+                saveLocalData();
+                
+                // 上传到GitHub
+                const response = await fetch(`https://api.github.com/gists/${config.gistId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `token ${config.githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        description: `720班作业通知系统数据 - 更新于 ${new Date().toLocaleString()}`,
+                        files: {
+                            "homework_data.json": {
+                                content: JSON.stringify(homeworkData, null, 2)
+                            }
+                        }
+                    })
+                });
+
+                if (response.ok) {
+                    config.lastSync = new Date().toLocaleString();
+                    localStorage.setItem('homework_teacher_config', JSON.stringify(config));
+                    showStatus('✅ 作业发布成功！已同步到云端', 'success');
+                    updateDisplay();
+                } else {
+                    throw new Error(`上传失败: HTTP ${response.status}`);
+                }
+            } catch (error) {
+                showStatus(`❌ 发布失败: ${error.message}`, 'error');
+            }
+            
+            showLoading(false);
+        }
+
+        // 从云端同步数据
+        async function syncFromCloud() {
+            if (!config.githubToken || !config.gistId) {
+                showStatus('❌ 请先完成GitHub配置', 'error');
+                toggleConfig();
+                return;
+            }
+
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`https://api.github.com/gists/${config.gistId}`, {
+                    headers: {
+                        'Authorization': `token ${config.githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (response.ok) {
+                    const gistData = await response.json();
+                    const content = gistData.files['homework_data.json'].content;
+                    homeworkData = JSON.parse(content);
+                    
+                    // 更新输入框
+                    subjects.forEach(subject => {
+                        const input = document.getElementById(`input-${subject.id}`);
+                        if (input) {
+                            input.value = homeworkData[subject.name] || '';
+                        }
+                    });
+                    
+                    saveLocalData();
+                    config.lastSync = new Date().toLocaleString();
+                    localStorage.setItem('homework_teacher_config', JSON.stringify(config));
+                    showStatus('✅ 同步成功！已获取最新作业数据', 'success');
+                    updateDisplay();
+                } else {
+                    throw new Error(`同步失败: HTTP ${response.status}`);
+                }
+            } catch (error) {
+                showStatus(`❌ 同步失败: ${error.message}`, 'error');
+            }
+            
+            showLoading(false);
+        }
+
+        // 更新显示状态
+        function updateDisplay() {
+            updateConfigStatus();
+            updateLastUpdate();
+            
+            const statusBar = document.getElementById('statusBar');
+            if (config.githubToken && config.gistId) {
+                statusBar.innerHTML = `✅ 云端同步已就绪 | Gist: ${config.gistId.substring(0, 8)}...`;
+                statusBar.style.background = '#d4edda';
+                statusBar.style.borderColor = '#c3e6cb';
+                statusBar.style.color = '#155724';
+            } else {
+                statusBar.innerHTML = '📱 请先配置GitHub设置以启用云端同步';
+                statusBar.style.background = '#fff3cd';
+                statusBar.style.borderColor = '#ffeaa7';
+                statusBar.style.color = '#856404';
+            }
+        }
+
+        // 显示状态消息
+        function showStatus(message, type) {
+            const statusBar = document.getElementById('statusBar');
+            statusBar.textContent = message;
+            
+            if (type === 'success') {
+                statusBar.style.background = '#d4edda';
+                statusBar.style.borderColor = '#c3e6cb';
+                statusBar.style.color = '#155724';
+            } else {
+                statusBar.style.background = '#f8d7da';
+                statusBar.style.borderColor = '#f5c6cb';
+                statusBar.style.color = '#721c24';
+            }
+            
+            // 3秒后恢复原状态
+            setTimeout(updateDisplay, 3000);
+        }
+
+        // 显示/隐藏加载动画
+        function showLoading(show) {
+            document.getElementById('loading').classList.toggle('active', show);
+        }
+
+        // 为所有科目添加示例数据（开发用）
+        function fillSampleData() {
+            const sampleData = {
+                'chinese': '1. 背诵《春晓》\n2. 完成练习册P25-26\n3. 预习下一课生字',
+                'math': '1. 完成练习卷一张\n2. 复习乘法口诀\n3. 预习下一章内容',
+                'english': '1. 背诵单词表\n2. 完成语法练习\n3. 听读课文三遍',
+                'science': '1. 观察植物生长\n2. 完成实验报告\n3. 预习新章节',
+                'morality': '1. 阅读相关故事\n2. 完成思考题\n3. 准备课堂分享',
+                'society': '1. 了解本地历史\n2. 完成地图练习\n3. 收集相关资料'
+            };
+            
+            Object.keys(sampleData).forEach(subjectId => {
+                const input = document.getElementById(`input-${subjectId}`);
+                if (input) {
+                    input.value = sampleData[subjectId];
+                }
+            });
+            
+            showStatus('📝 示例数据已填充', 'success');
+        }
+
+        // 在控制台暴露一些开发函数
+        console.log('教师作业系统已加载');
+        console.log('可用命令: fillSampleData() - 填充示例数据');
+    </script>
+</body>
+</html>
