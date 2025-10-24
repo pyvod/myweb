@@ -492,7 +492,10 @@
         const DEFAULT_GIST_ID = '4cef08aa9c1b205d619fd522f7513031';
 
         // 数据存储
-        let homeworkData = {};
+        let homeworkData = {
+            homework_data: {},
+            app_config: {}
+        };
         let config = {};
         let isAutoSyncing = false;
 
@@ -544,19 +547,38 @@
                     const content = gistData.files['homework_data.json'].content;
                     const cloudData = JSON.parse(content);
                     
+                    // 处理新旧数据结构兼容
+                    let cloudHomeworkData = cloudData;
+                    
+                    // 如果是新数据结构（包含 homework_data 字段）
+                    if (cloudData.homework_data) {
+                        cloudHomeworkData = cloudData;
+                    } else {
+                        // 如果是旧数据结构，转换为新结构
+                        cloudHomeworkData = {
+                            homework_data: cloudData,
+                            app_config: {}
+                        };
+                    }
+                    
                     // 检查数据是否有更新
-                    const localUpdated = homeworkData.last_updated;
-                    const cloudUpdated = cloudData.last_updated;
+                    const localUpdated = homeworkData.homework_data?.last_updated;
+                    const cloudUpdated = cloudHomeworkData.homework_data?.last_updated;
                     
                     if (!localUpdated || new Date(cloudUpdated) > new Date(localUpdated)) {
                         // 云端数据更新，使用云端数据
-                        homeworkData = cloudData;
+                        homeworkData = cloudHomeworkData;
                         
                         // 更新输入框
                         subjects.forEach(subject => {
                             const input = document.getElementById(`input-${subject.id}`);
                             if (input) {
-                                input.value = homeworkData[subject.name] || '';
+                                const homeworkContent = homeworkData.homework_data[subject.name];
+                                if (homeworkContent) {
+                                    input.value = homeworkContent;
+                                } else {
+                                    input.value = subject.isMorningReading ? '暂无晨读任务' : '暂无作业';
+                                }
                             }
                         });
                         
@@ -765,13 +787,30 @@
         function loadLocalData() {
             const saved = localStorage.getItem('homework_teacher_data');
             if (saved) {
-                homeworkData = JSON.parse(saved);
+                const localData = JSON.parse(saved);
+                
+                // 处理新旧数据结构兼容
+                if (localData.homework_data) {
+                    // 新数据结构
+                    homeworkData = localData;
+                } else {
+                    // 旧数据结构，转换为新结构
+                    homeworkData = {
+                        homework_data: localData,
+                        app_config: {}
+                    };
+                }
                 
                 // 填充到输入框
                 subjects.forEach(subject => {
                     const input = document.getElementById(`input-${subject.id}`);
                     if (input) {
-                        input.value = homeworkData[subject.name] || '';
+                        const homeworkContent = homeworkData.homework_data[subject.name];
+                        if (homeworkContent) {
+                            input.value = homeworkContent;
+                        } else {
+                            input.value = subject.isMorningReading ? '暂无晨读任务' : '暂无作业';
+                        }
                     }
                 });
                 
@@ -781,18 +820,31 @@
 
         // 保存本地数据
         function saveLocalData() {
+            // 清空作业数据
+            homeworkData.homework_data = {};
+            
+            // 从输入框获取最新数据
             subjects.forEach(subject => {
                 const input = document.getElementById(`input-${subject.id}`);
                 if (input) {
                     if (subject.isMorningReading) {
-                        homeworkData[subject.name] = input.value.trim() || "暂无晨读任务";
+                        homeworkData.homework_data[subject.name] = input.value.trim() || "暂无晨读任务";
                     } else {
-                        homeworkData[subject.name] = input.value.trim() || "暂无作业";
+                        homeworkData.homework_data[subject.name] = input.value.trim() || "暂无作业";
                     }
                 }
             });
             
-            homeworkData.last_updated = new Date().toLocaleString();
+            // 添加更新时间
+            homeworkData.homework_data.last_updated = new Date().toLocaleString();
+            
+            // 更新配置信息
+            homeworkData.app_config = {
+                gist_id: getGistId(),
+                config_version: "1.0",
+                last_updated: new Date().toLocaleString()
+            };
+            
             localStorage.setItem('homework_teacher_data', JSON.stringify(homeworkData));
             updateLastUpdate();
         }
@@ -800,8 +852,8 @@
         // 更新最后更新时间显示
         function updateLastUpdate() {
             const el = document.getElementById('lastUpdate');
-            if (homeworkData.last_updated) {
-                el.textContent = `最后更新: ${homeworkData.last_updated}`;
+            if (homeworkData.homework_data?.last_updated) {
+                el.textContent = `最后更新: ${homeworkData.homework_data.last_updated}`;
             }
         }
 
@@ -836,7 +888,7 @@
                 // 先保存到本地
                 saveLocalData();
                 
-                // 上传到GitHub
+                // 上传到GitHub - 使用与学生端兼容的数据结构
                 const response = await fetch(`https://api.github.com/gists/${gistId}`, {
                     method: 'PATCH',
                     headers: {
@@ -964,13 +1016,29 @@
                 if (response.ok) {
                     const gistData = await response.json();
                     const content = gistData.files['homework_data.json'].content;
-                    homeworkData = JSON.parse(content);
+                    const cloudData = JSON.parse(content);
+                    
+                    // 处理新旧数据结构兼容
+                    if (cloudData.homework_data) {
+                        homeworkData = cloudData;
+                    } else {
+                        // 旧数据结构，转换为新结构
+                        homeworkData = {
+                            homework_data: cloudData,
+                            app_config: {}
+                        };
+                    }
                     
                     // 更新输入框
                     subjects.forEach(subject => {
                         const input = document.getElementById(`input-${subject.id}`);
                         if (input) {
-                            input.value = homeworkData[subject.name] || '';
+                            const homeworkContent = homeworkData.homework_data[subject.name];
+                            if (homeworkContent) {
+                                input.value = homeworkContent;
+                            } else {
+                                input.value = subject.isMorningReading ? '暂无晨读任务' : '暂无作业';
+                            }
                         }
                     });
                     
