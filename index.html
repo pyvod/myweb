@@ -471,7 +471,7 @@
             margin-top: 15px;
         }
 
-        .quick-actions {
+        .subject-controls {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
@@ -513,7 +513,7 @@
                 justify-content: center;
             }
             
-            .quick-actions {
+            .subject-controls {
                 justify-content: center;
             }
         }
@@ -576,22 +576,6 @@
             <div class="editor-section">
                 <h2 class="section-title">作业编辑</h2>
                 
-                <!-- 快速操作区域 -->
-                <div class="quick-actions">
-                    <button class="btn btn-morning" onclick="quickMorningReading()">
-                        🌅 快速发布晨读
-                    </button>
-                    <button class="btn btn-success" onclick="saveCurrent()">
-                        💾 保存当前科目
-                    </button>
-                    <button class="btn btn-warning" onclick="clearCurrent()">
-                        🗑️ 清空当前科目
-                    </button>
-                    <button class="btn btn-danger" onclick="clearAllContent()">
-                        🗑️ 清空全部
-                    </button>
-                </div>
-                
                 <!-- 晨读专用区域 -->
                 <div class="morning-reading-section">
                     <h3 class="morning-reading-title">📚 晨读内容管理</h3>
@@ -607,10 +591,26 @@
                         <button class="btn btn-morning" onclick="saveMorningReading()">
                             🌅 仅发布晨读
                         </button>
+                        <button class="btn btn-morning" onclick="quickMorningReading()">
+                            ⚡ 快速发布晨读
+                        </button>
                         <button class="btn btn-warning" onclick="clearMorningReading()">
                             🗑️ 清空晨读
                         </button>
                     </div>
+                </div>
+
+                <!-- 科目操作按钮 -->
+                <div class="subject-controls">
+                    <button class="btn btn-success" onclick="saveCurrent()">
+                        💾 保存当前科目
+                    </button>
+                    <button class="btn btn-warning" onclick="clearCurrent()">
+                        🗑️ 清空当前科目
+                    </button>
+                    <button class="btn btn-danger" onclick="clearAllContent()">
+                        🗑️ 清空全部科目
+                    </button>
                 </div>
 
                 <div class="subject-selector">
