@@ -129,6 +129,12 @@
             color: white;
         }
 
+        .btn-morning {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            font-weight: bold;
+        }
+
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
@@ -442,6 +448,36 @@
             margin-top: 20px;
         }
 
+        .morning-reading-section {
+            background: linear-gradient(135deg, #fff5f5, #fed7d7);
+            border: 2px solid #e74c3c;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .morning-reading-title {
+            color: #e74c3c;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .morning-reading-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
         /* 响应式设计 */
         @media (max-width: 1024px) {
             .content {
@@ -474,6 +510,10 @@
             }
             
             .controls {
+                justify-content: center;
+            }
+            
+            .quick-actions {
                 justify-content: center;
             }
         }
@@ -521,10 +561,7 @@
                     📥 加载作业
                 </button>
                 <button class="btn btn-success" onclick="saveAll()">
-                    💾 保存作业
-                </button>
-                <button class="btn btn-warning" onclick="clearAllContent()">
-                    🗑️ 清空全部
+                    💾 保存全部
                 </button>
                 <button class="btn btn-info" onclick="showConfigModal()">
                     ⚙️ 云存储设置
@@ -539,6 +576,43 @@
             <div class="editor-section">
                 <h2 class="section-title">作业编辑</h2>
                 
+                <!-- 快速操作区域 -->
+                <div class="quick-actions">
+                    <button class="btn btn-morning" onclick="quickMorningReading()">
+                        🌅 快速发布晨读
+                    </button>
+                    <button class="btn btn-success" onclick="saveCurrent()">
+                        💾 保存当前科目
+                    </button>
+                    <button class="btn btn-warning" onclick="clearCurrent()">
+                        🗑️ 清空当前科目
+                    </button>
+                    <button class="btn btn-danger" onclick="clearAllContent()">
+                        🗑️ 清空全部
+                    </button>
+                </div>
+                
+                <!-- 晨读专用区域 -->
+                <div class="morning-reading-section">
+                    <h3 class="morning-reading-title">📚 晨读内容管理</h3>
+                    <div class="editor-container">
+                        <label class="editor-label">晨读内容：</label>
+                        <textarea 
+                            class="homework-editor" 
+                            id="morningEditor"
+                            placeholder="请输入晨读内容...（支持多行输入）"
+                        ></textarea>
+                    </div>
+                    <div class="morning-reading-controls">
+                        <button class="btn btn-morning" onclick="saveMorningReading()">
+                            🌅 仅发布晨读
+                        </button>
+                        <button class="btn btn-warning" onclick="clearMorningReading()">
+                            🗑️ 清空晨读
+                        </button>
+                    </div>
+                </div>
+
                 <div class="subject-selector">
                     <h3>选择科目：</h3>
                     <div class="subject-buttons" id="subjectButtons">
@@ -562,6 +636,7 @@
                         <li>晨读内容会在早上7:50前自动提醒学生</li>
                         <li>保存前可以在右侧预览效果</li>
                         <li>点击"保存作业"后，所有学生端会立即更新</li>
+                        <li>使用"快速发布晨读"可快速设置晨读内容</li>
                     </ul>
                 </div>
             </div>
@@ -626,17 +701,18 @@
         let homeworkData = null;
         let currentSubject = '语文';
         
-       // 存储桶配置
-const COS_CONFIG = {
-    bucket: 'class-720-homework-1257663765',
-    region: 'ap-beijing'
-};
+        // 存储桶配置
+        const COS_CONFIG = {
+            bucket: 'class-720-homework-1257663765',
+            region: 'ap-beijing'
+        };
+        
+        let config = {
+            secretId: 'AKIDXsyve7LJ4bu0wc4GExue8PRDvOcaIm36',
+            secretKey: 'tXw61g5FBsKZYIm10jDTYO4UfaGgqlQp',
+            ...COS_CONFIG
+        };
 
-let config = {
-    secretId: 'AKIDXsyve7LJ4bu0wc4GExue8PRDvOcaIm36',
-    secretKey: 'tXw61g5FBsKZYIm10jDTYO4UfaGgqlQp',
-    ...COS_CONFIG
-};
         // 科目列表
         const subjects = [
             { id: '语文', name: '语文' },
@@ -685,11 +761,12 @@ let config = {
             let html = '';
             
             subjects.forEach(subject => {
+                if (subject.id === '晨读') return; // 晨读有专门区域，不在科目按钮中显示
+                
                 const isActive = subject.id === currentSubject;
                 html += `
-                    <button class="subject-btn ${isActive ? 'active' : ''} ${
-                        subject.isMorningReading ? 'morning-reading' : ''
-                    }" onclick="switchSubject('${subject.id}')">
+                    <button class="subject-btn ${isActive ? 'active' : ''}" 
+                            onclick="switchSubject('${subject.id}')">
                         ${subject.name}
                     </button>
                 `;
@@ -710,7 +787,7 @@ let config = {
             
             // 更新编辑器标签
             document.getElementById('editorLabel').textContent = 
-                `${subjectId}${subjectId === '晨读' ? '内容' : '作业内容'}：`;
+                `${subjectId}作业内容：`;
             
             // 加载当前科目的内容
             loadCurrentSubjectContent();
@@ -722,6 +799,13 @@ let config = {
                 document.getElementById('homeworkEditor').value = homeworkData[currentSubject];
             } else {
                 document.getElementById('homeworkEditor').value = '';
+            }
+            
+            // 加载晨读内容
+            if (homeworkData && homeworkData['晨读']) {
+                document.getElementById('morningEditor').value = homeworkData['晨读'];
+            } else {
+                document.getElementById('morningEditor').value = '';
             }
         }
 
@@ -786,13 +870,16 @@ let config = {
             }
         }
 
-        // 保存所有内容 - 合并功能
+        // 保存所有内容
         async function saveAll() {
             if (!homeworkData) return;
             
             // 确保所有科目都有最新内容
             const content = document.getElementById('homeworkEditor').value.trim();
-            homeworkData[currentSubject] = content || (currentSubject === '晨读' ? '暂无晨读任务' : '暂无作业');
+            const morningContent = document.getElementById('morningEditor').value.trim();
+            
+            homeworkData[currentSubject] = content || '暂无作业';
+            homeworkData['晨读'] = morningContent || '暂无晨读任务';
             homeworkData.last_updated = new Date().toLocaleString('zh-CN');
             
             updatePreview();
@@ -808,7 +895,7 @@ let config = {
                 
                 if (result.success) {
                     updateSyncStatus('云端保存成功');
-                    showNotification('作业已保存到本地和云端！学生端将自动更新', 'success');
+                    showNotification('所有作业已保存到本地和云端！学生端将自动更新', 'success');
                 } else {
                     updateSyncStatus('云端保存失败，已保存到本地');
                     showNotification('作业已保存到本地，但云端上传失败: ' + result.message, 'warning');
@@ -819,14 +906,78 @@ let config = {
             }
         }
 
-        // 上传到腾讯云COS - 简化版
+        // 保存当前科目
+        async function saveCurrent() {
+            if (!homeworkData) return;
+            
+            const content = document.getElementById('homeworkEditor').value.trim();
+            homeworkData[currentSubject] = content || '暂无作业';
+            homeworkData.last_updated = new Date().toLocaleString('zh-CN');
+            
+            updatePreview();
+            
+            // 先保存到本地
+            localStorage.setItem('homeworkData', JSON.stringify(homeworkData));
+            
+            // 然后尝试上传到云端
+            updateSyncStatus('正在上传到云端...');
+            
+            try {
+                const result = await uploadToCOS(homeworkData);
+                
+                if (result.success) {
+                    updateSyncStatus('云端保存成功');
+                    showNotification(`${currentSubject}作业已保存到本地和云端！`, 'success');
+                } else {
+                    updateSyncStatus('云端保存失败，已保存到本地');
+                    showNotification(`${currentSubject}作业已保存到本地，但云端上传失败: ` + result.message, 'warning');
+                }
+            } catch (error) {
+                updateSyncStatus('云端保存失败，已保存到本地');
+                showNotification(`${currentSubject}作业已保存到本地，但云端上传失败: ` + error.message, 'warning');
+            }
+        }
+
+        // 仅保存晨读内容
+        async function saveMorningReading() {
+            if (!homeworkData) return;
+            
+            const morningContent = document.getElementById('morningEditor').value.trim();
+            homeworkData['晨读'] = morningContent || '暂无晨读任务';
+            homeworkData.last_updated = new Date().toLocaleString('zh-CN');
+            
+            updatePreview();
+            
+            // 先保存到本地
+            localStorage.setItem('homeworkData', JSON.stringify(homeworkData));
+            
+            // 然后尝试上传到云端
+            updateSyncStatus('正在上传晨读内容到云端...');
+            
+            try {
+                const result = await uploadToCOS(homeworkData);
+                
+                if (result.success) {
+                    updateSyncStatus('晨读内容保存成功');
+                    showNotification('晨读内容已保存到本地和云端！学生端将立即更新', 'success');
+                } else {
+                    updateSyncStatus('云端保存失败，已保存到本地');
+                    showNotification('晨读内容已保存到本地，但云端上传失败: ' + result.message, 'warning');
+                }
+            } catch (error) {
+                updateSyncStatus('云端保存失败，已保存到本地');
+                showNotification('晨读内容已保存到本地，但云端上传失败: ' + error.message, 'warning');
+            }
+        }
+
+        // 上传到腾讯云COS
         async function uploadToCOS(data) {
             const jsonData = JSON.stringify(data, null, 2);
             
             try {
                 console.log('开始直接上传到COS...');
                 
-                // 方法1: 直接PUT请求（最简单的方式）
+                // 方法1: 直接PUT请求
                 const response = await fetch(
                     `https://${config.bucket}.cos.${config.region}.myqcloud.com/homework_data.json`,
                     {
@@ -857,7 +1008,7 @@ let config = {
         async function tryAlternativeUploadMethods(data) {
             showNotification('正在尝试备选上传方案...', 'warning');
             
-            // 方法2: 使用FormData（可能绕过CORS限制）
+            // 方法2: 使用FormData
             try {
                 const formData = new FormData();
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -878,7 +1029,7 @@ let config = {
                 console.log('FormData上传失败:', error);
             }
             
-            // 方法3: 使用XMLHttpRequest（更兼容）
+            // 方法3: 使用XMLHttpRequest
             try {
                 return await uploadViaXHR(data);
             } catch (error) {
@@ -931,6 +1082,45 @@ let config = {
                 updatePreview();
                 showNotification('所有内容已清空', 'warning');
             }
+        }
+
+        // 清空当前科目
+        function clearCurrent() {
+            if (confirm(`确定要清空${currentSubject}科目的作业内容吗？`)) {
+                homeworkData[currentSubject] = '暂无作业';
+                document.getElementById('homeworkEditor').value = '';
+                updatePreview();
+                showNotification(`${currentSubject}内容已清空`, 'warning');
+            }
+        }
+
+        // 清空晨读内容
+        function clearMorningReading() {
+            if (confirm('确定要清空晨读内容吗？')) {
+                homeworkData['晨读'] = '暂无晨读任务';
+                document.getElementById('morningEditor').value = '';
+                updatePreview();
+                showNotification('晨读内容已清空', 'warning');
+            }
+        }
+
+        // 快速发布晨读
+        function quickMorningReading() {
+            // 设置一些常见的晨读内容选项
+            const morningOptions = [
+                "语文：背诵课文《春》第1-3段",
+                "英语：朗读Unit 2单词和对话",
+                "语文：预习新课《古诗三首》",
+                "英语：复习Unit 1重点句型",
+                "语文：朗读《论语》选段",
+                "英语：跟读录音练习发音"
+            ];
+            
+            // 随机选择一个晨读内容
+            const randomOption = morningOptions[Math.floor(Math.random() * morningOptions.length)];
+            document.getElementById('morningEditor').value = randomOption;
+            
+            showNotification('已填充示例晨读内容，请根据实际情况修改', 'success');
         }
 
         // 更新预览
@@ -1061,6 +1251,10 @@ let config = {
                     case 'l':
                         event.preventDefault();
                         loadHomeworkData();
+                        break;
+                    case 'm':
+                        event.preventDefault();
+                        saveMorningReading();
                         break;
                 }
             }
