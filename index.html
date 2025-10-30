@@ -626,18 +626,17 @@
         let homeworkData = null;
         let currentSubject = '语文';
         
-        // 存储桶配置
-        const COS_CONFIG = {
-            bucket: 'class-720-homework-1257663765',
-            region: 'ap-beijing'
-        };
-        
-        let config = {
-            secretId: '',
-            secretKey: '',
-            ...COS_CONFIG
-        };
+       // 存储桶配置
+const COS_CONFIG = {
+    bucket: 'class-720-homework-1257663765',
+    region: 'ap-beijing'
+};
 
+let config = {
+    secretId: 'AKIDXsyve7LJ4bu0wc4GExue8PRDvOcaIm36',
+    secretKey: 'tXw61g5FBsKZYIm10jDTYO4UfaGgqlQp',
+    ...COS_CONFIG
+};
         // 科目列表
         const subjects = [
             { id: '语文', name: '语文' },
