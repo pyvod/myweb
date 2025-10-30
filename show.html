@@ -3,1038 +3,470 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>720班每日作业 - 家长端</title>
+    <title>720班作业通知 - 家长端</title>
     <style>
-        /* 样式保持不变 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
-            color: #333;
         }
-        
+
         .container {
-            max-width: 500px;
+            max-width: 1200px;
             margin: 0 auto;
             background: white;
-            border-radius: 20px;
+            border-radius: 15px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
         }
-        
+
         .header {
             background: linear-gradient(135deg, #2c3e50, #3498db);
             color: white;
-            padding: 25px 20px;
+            padding: 30px;
             text-align: center;
             position: relative;
         }
-        
+
         .header h1 {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .header .subtitle {
-            font-size: 14px;
-            opacity: 0.9;
+            font-size: 2.5em;
             margin-bottom: 10px;
-        }
-        
-        .date-info {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            font-size: 14px;
-            background: rgba(255,255,255,0.2);
-            padding: 8px 15px;
-            border-radius: 20px;
-            margin-top: 10px;
-        }
-        
-        .content {
-            padding: 20px;
-        }
-        
-        .status-bar {
-            background: #e3f2fd;
-            border: 2px solid #bbdefb;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 14px;
-        }
-        
-        .status-bar.success {
-            background: #e8f5e8;
-            border-color: #c8e6c9;
-            color: #2e7d32;
-        }
-        
-        .status-bar.error {
-            background: #ffebee;
-            border-color: #ffcdd2;
-            color: #c62828;
-        }
-        
-        .homework-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .subject-card {
-            background: white;
-            border-radius: 15px;
-            border: 2px solid #e3f2fd;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        
-        .subject-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            border-color: #3498db;
-        }
-        
-        .subject-card.morning-reading {
-            border-color: #f8bbd9;
-            background: #fce4ec;
-        }
-        
-        .subject-card.morning-reading:hover {
-            border-color: #e91e63;
-        }
-        
-        .subject-header {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .subject-card.morning-reading .subject-header {
-            background: linear-gradient(135deg, #fce4ec, #f8bbd9);
-            border-bottom-color: #f8bbd9;
-        }
-        
-        .subject-name {
-            font-weight: 600;
-            font-size: 16px;
-            color: #2c3e50;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .subject-card.morning-reading .subject-name {
-            color: #c2185b;
-        }
-        
-        .subject-icon {
-            width: 32px;
-            height: 32px;
-            background: #3498db;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        
-        .subject-card.morning-reading .subject-icon {
-            background: #e91e63;
-        }
-        
-        .subject-content {
-            padding: 20px;
-            background: white;
-        }
-        
-        .subject-card.morning-reading .subject-content {
-            background: #fff9fc;
-        }
-        
-        .homework-text {
-            font-size: 15px;
-            line-height: 1.6;
-            color: #555;
-            white-space: pre-line;
-        }
-        
-        .subject-card.morning-reading .homework-text {
-            font-size: 16px;
-            font-weight: 500;
-            color: #c2185b;
-        }
-        
-        .no-homework {
-            color: #999;
-            font-style: italic;
-        }
-        
-        .last-update {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 12px;
-            margin-top: 20px;
-            text-align: center;
-            font-size: 12px;
-            color: #6c757d;
-            border: 1px solid #e9ecef;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .btn {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-        }
-        
-        .btn-success {
-            background: linear-gradient(135deg, #27ae60, #219a52);
-            color: white;
-        }
-        
-        .btn-warning {
-            background: linear-gradient(135deg, #e67e22, #d35400);
-            color: white;
-        }
-        
-        .btn-error {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-        }
-        
-        .btn-morning {
-            background: linear-gradient(135deg, #e91e63, #c2185b);
-            color: white;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 30px;
-        }
-        
-        .loading.active {
-            display: block;
-        }
-        
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .notification {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            background: white;
-            padding: 20px 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            z-index: 1000;
-            text-align: center;
-            min-width: 300px;
-            opacity: 0;
-            transition: all 0.4s ease;
-            border-left: 5px solid #3498db;
-        }
-        
-        .notification.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-        
-        .notification.success {
-            border-left-color: #27ae60;
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-        }
-        
-        .notification.error {
-            border-left-color: #e74c3c;
-            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-        }
-        
-        .notification.warning {
-            border-left-color: #e67e22;
-            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-        }
-        
-        .notification.morning {
-            border-left-color: #e91e63;
-            background: linear-gradient(135deg, #fce4ec, #f8bbd9);
-        }
-        
-        .auto-sync-indicator {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #3498db;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 999;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-        }
-        
-        .auto-sync-indicator.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        .weekday-badge {
-            background: rgba(52, 152, 219, 0.2);
-            color: #3498db;
-            padding: 4px 8px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #6c757d;
-        }
-        
-        .empty-state .icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-            opacity: 0.5;
-        }
-        
-        .subject-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            background: #e3f2fd;
-            color: #1976d2;
-            border-radius: 6px;
-            font-size: 12px;
-            margin-left: 10px;
-        }
-        
-        .subject-badge.no-homework {
-            background: #f8f9fa;
-            color: #6c757d;
-        }
-        
-        .subject-badge.morning-reading {
-            background: #fce4ec;
-            color: #c2185b;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        .config-panel {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 20px;
-            border: 2px dashed #dee2e6;
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
         }
-        
-        .config-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            font-size: 14px;
-            margin-bottom: 15px;
-            transition: border-color 0.3s;
-        }
-        
-        .config-input:focus {
-            border-color: #3498db;
-            outline: none;
-        }
-        
-        .show-settings-btn {
+
+        .datetime {
             position: absolute;
             top: 20px;
             right: 20px;
             background: rgba(255,255,255,0.2);
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+
+        .status-bar {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sync-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
             border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .subject-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #3498db;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .subject-card.morning-reading {
+            border-left-color: #e74c3c;
+            background: linear-gradient(135deg, #fff5f5, #fed7d7);
+        }
+
+        .subject-card.morning-reading .subject-header {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .subject-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .subject-header h3 {
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+        .subject-content {
+            padding: 20px;
+            min-height: 120px;
+        }
+
+        .homework-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #2c3e50;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .empty-content {
+            color: #7f8c8d;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
             border-radius: 50%;
             width: 40px;
             height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: #28a745;
             color: white;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
         }
-        
-        .show-settings-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.1);
+
+        .notification.show {
+            transform: translateX(0);
         }
-        
-        .morning-reading-hint {
-            font-size: 12px;
-            color: #e91e63;
-            margin-top: 5px;
-            text-align: center;
-            font-style: italic;
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .datetime {
+                position: static;
+                margin-top: 10px;
+            }
+            
+            .status-bar {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .subjects-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .subject-content {
+                min-height: 100px;
+            }
+        }
+
+        /* 打印样式 */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .btn, .datetime {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>720班每日作业</h1>
-            <div class="subtitle">家长查看端 · 实时同步 · 晨读提醒</div>
-            <div class="date-info">
-                <span id="currentDate">加载中...</span>
-                <span class="weekday-badge" id="weekday">星期</span>
+            <h1>720班作业通知</h1>
+            <div class="subtitle">家长端 - 实时作业查看</div>
+            <div class="datetime" id="currentDateTime">
+                <!-- 日期时间将通过JavaScript动态更新 -->
             </div>
-            <button class="show-settings-btn" id="showSettingsBtn" title="显示设置">⚙️</button>
         </div>
-        
+
+        <div class="status-bar">
+            <div class="sync-status">
+                <div class="sync-indicator"></div>
+                <span id="syncStatus">正在检查更新...</span>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="loadHomeworkData()">
+                    🔄 刷新作业
+                </button>
+                <button class="btn btn-success" onclick="printPage()">
+                    🖨️ 打印作业
+                </button>
+            </div>
+        </div>
+
         <div class="content">
-            <div class="status-bar error" id="statusBar">
-                🔴 请配置GitHub Token以获取作业
-            </div>
-
-            <div class="config-panel" id="configPanel">
-                <h3 style="margin-bottom: 15px; color: #2c3e50;">云端配置</h3>
-                
-                <!-- 状态显示 -->
-                <div id="configStatus" style="margin-bottom: 15px;">
-                    <div style="background: #e8f5e8; padding: 15px; border-radius: 10px; display: none;" id="configReady">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="color: #2e7d32;">✅</span>
-                            <div>
-                                <strong style="color: #2e7d32;">配置已生效</strong>
-                                <p style="font-size: 13px; color: #555; margin: 5px 0 0 0;">
-                                    已连接到班级作业系统，可以查看作业和晨读任务
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 配置表单 -->
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; border: 1px solid #e9ecef;">
-                    <p style="margin-bottom: 15px; font-size: 14px; color: #666;">
-                        请输入GitHub Token以连接班级作业系统：
-                    </p>
-                    <input type="password" class="config-input" id="githubToken" 
-                           placeholder="输入 GitHub Personal Access Token">
-                    
-                    <input type="text" class="config-input" id="gistId" 
-                           value="4cef08aa9c1b205d619fd522f7513031"
-                           placeholder="Gist ID" readonly
-                           style="background: #f5f5f5; color: #666;">
-                    
-                    <div style="font-size: 12px; color: #666; margin-bottom: 15px; text-align: center;">
-                        已预置班级共享Gist，只需配置GitHub Token即可使用
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-success" onclick="saveConfig()" style="flex: 2;">
-                            <span>💾</span> 保存配置
-                        </button>
-                        <button class="btn btn-primary" onclick="testConnection()" style="flex: 1;">
-                            <span>🔍</span> 测试连接
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="homework-list" id="homeworkList">
-                <div class="empty-state">
-                    <div class="icon">🔐</div>
-                    <h3>需要配置GitHub Token</h3>
-                    <p>请在上方输入GitHub Token以查看作业</p>
-                </div>
-            </div>
-            
-            <div class="last-update" id="lastUpdate">
-                最后更新: 未同步
-            </div>
-            
-            <div class="button-group">
-                <button class="btn btn-success" onclick="syncFromCloud()">
-                    <span>🔄</span> 刷新作业
-                </button>
-                <button class="btn btn-primary" onclick="shareHomework()">
-                    <span>📤</span> 分享作业
-                </button>
-                <button class="btn btn-morning" onclick="checkMorningReading()">
-                    <span>📚</span> 晨读提醒
-                </button>
-            </div>
-            
-            <div class="loading" id="loading">
+            <div id="loading" class="loading">
                 <div class="spinner"></div>
-                <div id="loadingText">正在获取作业数据...</div>
+                <p>正在加载作业数据...</p>
+            </div>
+
+            <div id="subjectsContainer" class="subjects-grid" style="display: none;">
+                <!-- 科目卡片将通过JavaScript动态生成 -->
+            </div>
+
+            <div class="last-updated" id="lastUpdated">
+                <!-- 最后更新时间将通过JavaScript动态更新 -->
             </div>
         </div>
     </div>
 
-    <!-- 通知弹窗 -->
     <div class="notification" id="notification">
-        <div class="notification-icon" id="notificationIcon">📢</div>
-        <div class="notification-title" id="notificationTitle">通知</div>
-        <div class="notification-message" id="notificationMessage">这里是通知内容</div>
+        <!-- 通知消息 -->
     </div>
 
     <script>
-        // 科目配置 - 与教师端保持一致
-        const subjects = [
-            { id: 'chinese', name: '语文', icon: '文', color: '#e74c3c' },
-            { id: 'math', name: '数学', icon: '数', color: '#3498db' },
-            { id: 'english', name: '英语', icon: '英', color: '#9b59b6' },
-            { id: 'science', name: '科学', icon: '科', color: '#2ecc71' },
-            { id: 'morality', name: '道法', icon: '德', color: '#e67e22' },
-            { id: 'society', name: '社会', icon: '社', color: '#1abc9c' },
-            { id: 'morningReading', name: '晨读', icon: '🌞', color: '#e91e63', isMorningReading: true }
-        ];
+        // 全局变量
+        let homeworkData = null;
+        let autoRefreshInterval = null;
 
-        // 默认Gist ID - 与教师端相同
-        const DEFAULT_GIST_ID = '4cef08aa9c1b205d619fd522f7513031';
-
-        // 数据存储 - 与教师端数据结构保持一致
-        let homeworkData = {};
-        let isAutoSyncing = false;
-        let currentConfig = {
-            token: '',
-            gistId: DEFAULT_GIST_ID
+        // 存储桶配置
+        const COS_CONFIG = {
+            bucket: 'class-720-homework-1257663765',
+            region: 'ap-beijing'
         };
 
-        // 初始化
+        // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
             updateDateTime();
-            loadConfig();
-            loadLocalData();
-            
-            // 设置按钮点击事件
-            document.getElementById('showSettingsBtn').addEventListener('click', function() {
-                const configPanel = document.getElementById('configPanel');
-                configPanel.style.display = configPanel.style.display === 'none' ? 'block' : 'none';
-            });
+            loadHomeworkData();
+            startAutoRefresh();
             
             // 每分钟更新一次时间
             setInterval(updateDateTime, 60000);
             
-            // 检查是否需要显示晨读提醒
-            checkMorningReadingOnLoad();
+            // 每5分钟自动刷新数据
+            setInterval(loadHomeworkData, 300000);
         });
-
-        // 页面加载时检查晨读提醒
-        function checkMorningReadingOnLoad() {
-            const now = new Date();
-            const hour = now.getHours();
-            const minute = now.getMinutes();
-            
-            // 如果在7:50之前，检查是否有晨读任务
-            if (hour < 7 || (hour === 7 && minute < 50)) {
-                const morningReading = homeworkData['晨读'];
-                if (morningReading && morningReading !== "暂无晨读任务" && morningReading.trim()) {
-                    // 延迟显示，确保页面加载完成
-                    setTimeout(() => {
-                        showMorningReadingReminder(morningReading);
-                    }, 1000);
-                }
-            }
-        }
-
-        // 显示晨读提醒
-        function showMorningReadingReminder(content) {
-            const reminderWindow = document.createElement('div');
-            reminderWindow.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: lightyellow;
-                border: 3px solid darkred;
-                border-radius: 20px;
-                padding: 30px;
-                z-index: 2000;
-                max-width: 90%;
-                max-height: 80%;
-                overflow: auto;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            `;
-            
-            reminderWindow.innerHTML = `
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <div style="font-size: 28px; color: darkred; font-weight: bold;">⏰ 晨读时间到！</div>
-                    <div style="font-size: 16px; color: blue; margin-top: 10px;">请在7:50之前完成晨读任务</div>
-                </div>
-                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
-                    <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px; color: darkred;">今日晨读内容：</div>
-                    <div style="font-size: 16px; line-height: 1.5; background: lightcyan; padding: 15px; border-radius: 8px; white-space: pre-wrap;">${content}</div>
-                </div>
-                <button onclick="this.parentElement.remove()" style="
-                    background: lightgreen;
-                    border: none;
-                    padding: 12px 24px;
-                    border-radius: 10px;
-                    font-size: 16px;
-                    font-weight: bold;
-                    cursor: pointer;
-                    width: 100%;
-                ">我已知晓，开始晨读</button>
-            `;
-            
-            document.body.appendChild(reminderWindow);
-        }
-
-        // 手动检查晨读提醒
-        function checkMorningReading() {
-            const morningReading = homeworkData['晨读'];
-            if (morningReading && morningReading !== "暂无晨读任务" && morningReading.trim()) {
-                showMorningReadingReminder(morningReading);
-                showNotification('晨读提醒', '📚 已显示今日晨读内容', 'morning');
-            } else {
-                showNotification('无晨读任务', '📖 今日暂无晨读任务', 'warning');
-            }
-        }
-
-        // 加载配置
-        function loadConfig() {
-            const saved = localStorage.getItem('homework_parent_config');
-            if (saved) {
-                try {
-                    const config = JSON.parse(saved);
-                    currentConfig.token = config.token || '';
-                    currentConfig.gistId = config.gistId || DEFAULT_GIST_ID;
-                    
-                    document.getElementById('githubToken').value = currentConfig.token;
-                    document.getElementById('gistId').value = currentConfig.gistId;
-                    
-                    if (currentConfig.token) {
-                        // 显示配置就绪状态
-                        document.getElementById('configReady').style.display = 'block';
-                        document.getElementById('statusBar').className = 'status-bar success';
-                        document.getElementById('statusBar').textContent = '✅ 配置已就绪，点击刷新获取作业';
-                        
-                        // 隐藏配置面板
-                        document.getElementById('configPanel').style.display = 'none';
-                        
-                        // 有配置时自动同步
-                        setTimeout(() => {
-                            syncFromCloud();
-                        }, 500);
-                    }
-                } catch (e) {
-                    console.error('加载配置失败:', e);
-                }
-            }
-        }
 
         // 更新日期时间显示
         function updateDateTime() {
             const now = new Date();
-            const dateEl = document.getElementById('currentDate');
-            const weekdayEl = document.getElementById('weekday');
-            
-            const year = now.getFullYear();
-            const month = now.getMonth() + 1;
-            const date = now.getDate();
-            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-            const weekday = weekdays[now.getDay()];
-            
-            dateEl.textContent = `${year}年${month}月${date}日`;
-            weekdayEl.textContent = weekday;
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                weekday: 'long',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('currentDateTime').textContent = 
+                now.toLocaleDateString('zh-CN', options);
         }
 
-        // 保存配置到本地
-        function saveConfig() {
-            const newToken = document.getElementById('githubToken').value.trim();
-            const newGistId = document.getElementById('gistId').value.trim() || DEFAULT_GIST_ID;
-            
-            if (!newToken) {
-                showNotification('配置错误', '❌ 请输入GitHub Token', 'error');
-                return;
-            }
-            
-            currentConfig.token = newToken;
-            currentConfig.gistId = newGistId;
-            
-            localStorage.setItem('homework_parent_config', JSON.stringify(currentConfig));
-            
-            // 显示配置就绪状态
-            document.getElementById('configReady').style.display = 'block';
-            document.getElementById('statusBar').className = 'status-bar success';
-            document.getElementById('statusBar').textContent = '✅ 配置已保存，正在同步数据...';
-            
-            // 保存成功后隐藏配置面板
-            document.getElementById('configPanel').style.display = 'none';
-            
-            showNotification('配置已保存', '✅ 配置已保存到本地', 'success');
-            
-            // 重新同步数据
-            setTimeout(() => {
-                syncFromCloud();
-            }, 500);
-        }
-
-        // 测试连接
-        async function testConnection() {
-            const token = document.getElementById('githubToken').value.trim();
-            const gistId = document.getElementById('gistId').value.trim() || DEFAULT_GIST_ID;
-            
-            if (!token) {
-                showNotification('测试失败', '❌ 请输入GitHub Token', 'error');
-                return;
-            }
-            
-            showLoading(true, '正在测试连接...');
+        // 从COS加载作业数据
+        async function loadHomeworkData() {
+            showLoading();
+            updateSyncStatus('正在同步作业数据...');
             
             try {
-                const response = await fetch(`https://api.github.com/gists/${gistId}`, {
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
+                // 直接从COS获取数据
+                const response = await fetch(`https://${COS_CONFIG.bucket}.cos.${COS_CONFIG.region}.myqcloud.com/homework_data.json?t=${Date.now()}`);
                 
-                if (response.ok) {
-                    showNotification('连接成功', '✅ Token 和 Gist ID 有效', 'success');
-                // 测试成功后自动保存配置
-                    saveConfig();
-                } else {
-                    if (response.status === 404) {
-                        throw new Error('Gist ID 不存在');
-                    } else if (response.status === 401) {
-                        throw new Error('Token 无效');
-                    } else {
-                        throw new Error(`连接失败: HTTP ${response.status}`);
-                    }
+                if (!response.ok) {
+                    throw new Error(`网络错误: ${response.status}`);
                 }
+                
+                homeworkData = await response.json();
+                displayHomeworkData();
+                updateSyncStatus('数据同步成功');
+                showNotification('作业数据已更新', 'success');
+                
             } catch (error) {
-                showNotification('连接失败', `❌ ${error.message}`, 'error');
-            }
-            
-            showLoading(false);
-        }
-
-        // 从云端同步数据
-        async function syncFromCloud() {
-            if (!currentConfig.token) {
-                showNotification('配置错误', '❌ 请先配置GitHub Token', 'error');
-                return;
-            }
-
-            showLoading(true, '正在获取最新作业数据...');
-
-            try {
-                const response = await fetch(`https://api.github.com/gists/${currentConfig.gistId}`, {
-                    headers: {
-                        'Authorization': `token ${currentConfig.token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-
-                if (response.ok) {
-                    const gistData = await response.json();
-                    const content = gistData.files['homework_data.json'].content;
-                    
-                    // 直接使用教师端的数据结构
-                    homeworkData = JSON.parse(content);
-                    
-                    saveLocalData();
-                    
-                    document.getElementById('statusBar').className = 'status-bar success';
-                    document.getElementById('statusBar').textContent = '✅ 数据同步成功';
-                    
-                    showNotification('同步成功', '✅ 已获取最新作业数据', 'success');
-                    
-                } else if (response.status === 401) {
-                    throw new Error('Token无效或已过期');
-                } else if (response.status === 404) {
-                    throw new Error('Gist ID 不存在');
-                } else {
-                    throw new Error(`同步失败: HTTP ${response.status}`);
-                }
-            } catch (error) {
-                console.log('同步失败:', error);
-                handleSyncError(error);
-            }
-            
-            showLoading(false);
-            renderHomeworkList();
-            updateDisplay();
-        }
-
-        // 错误处理
-        function handleSyncError(error) {
-            document.getElementById('statusBar').className = 'status-bar error';
-            document.getElementById('statusBar').textContent = `❌ ${error.message}`;
-            
-            // 显示配置面板以便用户重新配置
-            document.getElementById('configPanel').style.display = 'block';
-            
-            if (error.message.includes('Token')) {
-                showNotification('Token失效', '🔐 GitHub Token已失效，请更新Token', 'error');
-            } else if (error.message.includes('Gist ID')) {
-                showNotification('Gist不存在', '📄 请检查Gist ID是否正确', 'error');
-            } else {
-                showNotification('网络异常', '⚠️ 请检查网络连接', 'warning');
-            }
-        }
-
-        // 渲染作业列表
-        function renderHomeworkList() {
-            const container = document.getElementById('homeworkList');
-            
-            if (!currentConfig.token) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">🔐</div>
-                        <h3>需要配置GitHub Token</h3>
-                        <p>请在上方输入GitHub Token以查看作业</p>
+                console.error('加载作业数据失败:', error);
+                updateSyncStatus('同步失败: ' + error.message);
+                showNotification('加载作业失败: ' + error.message, 'error');
+                
+                // 显示错误状态
+                document.getElementById('subjectsContainer').innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #dc3545;">
+                        <h3>❌ 加载作业失败</h3>
+                        <p>${error.message}</p>
+                        <p>请检查网络连接后重试</p>
                     </div>
                 `;
-                return;
+                document.getElementById('subjectsContainer').style.display = 'grid';
+            } finally {
+                hideLoading();
             }
-            
-            // 检查是否有作业数据
-            if (!homeworkData || Object.keys(homeworkData).length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">📚</div>
-                        <h3>暂无作业数据</h3>
-                        <p>正在努力获取作业信息...</p>
-                    </div>
-                `;
-                return;
-            }
+        }
 
-            container.innerHTML = '';
+        // 显示作业数据
+        function displayHomeworkData() {
+            if (!homeworkData) return;
             
-            let hasValidHomework = false;
+            const container = document.getElementById('subjectsContainer');
+            const subjects = [
+                { name: '语文', key: '语文' },
+                { name: '数学', key: '数学' },
+                { name: '英语', key: '英语' },
+                { name: '科学', key: '科学' },
+                { name: '道法', key: '道法' },
+                { name: '社会', key: '社会' },
+                { name: '晨读', key: '晨读', isMorningReading: true }
+            ];
+            
+            let html = '';
             
             subjects.forEach(subject => {
-                const homework = homeworkData[subject.name];
-                const isMorningReading = subject.isMorningReading || false;
+                const content = homeworkData[subject.key] || '暂无内容';
+                const isEmpty = !content || content === '暂无作业' || content === '暂无晨读任务';
                 
-                let displayHomework;
-                if (isMorningReading) {
-                    displayHomework = homework && homework !== "暂无晨读任务" ? homework : null;
-                } else {
-                    displayHomework = homework && homework !== "暂无作业" ? homework : null;
-                }
-                
-                if (displayHomework) {
-                    hasValidHomework = true;
-                }
-                
-                const cardClass = isMorningReading ? 'subject-card morning-reading' : 'subject-card';
-                const badgeClass = isMorningReading ? 'subject-badge morning-reading' : 'subject-badge';
-                const badgeText = isMorningReading ? 
-                    (displayHomework ? '有晨读' : '无晨读') : 
-                    (displayHomework ? '有作业' : '无作业');
-                
-                const card = document.createElement('div');
-                card.className = cardClass;
-                card.innerHTML = `
-                    <div class="subject-header">
-                        <div class="subject-name">
-                            <div class="subject-icon" style="background: ${subject.color}">${subject.icon}</div>
-                            ${subject.name}
-                            <span class="${badgeClass} ${!displayHomework ? 'no-homework' : ''}">${badgeText}</span>
+                html += `
+                    <div class="subject-card ${subject.isMorningReading ? 'morning-reading' : ''}">
+                        <div class="subject-header">
+                            <h3>${subject.name}</h3>
                         </div>
-                    </div>
-                    <div class="subject-content">
-                        <div class="homework-text ${!displayHomework ? 'no-homework' : ''}">
-                            ${displayHomework || (isMorningReading ? '今日暂无晨读任务' : '今日暂无作业，请关注班级通知')}
+                        <div class="subject-content">
+                            ${isEmpty ? 
+                                `<div class="empty-content">${subject.isMorningReading ? '暂无晨读任务' : '暂无作业'}</div>` :
+                                `<div class="homework-text">${escapeHtml(content)}</div>`
+                            }
                         </div>
-                        ${isMorningReading && displayHomework ? 
-                            `<div class="morning-reading-hint">学生将在7:50前自动收到晨读提醒</div>` : ''}
                     </div>
                 `;
-                container.appendChild(card);
             });
-
-            // 如果所有科目都没有作业，显示提示
-            if (!hasValidHomework) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">🎉</div>
-                        <h3>今日暂无作业</h3>
-                        <p>所有科目今天都没有布置作业，让孩子好好休息吧！</p>
-                    </div>
-                `;
-            }
-        }
-
-        // 加载本地数据
-        function loadLocalData() {
-            const saved = localStorage.getItem('homework_parent_data');
-            if (saved) {
-                try {
-                    homeworkData = JSON.parse(saved);
-                    renderHomeworkList();
-                    updateLastUpdate();
-                } catch (e) {
-                    console.error('加载本地数据失败:', e);
-                    homeworkData = {};
-                    updateLastUpdate();
-                    renderHomeworkList();
-                    showNotification('数据错误', '⚠️ 本地数据损坏，已重置', 'warning');
-                    localStorage.removeItem('homework_parent_data');
-                    localStorage.removeItem('homework_parent_config');
-                    location.reload();
-                    return;
-                }
-            }
-        }
-
-        // 保存本地数据
-        function saveLocalData() {
-            localStorage.setItem('homework_parent_data', JSON.stringify(homeworkData));
-            updateLastUpdate();
-        }
-
-        // 更新最后更新时间显示
-        function updateLastUpdate() {
-            const el = document.getElementById('lastUpdate');
-            if (homeworkData && homeworkData.last_updated) {
-                el.textContent = `最后更新: ${homeworkData.last_updated}`;
-            } else {
-                el.textContent = `最后更新: 未同步`;
-            }
-        }
-
-        // 分享作业功能
-        function shareHomework() {
-            if (!homeworkData || Object.keys(homeworkData).length === 0) {
-                showNotification('分享失败', '❌ 暂无作业数据可分享', 'error');
-                return;
-            }
-
-            let shareText = `📚 720班今日作业 - ${new Date().toLocaleDateString()}\n\n`;
             
-            subjects.forEach(subject => {
-                const homework = homeworkData[subject.name];
-                const isMorningReading = subject.isMorningReading || false;
-                
-                if (homework) {
-                    if (isMorningReading && homework !== "暂无晨读任务") {
-                        shareText += `🌞 ${subject.name}：\n${homework}\n\n`;
-                    } else if (!isMorningReading && homework !== "暂无作业") {
-                        shareText += `📖 ${subject.name}：\n${homework}\n\n`;
-                    }
-                }
-            });
-
-            if (navigator.share) {
-                navigator.share({
-                    title: '720班今日作业',
-                    text: shareText
-                }).then(() => {
-                    showNotification('分享成功', '✅ 作业已分享', 'success');
-                }).catch(() => {
-                    copyToClipboard(shareText);
-                });
-            } else {
-                copyToClipboard(shareText);
-            }
+            container.innerHTML = html;
+            container.style.display = 'grid';
+            
+            // 更新最后同步时间
+            const lastUpdated = homeworkData.last_updated || '未知时间';
+            document.getElementById('lastUpdated').textContent = 
+                `最后更新: ${lastUpdated}`;
         }
 
-        // 复制到剪贴板
-        function copyToClipboard(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            showNotification('复制成功', '✅ 作业内容已复制到剪贴板', 'success');
+        // 显示加载状态
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('subjectsContainer').style.display = 'none';
         }
 
-        // 更新显示状态
-        function updateDisplay() {
-            updateLastUpdate();
+        // 隐藏加载状态
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
         }
 
-        // 显示通知弹窗
-        function showNotification(title, message, type = 'info') {
+        // 更新同步状态
+        function updateSyncStatus(message) {
+            document.getElementById('syncStatus').textContent = message;
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
-            const icon = document.getElementById('notificationIcon');
-            const titleEl = document.getElementById('notificationTitle');
-            const messageEl = document.getElementById('notificationMessage');
-            
-            titleEl.textContent = title;
-            messageEl.textContent = message;
-            
+            notification.textContent = message;
             notification.className = 'notification';
-            if (type === 'success') {
-                notification.classList.add('success');
-                icon.textContent = '✅';
-            } else if (type === 'error') {
-                notification.classList.add('error');
-                icon.textContent = '❌';
-            } else if (type === 'warning') {
-                notification.classList.add('warning');
-                icon.textContent = '⚠️';
-            } else if (type === 'morning') {
-                notification.classList.add('morning');
-                icon.textContent = '📚';
-            } else {
-                icon.textContent = '📢';
-            }
-            
+            notification.classList.add(type === 'error' ? 'error' : 'success');
             notification.classList.add('show');
             
             setTimeout(() => {
@@ -1042,14 +474,69 @@
             }, 3000);
         }
 
-        // 显示/隐藏加载动画
-        function showLoading(show, text = '处理中...') {
-            const loading = document.getElementById('loading');
-            const loadingText = document.getElementById('loadingText');
-            
-            loadingText.textContent = text;
-            loading.classList.toggle('active', show);
+        // HTML转义函数
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
+
+        // 打印页面
+        function printPage() {
+            window.print();
+        }
+
+        // 开始自动刷新
+        function startAutoRefresh() {
+            // 每5分钟自动刷新一次
+            autoRefreshInterval = setInterval(loadHomeworkData, 300000);
+        }
+
+        // 停止自动刷新
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+        }
+
+        // 检查晨读提醒
+        function checkMorningReading() {
+            if (!homeworkData) return;
+            
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            
+            // 在7:00-7:50之间显示晨读提醒
+            if (currentHour === 7 && currentMinute <= 50) {
+                const morningReading = homeworkData['晨读'];
+                if (morningReading && morningReading !== '暂无晨读任务') {
+                    showNotification('⏰ 晨读时间到！请查看今日晨读内容', 'success');
+                }
+            }
+        }
+
+        // 页面可见性变化处理
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // 页面变为可见时刷新数据
+                loadHomeworkData();
+            }
+        });
+
+        // 添加键盘快捷键
+        document.addEventListener('keydown', function(event) {
+            // F5 刷新
+            if (event.key === 'F5') {
+                event.preventDefault();
+                loadHomeworkData();
+            }
+            // Ctrl+P 打印
+            if (event.ctrlKey && event.key === 'p') {
+                event.preventDefault();
+                printPage();
+            }
+        });
     </script>
 </body>
 </html>
