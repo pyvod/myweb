@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
@@ -30,40 +30,27 @@
         .header {
             background: linear-gradient(135deg, #2c3e50, #e74c3c);
             color: white;
-            padding: 30px;
+            padding: 25px;
             text-align: center;
-            position: relative;
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 2.2em;
+            margin-bottom: 5px;
         }
 
         .header .subtitle {
-            font-size: 1.2em;
+            font-size: 1.1em;
             opacity: 0.9;
-        }
-
-        .teacher-info {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.2);
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-size: 0.9em;
         }
 
         .status-bar {
             background: #f8f9fa;
-            padding: 15px 30px;
+            padding: 12px 25px;
             border-bottom: 1px solid #e9ecef;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
         }
 
         .sync-status {
@@ -89,19 +76,18 @@
         .controls {
             display: flex;
             gap: 10px;
-            flex-wrap: wrap;
         }
 
         .btn {
-            padding: 10px 20px;
+            padding: 8px 16px;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 1em;
+            font-size: 0.95em;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .btn-primary {
@@ -124,65 +110,54 @@
             color: white;
         }
 
-        .btn-info {
-            background: #17a2b8;
-            color: white;
-        }
-
-        .btn-morning {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-            font-weight: bold;
-        }
-
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
         }
 
         .content {
-            padding: 30px;
+            padding: 25px;
             display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 30px;
+            grid-template-columns: 1fr 350px;
+            gap: 25px;
             min-height: 600px;
         }
 
         .editor-section {
             background: #f8f9fa;
             border-radius: 10px;
-            padding: 25px;
+            padding: 20px;
         }
 
         .preview-section {
             background: white;
             border: 2px solid #e9ecef;
             border-radius: 10px;
-            padding: 25px;
+            padding: 20px;
             max-height: 800px;
             overflow-y: auto;
         }
 
         .section-title {
-            font-size: 1.5em;
-            margin-bottom: 20px;
+            font-size: 1.3em;
+            margin-bottom: 15px;
             color: #2c3e50;
             border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
 
         .class-selector {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .grade-tabs {
             display: flex;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             border-bottom: 2px solid #e9ecef;
         }
 
         .grade-tab {
-            padding: 10px 20px;
+            padding: 8px 16px;
             background: #f8f9fa;
             border: none;
             border-bottom: 3px solid transparent;
@@ -199,26 +174,26 @@
 
         .class-buttons {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 10px;
-            max-height: 200px;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            gap: 8px;
+            max-height: 150px;
             overflow-y: auto;
-            padding: 10px;
+            padding: 8px;
             border: 1px solid #e9ecef;
-            border-radius: 8px;
+            border-radius: 6px;
             background: white;
         }
 
         .class-btn {
-            padding: 8px 5px;
+            padding: 6px 4px;
             border: 2px solid #dee2e6;
-            border-radius: 6px;
+            border-radius: 5px;
             background: white;
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
             font-weight: bold;
-            font-size: 0.9em;
+            font-size: 0.85em;
         }
 
         .class-btn.active {
@@ -228,20 +203,20 @@
         }
 
         .subject-selector {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .subject-buttons {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 15px;
         }
 
         .subject-btn {
-            padding: 12px;
+            padding: 10px;
             border: 2px solid #dee2e6;
-            border-radius: 8px;
+            border-radius: 6px;
             background: white;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -255,35 +230,26 @@
             color: white;
         }
 
-        .subject-btn.morning-reading {
-            border-color: #e74c3c;
-        }
-
-        .subject-btn.morning-reading.active {
-            background: #e74c3c;
-            color: white;
-        }
-
         .editor-container {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .editor-label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: bold;
             color: #2c3e50;
         }
 
         .homework-editor {
             width: 100%;
-            height: 300px;
-            padding: 15px;
+            height: 250px;
+            padding: 12px;
             border: 2px solid #dee2e6;
-            border-radius: 8px;
+            border-radius: 6px;
             font-family: 'Microsoft YaHei', Arial, sans-serif;
-            font-size: 1.1em;
-            line-height: 1.6;
+            font-size: 1em;
+            line-height: 1.5;
             resize: vertical;
             transition: border-color 0.3s ease;
         }
@@ -293,79 +259,50 @@
             border-color: #007bff;
         }
 
-        .editor-tips {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            border-radius: 4px;
+        .action-buttons {
+            display: flex;
+            gap: 10px;
             margin-top: 15px;
-        }
-
-        .editor-tips h4 {
-            color: #1976d2;
-            margin-bottom: 8px;
-        }
-
-        .editor-tips ul {
-            padding-left: 20px;
-            color: #555;
-        }
-
-        .editor-tips li {
-            margin-bottom: 5px;
+            flex-wrap: wrap;
         }
 
         .preview-card {
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
             border-left: 5px solid #3498db;
             transition: all 0.3s ease;
         }
 
-        .preview-card.morning-reading {
-            border-left-color: #e74c3c;
-            background: linear-gradient(135deg, #fff5f5, #fed7d7);
-        }
-
         .preview-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 12px rgba(0,0,0,0.15);
         }
 
         .preview-header {
             background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
-            padding: 15px;
-            border-radius: 8px 8px 0 0;
+            padding: 12px;
+            border-radius: 6px 6px 0 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .preview-header.morning-reading {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-        }
-
         .preview-header h3 {
-            font-size: 1.3em;
+            font-size: 1.1em;
             margin: 0;
         }
 
-        .preview-class {
-            font-size: 0.9em;
-            opacity: 0.9;
-        }
-
         .preview-content {
-            padding: 20px;
-            min-height: 80px;
+            padding: 15px;
+            min-height: 60px;
         }
 
         .preview-text {
-            font-size: 1.1em;
-            line-height: 1.6;
+            font-size: 1em;
+            line-height: 1.5;
             color: #2c3e50;
             white-space: pre-wrap;
             word-wrap: break-word;
@@ -375,52 +312,32 @@
             color: #7f8c8d;
             font-style: italic;
             text-align: center;
-            padding: 20px;
+            padding: 15px;
         }
 
         .last-updated {
             background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
             text-align: center;
             color: #6c757d;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #6c757d;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 2s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            font-size: 0.9em;
         }
 
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 15px 25px;
+            padding: 12px 20px;
             background: #28a745;
             color: white;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border-radius: 6px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.2);
             transform: translateX(400px);
             transition: transform 0.3s ease;
             z-index: 1000;
-            max-width: 400px;
+            max-width: 350px;
         }
 
         .notification.show {
@@ -455,9 +372,9 @@
 
         .modal-content {
             background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
             max-width: 500px;
             width: 90%;
             max-height: 80vh;
@@ -465,8 +382,8 @@
         }
 
         .modal-title {
-            font-size: 1.5em;
-            margin-bottom: 20px;
+            font-size: 1.3em;
+            margin-bottom: 15px;
             color: #2c3e50;
             text-align: center;
         }
@@ -474,13 +391,13 @@
         .config-form {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         .form-label {
@@ -489,10 +406,10 @@
         }
 
         .form-input {
-            padding: 12px;
+            padding: 10px;
             border: 2px solid #dee2e6;
-            border-radius: 8px;
-            font-size: 1em;
+            border-radius: 6px;
+            font-size: 0.95em;
             transition: border-color 0.3s ease;
         }
 
@@ -501,92 +418,65 @@
             border-color: #007bff;
         }
 
-        .form-input[type="password"] {
-            font-family: monospace;
-        }
-
         .form-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             justify-content: flex-end;
-            margin-top: 20px;
-        }
-
-        .morning-reading-section {
-            background: linear-gradient(135deg, #fff5f5, #fed7d7);
-            border: 2px solid #e74c3c;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 25px;
-        }
-
-        .morning-reading-title {
-            color: #e74c3c;
-            font-size: 1.4em;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .morning-reading-controls {
-            display: flex;
-            gap: 10px;
             margin-top: 15px;
         }
 
-        .subject-controls {
+        .modal-tabs {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .batch-actions {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .link-generator {
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            border: 2px solid #2196f3;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 25px;
-        }
-
-        .link-generator-title {
-            color: #1976d2;
-            font-size: 1.4em;
+            border-bottom: 2px solid #e9ecef;
             margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        }
+
+        .modal-tab {
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .modal-tab.active {
+            background: white;
+            border-bottom-color: #007bff;
+            color: #007bff;
+        }
+
+        .modal-tab-content {
+            display: none;
+        }
+
+        .modal-tab-content.active {
+            display: block;
         }
 
         .link-controls {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 8px;
+            margin-top: 12px;
             flex-wrap: wrap;
         }
 
         .generated-link {
-            margin-top: 15px;
-            padding: 15px;
+            margin-top: 12px;
+            padding: 12px;
             background: #e8f5e9;
             border: 1px solid #4caf50;
-            border-radius: 8px;
+            border-radius: 6px;
             display: none;
         }
 
         .link-text {
             word-break: break-all;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: bold;
             color: #2e7d32;
+            font-size: 0.9em;
         }
 
         /* 响应式设计 */
@@ -602,17 +492,12 @@
 
         @media (max-width: 768px) {
             .header h1 {
-                font-size: 2em;
-            }
-            
-            .teacher-info {
-                position: static;
-                margin-top: 10px;
+                font-size: 1.8em;
             }
             
             .status-bar {
                 flex-direction: column;
-                gap: 15px;
+                gap: 12px;
                 text-align: center;
             }
             
@@ -624,33 +509,8 @@
                 justify-content: center;
             }
             
-            .subject-controls {
+            .action-buttons {
                 justify-content: center;
-            }
-            
-            .batch-actions {
-                justify-content: center;
-            }
-        }
-
-        /* 打印样式 */
-        @media print {
-            body {
-                background: white;
-                padding: 0;
-            }
-            
-            .container {
-                box-shadow: none;
-                border-radius: 0;
-            }
-            
-            .btn, .editor-section, .teacher-info {
-                display: none;
-            }
-            
-            .content {
-                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -659,11 +519,7 @@
     <div class="container">
         <div class="header">
             <h1>多班级作业管理系统</h1>
-            <div class="subtitle">教师端 - 支持初一至初三所有班级</div>
-            <div class="teacher-info">
-                <span id="teacherName">教师用户</span> | 
-                <span id="currentDateTime"></span>
-            </div>
+            <div class="subtitle">教师端 - 简洁操作版</div>
         </div>
 
         <div class="status-bar">
@@ -678,11 +534,8 @@
                 <button class="btn btn-success" onclick="saveAll()">
                     💾 保存全部
                 </button>
-                <button class="btn btn-info" onclick="showConfigModal()">
-                    ⚙️ 云存储设置
-                </button>
-                <button class="btn btn-primary" onclick="printPreview()">
-                    🖨️ 打印预览
+                <button class="btn btn-primary" onclick="showConfigModal()">
+                    ⚙️ 设置
                 </button>
             </div>
         </div>
@@ -691,9 +544,116 @@
             <div class="editor-section">
                 <h2 class="section-title">作业编辑</h2>
                 
-                <!-- 班级链接生成器 -->
-                <div class="link-generator">
-                    <h3 class="link-generator-title">🔗 班级链接生成器</h3>
+                <!-- 班级选择区域 -->
+                <div class="class-selector">
+                    <h3>选择班级：</h3>
+                    <div class="grade-tabs" id="gradeTabs">
+                        <button class="grade-tab active" data-grade="初一">初一年级 (26个班)</button>
+                        <button class="grade-tab" data-grade="初二">初二年级 (23个班)</button>
+                        <button class="grade-tab" data-grade="初三">初三年级 (23个班)</button>
+                    </div>
+                    <div class="class-buttons" id="classButtons">
+                        <!-- 班级按钮将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+
+                <!-- 科目选择区域 -->
+                <div class="subject-selector">
+                    <h3>选择科目：</h3>
+                    <div class="subject-buttons" id="subjectButtons">
+                        <!-- 科目按钮将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+
+                <!-- 作业编辑区域 -->
+                <div class="editor-container">
+                    <label class="editor-label" id="editorLabel">语文作业内容：</label>
+                    <textarea 
+                        class="homework-editor" 
+                        id="homeworkEditor"
+                        placeholder="请输入作业内容...（支持多行输入）"
+                    ></textarea>
+                </div>
+
+                <!-- 操作按钮区域 -->
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="saveCurrent()">
+                        💾 保存当前科目
+                    </button>
+                    <button class="btn btn-warning" onclick="copyToAllClasses()">
+                        📋 复制到同年级所有班级
+                    </button>
+                    <button class="btn btn-danger" onclick="clearCurrent()">
+                        🗑️ 清空当前科目
+                    </button>
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <h2 class="section-title">实时预览</h2>
+                <div id="previewContainer">
+                    <!-- 预览内容将通过JavaScript动态生成 -->
+                </div>
+                <div class="last-updated" id="lastUpdated">
+                    <!-- 最后更新时间 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知消息 -->
+    <div class="notification" id="notification"></div>
+
+    <!-- 配置模态框 -->
+    <div class="modal" id="configModal">
+        <div class="modal-content">
+            <h3 class="modal-title">系统设置</h3>
+            
+            <div class="modal-tabs">
+                <button class="modal-tab active" data-tab="storage">云存储设置</button>
+                <button class="modal-tab" data-tab="links">班级链接生成</button>
+            </div>
+            
+            <!-- 云存储设置标签页 -->
+            <div class="modal-tab-content active" id="storageTab">
+                <div class="config-form">
+                    <div class="form-group">
+                        <label class="form-label">腾讯云 SecretId</label>
+                        <input type="text" class="form-input" id="secretId" 
+                               placeholder="请输入SecretId">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">腾讯云 SecretKey</label>
+                        <input type="password" class="form-input" id="secretKey" 
+                               placeholder="请输入SecretKey">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">存储桶名称</label>
+                        <input type="text" class="form-input" id="cosBucket" 
+                               value="class-homework-1257663765" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">地域</label>
+                        <input type="text" class="form-input" id="cosRegion" 
+                               value="ap-beijing" readonly>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-warning" onclick="testConnection()">
+                            🔍 测试连接
+                        </button>
+                        <button class="btn btn-success" onclick="saveConfig()">
+                            💾 保存配置
+                        </button>
+                        <button class="btn btn-danger" onclick="hideConfigModal()">
+                            ❌ 取消
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 班级链接生成标签页 -->
+            <div class="modal-tab-content" id="linksTab">
+                <div class="config-form">
                     <div class="form-group">
                         <label class="form-label">选择年级和班级生成家长端链接：</label>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
@@ -717,155 +677,15 @@
                     </div>
                     <div class="generated-link" id="generatedLink">
                         <div class="link-text" id="classLinkText"></div>
-                        <button class="btn btn-success" onclick="copyClassLink()">
-                            📋 复制链接
-                        </button>
-                        <button class="btn btn-primary" onclick="testClassLink()">
-                            🔍 测试链接
-                        </button>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-success" onclick="copyClassLink()">
+                                📋 复制链接
+                            </button>
+                            <button class="btn btn-primary" onclick="testClassLink()">
+                                🔍 测试链接
+                            </button>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- 班级选择区域 -->
-                <div class="class-selector">
-                    <h3>选择班级：</h3>
-                    <div class="grade-tabs" id="gradeTabs">
-                        <button class="grade-tab active" data-grade="初一">初一年级 (26个班)</button>
-                        <button class="grade-tab" data-grade="初二">初二年级 (23个班)</button>
-                        <button class="grade-tab" data-grade="初三">初三年级 (23个班)</button>
-                    </div>
-                    <div class="class-buttons" id="classButtons">
-                        <!-- 班级按钮将通过JavaScript动态生成 -->
-                    </div>
-                </div>
-                
-                <!-- 晨读专用区域 -->
-                <div class="morning-reading-section">
-                    <h3 class="morning-reading-title">📚 晨读内容管理</h3>
-                    <div class="editor-container">
-                        <label class="editor-label">晨读内容：</label>
-                        <textarea 
-                            class="homework-editor" 
-                            id="morningEditor"
-                            placeholder="请输入晨读内容...（支持多行输入）"
-                        ></textarea>
-                    </div>
-                    <div class="morning-reading-controls">
-                        <button class="btn btn-morning" onclick="saveMorningReading()">
-                            🌅 仅发布晨读
-                        </button>
-                        <button class="btn btn-morning" onclick="quickMorningReading()">
-                            ⚡ 快速发布晨读
-                        </button>
-                        <button class="btn btn-warning" onclick="clearMorningReading()">
-                            🗑️ 清空晨读
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 批量操作区域 -->
-                <div class="batch-actions">
-                    <button class="btn btn-success" onclick="copyToAllClasses()">
-                        📋 复制到同年级所有班级
-                    </button>
-                    <button class="btn btn-warning" onclick="clearAllClasses()">
-                        🗑️ 清空同年级所有班级
-                    </button>
-                </div>
-
-                <!-- 科目操作按钮 -->
-                <div class="subject-controls">
-                    <button class="btn btn-success" onclick="saveCurrent()">
-                        💾 保存当前科目
-                    </button>
-                    <button class="btn btn-warning" onclick="clearCurrent()">
-                        🗑️ 清空当前科目
-                    </button>
-                    <button class="btn btn-danger" onclick="clearAllContent()">
-                        🗑️ 清空全部科目
-                    </button>
-                </div>
-
-                <div class="subject-selector">
-                    <h3>选择科目：</h3>
-                    <div class="subject-buttons" id="subjectButtons">
-                        <!-- 科目按钮将通过JavaScript动态生成 -->
-                    </div>
-                </div>
-
-                <div class="editor-container">
-                    <label class="editor-label" id="editorLabel">语文作业内容：</label>
-                    <textarea 
-                        class="homework-editor" 
-                        id="homeworkEditor"
-                        placeholder="请输入作业内容...（支持多行输入）"
-                    ></textarea>
-                </div>
-
-                <div class="editor-tips">
-                    <h4>📝 编辑提示：</h4>
-                    <ul>
-                        <li>每行输入一个作业项目，学生端显示更清晰</li>
-                        <li>晨读内容会在早上7:50前自动提醒学生</li>
-                        <li>保存前可以在右侧预览效果</li>
-                        <li>点击"保存作业"后，所有学生端会立即更新</li>
-                        <li>使用"快速发布晨读"可快速设置晨读内容</li>
-                        <li>使用"复制到同年级所有班级"可快速布置相同作业</li>
-                        <li>使用"班级链接生成器"生成家长端查看链接</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="preview-section">
-                <h2 class="section-title">实时预览</h2>
-                <div id="previewContainer">
-                    <!-- 预览内容将通过JavaScript动态生成 -->
-                </div>
-                <div class="last-updated" id="lastUpdated">
-                    <!-- 最后更新时间 -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 通知消息 -->
-    <div class="notification" id="notification"></div>
-
-    <!-- 配置模态框 -->
-    <div class="modal" id="configModal">
-        <div class="modal-content">
-            <h3 class="modal-title">云存储配置</h3>
-            <div class="config-form">
-                <div class="form-group">
-                    <label class="form-label">腾讯云 SecretId</label>
-                    <input type="text" class="form-input" id="secretId" 
-                           placeholder="请输入SecretId">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">腾讯云 SecretKey</label>
-                    <input type="password" class="form-input" id="secretKey" 
-                           placeholder="请输入SecretKey">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">存储桶名称</label>
-                    <input type="text" class="form-input" id="cosBucket" 
-                           value="class-homework-1257663765" readonly>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">地域</label>
-                    <input type="text" class="form-input" id="cosRegion" 
-                           value="ap-beijing" readonly>
-                </div>
-                <div class="form-actions">
-                    <button class="btn btn-warning" onclick="testConnection()">
-                        🔍 测试连接
-                    </button>
-                    <button class="btn btn-success" onclick="saveConfig()">
-                        💾 保存配置
-                    </button>
-                    <button class="btn btn-danger" onclick="hideConfigModal()">
-                        ❌ 取消
-                    </button>
                 </div>
             </div>
         </div>
@@ -905,7 +725,7 @@
             { id: '科学', name: '科学' },
             { id: '道法', name: '道法' },
             { id: '社会', name: '社会' },
-            { id: '晨读', name: '晨读', isMorningReading: true }
+            { id: '晨读', name: '晨读' }
         ];
 
         // 页面加载完成后初始化
@@ -915,50 +735,30 @@
 
         // 初始化应用
         function initializeApp() {
-            updateDateTime();
             loadConfig();
             initializeGradeTabs();
             initializeClassButtons();
             initializeSubjectButtons();
             initializeLinkGenerator();
+            initializeModalTabs();
             loadHomeworkData();
-            
-            // 每分钟更新一次时间
-            setInterval(updateDateTime, 60000);
-        }
-
-        // 更新日期时间显示
-        function updateDateTime() {
-            const now = new Date();
-            const options = { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                weekday: 'long',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
-            document.getElementById('currentDateTime').textContent = 
-                now.toLocaleDateString('zh-CN', options);
         }
 
         // 初始化年级标签
         function initializeGradeTabs() {
             const container = document.getElementById('gradeTabs');
             
-            // 添加点击事件监听器
             container.addEventListener('click', function(e) {
                 if (e.target.classList.contains('grade-tab')) {
-                    // 更新活动标签
                     document.querySelectorAll('.grade-tab').forEach(tab => {
                         tab.classList.remove('active');
                     });
                     e.target.classList.add('active');
                     
-                    // 切换年级
                     currentGrade = e.target.dataset.grade;
                     initializeClassButtons();
                     initializeLinkClassOptions();
+                    loadCurrentClassContent();
                 }
             });
         }
@@ -987,7 +787,6 @@
         function initializeLinkGenerator() {
             initializeLinkClassOptions();
             
-            // 监听年级变化更新班级选项
             document.getElementById('linkGrade').addEventListener('change', function() {
                 initializeLinkClassOptions();
             });
@@ -1013,8 +812,6 @@
             let html = '';
             
             subjects.forEach(subject => {
-                if (subject.id === '晨读') return; // 晨读有专门区域，不在科目按钮中显示
-                
                 const isActive = subject.id === currentSubject;
                 html += `
                     <button class="subject-btn ${isActive ? 'active' : ''}" 
@@ -1025,6 +822,27 @@
             });
             
             container.innerHTML = html;
+        }
+
+        // 初始化模态框标签页
+        function initializeModalTabs() {
+            const tabs = document.querySelectorAll('.modal-tab');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.dataset.tab;
+                    
+                    // 更新活动标签
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 显示对应内容
+                    document.querySelectorAll('.modal-tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                });
+            });
         }
 
         // 生成班级链接
@@ -1142,16 +960,8 @@
                 } else {
                     document.getElementById('homeworkEditor').value = '';
                 }
-                
-                // 加载晨读内容
-                if (classData['晨读']) {
-                    document.getElementById('morningEditor').value = classData['晨读'];
-                } else {
-                    document.getElementById('morningEditor').value = '';
-                }
             } else {
                 document.getElementById('homeworkEditor').value = '';
-                document.getElementById('morningEditor').value = '';
             }
         }
 
@@ -1263,10 +1073,8 @@
             
             // 确保所有科目都有最新内容
             const content = document.getElementById('homeworkEditor').value.trim();
-            const morningContent = document.getElementById('morningEditor').value.trim();
             
             homeworkData[currentGrade][currentClass][currentSubject] = content || '暂无作业';
-            homeworkData[currentGrade][currentClass]['晨读'] = morningContent || '暂无晨读任务';
             homeworkData[currentGrade][currentClass].last_updated = new Date().toLocaleString('zh-CN');
             
             updatePreview();
@@ -1333,52 +1141,11 @@
             }
         }
 
-        // 仅保存晨读内容
-        async function saveMorningReading() {
-            if (!homeworkData) return;
-            
-            // 确保数据结构存在
-            if (!homeworkData[currentGrade]) {
-                homeworkData[currentGrade] = {};
-            }
-            if (!homeworkData[currentGrade][currentClass]) {
-                homeworkData[currentGrade][currentClass] = {};
-            }
-            
-            const morningContent = document.getElementById('morningEditor').value.trim();
-            homeworkData[currentGrade][currentClass]['晨读'] = morningContent || '暂无晨读任务';
-            homeworkData[currentGrade][currentClass].last_updated = new Date().toLocaleString('zh-CN');
-            
-            updatePreview();
-            
-            // 先保存到本地
-            localStorage.setItem('homeworkData', JSON.stringify(homeworkData));
-            
-            // 然后尝试上传到云端
-            updateSyncStatus('正在上传晨读内容到云端...');
-            
-            try {
-                const result = await uploadToCOS(homeworkData);
-                
-                if (result.success) {
-                    updateSyncStatus('晨读内容保存成功');
-                    showNotification(`${currentGrade}${currentClass}晨读内容已保存到本地和云端！学生端将立即更新`, 'success');
-                } else {
-                    updateSyncStatus('云端保存失败，已保存到本地');
-                    showNotification('晨读内容已保存到本地，但云端上传失败: ' + result.message, 'warning');
-                }
-            } catch (error) {
-                updateSyncStatus('云端保存失败，已保存到本地');
-                showNotification('晨读内容已保存到本地，但云端上传失败: ' + error.message, 'warning');
-            }
-        }
-
         // 复制到同年级所有班级
         function copyToAllClasses() {
             if (!homeworkData) return;
             
             const content = document.getElementById('homeworkEditor').value.trim();
-            const morningContent = document.getElementById('morningEditor').value.trim();
             const classCount = gradeConfig[currentGrade];
             
             if (confirm(`确定要将当前内容复制到${currentGrade}所有${classCount}个班级吗？`)) {
@@ -1391,38 +1158,11 @@
                     }
                     
                     homeworkData[currentGrade][classId][currentSubject] = content || '暂无作业';
-                    homeworkData[currentGrade][classId]['晨读'] = morningContent || '暂无晨读任务';
                     homeworkData[currentGrade][classId].last_updated = new Date().toLocaleString('zh-CN');
                 }
                 
                 updatePreview();
                 showNotification(`已成功复制到${currentGrade}所有${classCount}个班级`, 'success');
-            }
-        }
-
-        // 清空同年级所有班级
-        function clearAllClasses() {
-            const classCount = gradeConfig[currentGrade];
-            
-            if (confirm(`确定要清空${currentGrade}所有${classCount}个班级的作业内容吗？此操作不可撤销！`)) {
-                for (let i = 1; i <= classCount; i++) {
-                    const classId = `${i}班`;
-                    
-                    // 确保数据结构存在
-                    if (!homeworkData[currentGrade][classId]) {
-                        homeworkData[currentGrade][classId] = {};
-                    }
-                    
-                    subjects.forEach(subject => {
-                        homeworkData[currentGrade][classId][subject.id] = 
-                            subject.id === '晨读' ? '暂无晨读任务' : '暂无作业';
-                    });
-                    homeworkData[currentGrade][classId].last_updated = new Date().toLocaleString('zh-CN');
-                }
-                
-                loadCurrentClassContent();
-                updatePreview();
-                showNotification(`${currentGrade}所有${classCount}个班级内容已清空`, 'warning');
             }
         }
 
@@ -1526,21 +1266,6 @@
             });
         }
 
-        // 清空全部内容
-        function clearAllContent() {
-            if (confirm('确定要清空所有科目的作业内容吗？此操作不可撤销！')) {
-                subjects.forEach(subject => {
-                    homeworkData[currentGrade][currentClass][subject.id] = 
-                        subject.id === '晨读' ? '暂无晨读任务' : '暂无作业';
-                });
-                homeworkData[currentGrade][currentClass].last_updated = new Date().toLocaleString('zh-CN');
-                
-                loadCurrentClassContent();
-                updatePreview();
-                showNotification('所有内容已清空', 'warning');
-            }
-        }
-
         // 清空当前科目
         function clearCurrent() {
             if (confirm(`确定要清空${currentSubject}科目的作业内容吗？`)) {
@@ -1549,35 +1274,6 @@
                 updatePreview();
                 showNotification(`${currentSubject}内容已清空`, 'warning');
             }
-        }
-
-        // 清空晨读内容
-        function clearMorningReading() {
-            if (confirm('确定要清空晨读内容吗？')) {
-                homeworkData[currentGrade][currentClass]['晨读'] = '暂无晨读任务';
-                document.getElementById('morningEditor').value = '';
-                updatePreview();
-                showNotification('晨读内容已清空', 'warning');
-            }
-        }
-
-        // 快速发布晨读
-        function quickMorningReading() {
-            // 设置一些常见的晨读内容选项
-            const morningOptions = [
-                "语文：背诵课文《春》第1-3段",
-                "英语：朗读Unit 2单词和对话",
-                "语文：预习新课《古诗三首》",
-                "英语：复习Unit 1重点句型",
-                "语文：朗读《论语》选段",
-                "英语：跟读录音练习发音"
-            ];
-            
-            // 随机选择一个晨读内容
-            const randomOption = morningOptions[Math.floor(Math.random() * morningOptions.length)];
-            document.getElementById('morningEditor').value = randomOption;
-            
-            showNotification('已填充示例晨读内容，请根据实际情况修改', 'success');
         }
 
         // 更新预览
@@ -1596,8 +1292,8 @@
                     const isEmpty = !content || content === '暂无作业' || content === '暂无晨读任务';
                     
                     html += `
-                        <div class="preview-card ${subject.isMorningReading ? 'morning-reading' : ''}">
-                            <div class="preview-header ${subject.isMorningReading ? 'morning-reading' : ''}">
+                        <div class="preview-card">
+                            <div class="preview-header">
                                 <h3>${subject.name}</h3>
                                 <span class="preview-class">${currentGrade}${currentClass}</span>
                             </div>
@@ -1705,27 +1401,11 @@
             return div.innerHTML;
         }
 
-        function printPreview() {
-            window.print();
-        }
-
         // 键盘快捷键
         document.addEventListener('keydown', function(event) {
-            if (event.ctrlKey || event.metaKey) {
-                switch (event.key) {
-                    case 's':
-                        event.preventDefault();
-                        saveAll();
-                        break;
-                    case 'l':
-                        event.preventDefault();
-                        loadHomeworkData();
-                        break;
-                    case 'm':
-                        event.preventDefault();
-                        saveMorningReading();
-                        break;
-                }
+            if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+                event.preventDefault();
+                saveAll();
             }
         });
 
