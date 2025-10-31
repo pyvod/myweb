@@ -1037,7 +1037,7 @@
             const parentPage = baseUrl.replace('teacher', 'parent') || baseUrl.replace(/\.html$/, 'parent.html');
             
             // 生成家长端链接
-            const parentUrl = `${parentPage}?grade=${encodeURIComponent(grade)}&class=${classNum}`;
+            const parentUrl = `parent.html?grade=${encodeURIComponent(grade)}&class=${classNum}`;
             
             // 显示生成的链接
             document.getElementById('classLinkText').textContent = parentUrl;
