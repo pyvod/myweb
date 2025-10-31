@@ -1037,7 +1037,7 @@
             const parentPage = baseUrl.replace('teacher', 'parent') || baseUrl.replace(/index\.html$/, 'parent.html');
             
             // 生成家长端链接
-            const parentUrl = `${parentPage}?grade=${encodeURIComponent(grade)}&class=${classNum}`;
+            const parentUrl = `${parentPage}parent.html?grade=${encodeURIComponent(grade)}&class=${classNum}`;
             
             // 显示生成的链接
             document.getElementById('classLinkText').textContent = parentUrl;
@@ -1055,7 +1055,7 @@
             Object.entries(gradeConfig).forEach(([grade, classCount]) => {
                 allLinks += `${grade}:\n`;
                 for (let i = 1; i <= classCount; i++) {
-                    const link = `${parentPage}?grade=${encodeURIComponent(grade)}&class=${i}`;
+                    const link = `${parentPage}parent.html?grade=${encodeURIComponent(grade)}&class=${i}`;
                     allLinks += `${grade}${i}班: ${link}\n`;
                 }
                 allLinks += '\n';
