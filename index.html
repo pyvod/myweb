@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>720班作业管理系统 - 教师端</title>
+    <title>多班级作业管理系统 - 教师端</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
@@ -171,6 +171,62 @@
             padding-bottom: 10px;
         }
 
+        .class-selector {
+            margin-bottom: 25px;
+        }
+
+        .grade-tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .grade-tab {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .grade-tab.active {
+            background: white;
+            border-bottom-color: #007bff;
+            color: #007bff;
+        }
+
+        .class-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .class-btn {
+            padding: 8px 5px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .class-btn.active {
+            border-color: #007bff;
+            background: #007bff;
+            color: white;
+        }
+
         .subject-selector {
             margin-bottom: 25px;
         }
@@ -283,6 +339,9 @@
             color: white;
             padding: 15px;
             border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .preview-header.morning-reading {
@@ -292,6 +351,11 @@
         .preview-header h3 {
             font-size: 1.3em;
             margin: 0;
+        }
+
+        .preview-class {
+            font-size: 0.9em;
+            opacity: 0.9;
         }
 
         .preview-content {
@@ -478,6 +542,53 @@
             flex-wrap: wrap;
         }
 
+        .batch-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .link-generator {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border: 2px solid #2196f3;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .link-generator-title {
+            color: #1976d2;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .link-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .generated-link {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e8f5e9;
+            border: 1px solid #4caf50;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .link-text {
+            word-break: break-all;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
         /* 响应式设计 */
         @media (max-width: 1024px) {
             .content {
@@ -516,6 +627,10 @@
             .subject-controls {
                 justify-content: center;
             }
+            
+            .batch-actions {
+                justify-content: center;
+            }
         }
 
         /* 打印样式 */
@@ -543,8 +658,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>720班作业管理系统</h1>
-            <div class="subtitle">教师端 - 作业发布与管理</div>
+            <h1>多班级作业管理系统</h1>
+            <div class="subtitle">教师端 - 支持初一至初三所有班级</div>
             <div class="teacher-info">
                 <span id="teacherName">教师用户</span> | 
                 <span id="currentDateTime"></span>
@@ -576,6 +691,54 @@
             <div class="editor-section">
                 <h2 class="section-title">作业编辑</h2>
                 
+                <!-- 班级链接生成器 -->
+                <div class="link-generator">
+                    <h3 class="link-generator-title">🔗 班级链接生成器</h3>
+                    <div class="form-group">
+                        <label class="form-label">选择年级和班级生成家长端链接：</label>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <select class="form-input" id="linkGrade" style="flex: 1;">
+                                <option value="初一">初一年级</option>
+                                <option value="初二">初二年级</option>
+                                <option value="初三">初三年级</option>
+                            </select>
+                            <select class="form-input" id="linkClass" style="flex: 1;">
+                                <!-- 班级选项动态生成 -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="link-controls">
+                        <button class="btn btn-success" onclick="generateClassLink()">
+                            🔗 生成班级链接
+                        </button>
+                        <button class="btn btn-info" onclick="generateAllClassLinks()">
+                            📋 生成所有班级链接
+                        </button>
+                    </div>
+                    <div class="generated-link" id="generatedLink">
+                        <div class="link-text" id="classLinkText"></div>
+                        <button class="btn btn-success" onclick="copyClassLink()">
+                            📋 复制链接
+                        </button>
+                        <button class="btn btn-primary" onclick="testClassLink()">
+                            🔍 测试链接
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 班级选择区域 -->
+                <div class="class-selector">
+                    <h3>选择班级：</h3>
+                    <div class="grade-tabs" id="gradeTabs">
+                        <button class="grade-tab active" data-grade="初一">初一年级 (26个班)</button>
+                        <button class="grade-tab" data-grade="初二">初二年级 (23个班)</button>
+                        <button class="grade-tab" data-grade="初三">初三年级 (23个班)</button>
+                    </div>
+                    <div class="class-buttons" id="classButtons">
+                        <!-- 班级按钮将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+                
                 <!-- 晨读专用区域 -->
                 <div class="morning-reading-section">
                     <h3 class="morning-reading-title">📚 晨读内容管理</h3>
@@ -598,6 +761,16 @@
                             🗑️ 清空晨读
                         </button>
                     </div>
+                </div>
+
+                <!-- 批量操作区域 -->
+                <div class="batch-actions">
+                    <button class="btn btn-success" onclick="copyToAllClasses()">
+                        📋 复制到同年级所有班级
+                    </button>
+                    <button class="btn btn-warning" onclick="clearAllClasses()">
+                        🗑️ 清空同年级所有班级
+                    </button>
                 </div>
 
                 <!-- 科目操作按钮 -->
@@ -637,6 +810,8 @@
                         <li>保存前可以在右侧预览效果</li>
                         <li>点击"保存作业"后，所有学生端会立即更新</li>
                         <li>使用"快速发布晨读"可快速设置晨读内容</li>
+                        <li>使用"复制到同年级所有班级"可快速布置相同作业</li>
+                        <li>使用"班级链接生成器"生成家长端查看链接</li>
                     </ul>
                 </div>
             </div>
@@ -674,7 +849,7 @@
                 <div class="form-group">
                     <label class="form-label">存储桶名称</label>
                     <input type="text" class="form-input" id="cosBucket" 
-                           value="class-720-homework-1257663765" readonly>
+                           value="class-homework-1257663765" readonly>
                 </div>
                 <div class="form-group">
                     <label class="form-label">地域</label>
@@ -700,10 +875,12 @@
         // 全局变量
         let homeworkData = null;
         let currentSubject = '语文';
+        let currentGrade = '初一';
+        let currentClass = '1班';
         
         // 存储桶配置
         const COS_CONFIG = {
-            bucket: 'class-720-homework-1257663765',
+            bucket: 'class-homework-1257663765',
             region: 'ap-beijing'
         };
         
@@ -711,6 +888,13 @@
             secretId: 'AKIDXsyve7LJ4bu0wc4GExue8PRDvOcaIm36',
             secretKey: 'tXw61g5FBsKZYIm10jDTYO4UfaGgqlQp',
             ...COS_CONFIG
+        };
+
+        // 年级班级配置
+        const gradeConfig = {
+            '初一': 26,
+            '初二': 23,
+            '初三': 23
         };
 
         // 科目列表
@@ -733,7 +917,10 @@
         function initializeApp() {
             updateDateTime();
             loadConfig();
+            initializeGradeTabs();
+            initializeClassButtons();
             initializeSubjectButtons();
+            initializeLinkGenerator();
             loadHomeworkData();
             
             // 每分钟更新一次时间
@@ -753,6 +940,71 @@
             };
             document.getElementById('currentDateTime').textContent = 
                 now.toLocaleDateString('zh-CN', options);
+        }
+
+        // 初始化年级标签
+        function initializeGradeTabs() {
+            const container = document.getElementById('gradeTabs');
+            
+            // 添加点击事件监听器
+            container.addEventListener('click', function(e) {
+                if (e.target.classList.contains('grade-tab')) {
+                    // 更新活动标签
+                    document.querySelectorAll('.grade-tab').forEach(tab => {
+                        tab.classList.remove('active');
+                    });
+                    e.target.classList.add('active');
+                    
+                    // 切换年级
+                    currentGrade = e.target.dataset.grade;
+                    initializeClassButtons();
+                    initializeLinkClassOptions();
+                }
+            });
+        }
+
+        // 初始化班级按钮
+        function initializeClassButtons() {
+            const container = document.getElementById('classButtons');
+            const classCount = gradeConfig[currentGrade];
+            let html = '';
+            
+            for (let i = 1; i <= classCount; i++) {
+                const classId = `${i}班`;
+                const isActive = currentClass === classId && currentGrade === currentGrade;
+                html += `
+                    <button class="class-btn ${isActive ? 'active' : ''}" 
+                            onclick="switchClass('${classId}')">
+                        ${classId}
+                    </button>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // 初始化链接生成器
+        function initializeLinkGenerator() {
+            initializeLinkClassOptions();
+            
+            // 监听年级变化更新班级选项
+            document.getElementById('linkGrade').addEventListener('change', function() {
+                initializeLinkClassOptions();
+            });
+        }
+
+        // 初始化链接生成器的班级选项
+        function initializeLinkClassOptions() {
+            const grade = document.getElementById('linkGrade').value;
+            const classCount = gradeConfig[grade];
+            const classSelect = document.getElementById('linkClass');
+            
+            let html = '';
+            for (let i = 1; i <= classCount; i++) {
+                html += `<option value="${i}">${i}班</option>`;
+            }
+            
+            classSelect.innerHTML = html;
         }
 
         // 初始化科目按钮
@@ -775,6 +1027,91 @@
             container.innerHTML = html;
         }
 
+        // 生成班级链接
+        function generateClassLink() {
+            const grade = document.getElementById('linkGrade').value;
+            const classNum = document.getElementById('linkClass').value;
+            
+            // 获取当前页面的基础URL
+            const baseUrl = window.location.href.split('?')[0];
+            const parentPage = baseUrl.replace('teacher', 'parent') || baseUrl.replace(/teacher\.html$/, 'parent.html');
+            
+            // 生成家长端链接
+            const parentUrl = `${parentPage}?grade=${encodeURIComponent(grade)}&class=${classNum}`;
+            
+            // 显示生成的链接
+            document.getElementById('classLinkText').textContent = parentUrl;
+            document.getElementById('generatedLink').style.display = 'block';
+            
+            showNotification(`已生成${grade}${classNum}班家长端链接`, 'success');
+        }
+
+        // 生成所有班级链接
+        function generateAllClassLinks() {
+            const baseUrl = window.location.href.split('?')[0];
+            const parentPage = baseUrl.replace('teacher', 'parent') || baseUrl.replace(/teacher\.html$/, 'parent.html');
+            
+            let allLinks = '';
+            Object.entries(gradeConfig).forEach(([grade, classCount]) => {
+                allLinks += `${grade}:\n`;
+                for (let i = 1; i <= classCount; i++) {
+                    const link = `${parentPage}?grade=${encodeURIComponent(grade)}&class=${i}`;
+                    allLinks += `${grade}${i}班: ${link}\n`;
+                }
+                allLinks += '\n';
+            });
+            
+            // 在新窗口中显示所有链接
+            const linksWindow = window.open('', '_blank');
+            linksWindow.document.write(`
+                <html>
+                    <head><title>所有班级链接</title></head>
+                    <body style="font-family: 'Microsoft YaHei'; padding: 20px;">
+                        <h1>所有班级家长端链接</h1>
+                        <pre style="background: #f5f5f5; padding: 20px; border-radius: 5px; white-space: pre-wrap;">${allLinks}</pre>
+                        <button onclick="window.print()">打印链接列表</button>
+                    </body>
+                </html>
+            `);
+        }
+
+        // 复制班级链接
+        function copyClassLink() {
+            const linkText = document.getElementById('classLinkText').textContent;
+            navigator.clipboard.writeText(linkText).then(() => {
+                showNotification('链接已复制到剪贴板', 'success');
+            }).catch(() => {
+                // 备用方案
+                const textArea = document.createElement('textarea');
+                textArea.value = linkText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showNotification('链接已复制到剪贴板', 'success');
+            });
+        }
+
+        // 测试班级链接
+        function testClassLink() {
+            const linkText = document.getElementById('classLinkText').textContent;
+            window.open(linkText, '_blank');
+        }
+
+        // 切换班级
+        function switchClass(classId) {
+            currentClass = classId;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.class-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 加载当前班级的内容
+            loadCurrentClassContent();
+        }
+
         // 切换科目
         function switchSubject(subjectId) {
             currentSubject = subjectId;
@@ -793,19 +1130,44 @@
             loadCurrentSubjectContent();
         }
 
-        // 加载当前科目内容到编辑器
-        function loadCurrentSubjectContent() {
-            if (homeworkData && homeworkData[currentSubject]) {
-                document.getElementById('homeworkEditor').value = homeworkData[currentSubject];
+        // 加载当前班级内容
+        function loadCurrentClassContent() {
+            if (homeworkData && homeworkData[currentGrade] && 
+                homeworkData[currentGrade][currentClass]) {
+                const classData = homeworkData[currentGrade][currentClass];
+                
+                // 加载当前科目内容
+                if (classData[currentSubject]) {
+                    document.getElementById('homeworkEditor').value = classData[currentSubject];
+                } else {
+                    document.getElementById('homeworkEditor').value = '';
+                }
+                
+                // 加载晨读内容
+                if (classData['晨读']) {
+                    document.getElementById('morningEditor').value = classData['晨读'];
+                } else {
+                    document.getElementById('morningEditor').value = '';
+                }
             } else {
                 document.getElementById('homeworkEditor').value = '';
-            }
-            
-            // 加载晨读内容
-            if (homeworkData && homeworkData['晨读']) {
-                document.getElementById('morningEditor').value = homeworkData['晨读'];
-            } else {
                 document.getElementById('morningEditor').value = '';
+            }
+        }
+
+        // 加载当前科目内容到编辑器
+        function loadCurrentSubjectContent() {
+            if (homeworkData && homeworkData[currentGrade] && 
+                homeworkData[currentGrade][currentClass]) {
+                const classData = homeworkData[currentGrade][currentClass];
+                
+                if (classData[currentSubject]) {
+                    document.getElementById('homeworkEditor').value = classData[currentSubject];
+                } else {
+                    document.getElementById('homeworkEditor').value = '';
+                }
+            } else {
+                document.getElementById('homeworkEditor').value = '';
             }
         }
 
@@ -831,7 +1193,7 @@
                 }
                 
                 homeworkData = await response.json();
-                loadCurrentSubjectContent();
+                loadCurrentClassContent();
                 updatePreview();
                 updateSyncStatus('数据加载成功');
                 showNotification('作业数据加载成功', 'success');
@@ -850,37 +1212,62 @@
             const localData = localStorage.getItem('homeworkData');
             if (localData) {
                 homeworkData = JSON.parse(localData);
-                loadCurrentSubjectContent();
+                loadCurrentClassContent();
                 updatePreview();
                 updateSyncStatus('已加载本地备份数据');
                 showNotification('已加载本地备份数据', 'warning');
             } else {
                 // 初始化空数据
-                homeworkData = {
-                    "语文": "暂无作业",
-                    "数学": "暂无作业",
-                    "英语": "暂无作业",
-                    "科学": "暂无作业",
-                    "道法": "暂无作业",
-                    "社会": "暂无作业",
-                    "晨读": "暂无晨读任务",
-                    "last_updated": new Date().toLocaleString('zh-CN')
-                };
+                homeworkData = initializeEmptyData();
                 updateSyncStatus('初始化新数据');
             }
+        }
+
+        // 初始化空数据
+        function initializeEmptyData() {
+            const data = {};
+            
+            Object.keys(gradeConfig).forEach(grade => {
+                data[grade] = {};
+                const classCount = gradeConfig[grade];
+                
+                for (let i = 1; i <= classCount; i++) {
+                    const classId = `${i}班`;
+                    data[grade][classId] = {
+                        "语文": "暂无作业",
+                        "数学": "暂无作业",
+                        "英语": "暂无作业",
+                        "科学": "暂无作业",
+                        "道法": "暂无作业",
+                        "社会": "暂无作业",
+                        "晨读": "暂无晨读任务",
+                        "last_updated": new Date().toLocaleString('zh-CN')
+                    };
+                }
+            });
+            
+            return data;
         }
 
         // 保存所有内容
         async function saveAll() {
             if (!homeworkData) return;
             
+            // 确保数据结构存在
+            if (!homeworkData[currentGrade]) {
+                homeworkData[currentGrade] = {};
+            }
+            if (!homeworkData[currentGrade][currentClass]) {
+                homeworkData[currentGrade][currentClass] = {};
+            }
+            
             // 确保所有科目都有最新内容
             const content = document.getElementById('homeworkEditor').value.trim();
             const morningContent = document.getElementById('morningEditor').value.trim();
             
-            homeworkData[currentSubject] = content || '暂无作业';
-            homeworkData['晨读'] = morningContent || '暂无晨读任务';
-            homeworkData.last_updated = new Date().toLocaleString('zh-CN');
+            homeworkData[currentGrade][currentClass][currentSubject] = content || '暂无作业';
+            homeworkData[currentGrade][currentClass]['晨读'] = morningContent || '暂无晨读任务';
+            homeworkData[currentGrade][currentClass].last_updated = new Date().toLocaleString('zh-CN');
             
             updatePreview();
             
@@ -895,7 +1282,7 @@
                 
                 if (result.success) {
                     updateSyncStatus('云端保存成功');
-                    showNotification('所有作业已保存到本地和云端！学生端将自动更新', 'success');
+                    showNotification(`${currentGrade}${currentClass}作业已保存到本地和云端！学生端将自动更新`, 'success');
                 } else {
                     updateSyncStatus('云端保存失败，已保存到本地');
                     showNotification('作业已保存到本地，但云端上传失败: ' + result.message, 'warning');
@@ -910,9 +1297,17 @@
         async function saveCurrent() {
             if (!homeworkData) return;
             
+            // 确保数据结构存在
+            if (!homeworkData[currentGrade]) {
+                homeworkData[currentGrade] = {};
+            }
+            if (!homeworkData[currentGrade][currentClass]) {
+                homeworkData[currentGrade][currentClass] = {};
+            }
+            
             const content = document.getElementById('homeworkEditor').value.trim();
-            homeworkData[currentSubject] = content || '暂无作业';
-            homeworkData.last_updated = new Date().toLocaleString('zh-CN');
+            homeworkData[currentGrade][currentClass][currentSubject] = content || '暂无作业';
+            homeworkData[currentGrade][currentClass].last_updated = new Date().toLocaleString('zh-CN');
             
             updatePreview();
             
@@ -927,7 +1322,7 @@
                 
                 if (result.success) {
                     updateSyncStatus('云端保存成功');
-                    showNotification(`${currentSubject}作业已保存到本地和云端！`, 'success');
+                    showNotification(`${currentGrade}${currentClass}${currentSubject}作业已保存到本地和云端！`, 'success');
                 } else {
                     updateSyncStatus('云端保存失败，已保存到本地');
                     showNotification(`${currentSubject}作业已保存到本地，但云端上传失败: ` + result.message, 'warning');
@@ -942,9 +1337,17 @@
         async function saveMorningReading() {
             if (!homeworkData) return;
             
+            // 确保数据结构存在
+            if (!homeworkData[currentGrade]) {
+                homeworkData[currentGrade] = {};
+            }
+            if (!homeworkData[currentGrade][currentClass]) {
+                homeworkData[currentGrade][currentClass] = {};
+            }
+            
             const morningContent = document.getElementById('morningEditor').value.trim();
-            homeworkData['晨读'] = morningContent || '暂无晨读任务';
-            homeworkData.last_updated = new Date().toLocaleString('zh-CN');
+            homeworkData[currentGrade][currentClass]['晨读'] = morningContent || '暂无晨读任务';
+            homeworkData[currentGrade][currentClass].last_updated = new Date().toLocaleString('zh-CN');
             
             updatePreview();
             
@@ -959,7 +1362,7 @@
                 
                 if (result.success) {
                     updateSyncStatus('晨读内容保存成功');
-                    showNotification('晨读内容已保存到本地和云端！学生端将立即更新', 'success');
+                    showNotification(`${currentGrade}${currentClass}晨读内容已保存到本地和云端！学生端将立即更新`, 'success');
                 } else {
                     updateSyncStatus('云端保存失败，已保存到本地');
                     showNotification('晨读内容已保存到本地，但云端上传失败: ' + result.message, 'warning');
@@ -967,6 +1370,59 @@
             } catch (error) {
                 updateSyncStatus('云端保存失败，已保存到本地');
                 showNotification('晨读内容已保存到本地，但云端上传失败: ' + error.message, 'warning');
+            }
+        }
+
+        // 复制到同年级所有班级
+        function copyToAllClasses() {
+            if (!homeworkData) return;
+            
+            const content = document.getElementById('homeworkEditor').value.trim();
+            const morningContent = document.getElementById('morningEditor').value.trim();
+            const classCount = gradeConfig[currentGrade];
+            
+            if (confirm(`确定要将当前内容复制到${currentGrade}所有${classCount}个班级吗？`)) {
+                for (let i = 1; i <= classCount; i++) {
+                    const classId = `${i}班`;
+                    
+                    // 确保数据结构存在
+                    if (!homeworkData[currentGrade][classId]) {
+                        homeworkData[currentGrade][classId] = {};
+                    }
+                    
+                    homeworkData[currentGrade][classId][currentSubject] = content || '暂无作业';
+                    homeworkData[currentGrade][classId]['晨读'] = morningContent || '暂无晨读任务';
+                    homeworkData[currentGrade][classId].last_updated = new Date().toLocaleString('zh-CN');
+                }
+                
+                updatePreview();
+                showNotification(`已成功复制到${currentGrade}所有${classCount}个班级`, 'success');
+            }
+        }
+
+        // 清空同年级所有班级
+        function clearAllClasses() {
+            const classCount = gradeConfig[currentGrade];
+            
+            if (confirm(`确定要清空${currentGrade}所有${classCount}个班级的作业内容吗？此操作不可撤销！`)) {
+                for (let i = 1; i <= classCount; i++) {
+                    const classId = `${i}班`;
+                    
+                    // 确保数据结构存在
+                    if (!homeworkData[currentGrade][classId]) {
+                        homeworkData[currentGrade][classId] = {};
+                    }
+                    
+                    subjects.forEach(subject => {
+                        homeworkData[currentGrade][classId][subject.id] = 
+                            subject.id === '晨读' ? '暂无晨读任务' : '暂无作业';
+                    });
+                    homeworkData[currentGrade][classId].last_updated = new Date().toLocaleString('zh-CN');
+                }
+                
+                loadCurrentClassContent();
+                updatePreview();
+                showNotification(`${currentGrade}所有${classCount}个班级内容已清空`, 'warning');
             }
         }
 
@@ -1074,11 +1530,12 @@
         function clearAllContent() {
             if (confirm('确定要清空所有科目的作业内容吗？此操作不可撤销！')) {
                 subjects.forEach(subject => {
-                    homeworkData[subject.id] = subject.id === '晨读' ? '暂无晨读任务' : '暂无作业';
+                    homeworkData[currentGrade][currentClass][subject.id] = 
+                        subject.id === '晨读' ? '暂无晨读任务' : '暂无作业';
                 });
-                homeworkData.last_updated = new Date().toLocaleString('zh-CN');
+                homeworkData[currentGrade][currentClass].last_updated = new Date().toLocaleString('zh-CN');
                 
-                loadCurrentSubjectContent();
+                loadCurrentClassContent();
                 updatePreview();
                 showNotification('所有内容已清空', 'warning');
             }
@@ -1087,7 +1544,7 @@
         // 清空当前科目
         function clearCurrent() {
             if (confirm(`确定要清空${currentSubject}科目的作业内容吗？`)) {
-                homeworkData[currentSubject] = '暂无作业';
+                homeworkData[currentGrade][currentClass][currentSubject] = '暂无作业';
                 document.getElementById('homeworkEditor').value = '';
                 updatePreview();
                 showNotification(`${currentSubject}内容已清空`, 'warning');
@@ -1097,7 +1554,7 @@
         // 清空晨读内容
         function clearMorningReading() {
             if (confirm('确定要清空晨读内容吗？')) {
-                homeworkData['晨读'] = '暂无晨读任务';
+                homeworkData[currentGrade][currentClass]['晨读'] = '暂无晨读任务';
                 document.getElementById('morningEditor').value = '';
                 updatePreview();
                 showNotification('晨读内容已清空', 'warning');
@@ -1130,30 +1587,42 @@
             const container = document.getElementById('previewContainer');
             let html = '';
             
-            subjects.forEach(subject => {
-                const content = homeworkData[subject.id] || '暂无内容';
-                const isEmpty = !content || content === '暂无作业' || content === '暂无晨读任务';
+            // 只显示当前班级的预览
+            if (homeworkData[currentGrade] && homeworkData[currentGrade][currentClass]) {
+                const classData = homeworkData[currentGrade][currentClass];
                 
-                html += `
-                    <div class="preview-card ${subject.isMorningReading ? 'morning-reading' : ''}">
-                        <div class="preview-header ${subject.isMorningReading ? 'morning-reading' : ''}">
-                            <h3>${subject.name}</h3>
+                subjects.forEach(subject => {
+                    const content = classData[subject.id] || '暂无内容';
+                    const isEmpty = !content || content === '暂无作业' || content === '暂无晨读任务';
+                    
+                    html += `
+                        <div class="preview-card ${subject.isMorningReading ? 'morning-reading' : ''}">
+                            <div class="preview-header ${subject.isMorningReading ? 'morning-reading' : ''}">
+                                <h3>${subject.name}</h3>
+                                <span class="preview-class">${currentGrade}${currentClass}</span>
+                            </div>
+                            <div class="preview-content">
+                                ${isEmpty ? 
+                                    `<div class="empty-preview">${subject.id === '晨读' ? '暂无晨读任务' : '暂无作业'}</div>` :
+                                    `<div class="preview-text">${escapeHtml(content)}</div>`
+                                }
+                            </div>
                         </div>
-                        <div class="preview-content">
-                            ${isEmpty ? 
-                                `<div class="empty-preview">${subject.id === '晨读' ? '暂无晨读任务' : '暂无作业'}</div>` :
-                                `<div class="preview-text">${escapeHtml(content)}</div>`
-                            }
-                        </div>
-                    </div>
-                `;
-            });
+                    `;
+                });
+            } else {
+                html = '<div class="empty-preview">暂无数据</div>';
+            }
             
             container.innerHTML = html;
             
             // 更新最后更新时间
-            document.getElementById('lastUpdated').textContent = 
-                `最后更新: ${homeworkData.last_updated || '未知时间'}`;
+            if (homeworkData[currentGrade] && homeworkData[currentGrade][currentClass]) {
+                document.getElementById('lastUpdated').textContent = 
+                    `最后更新: ${homeworkData[currentGrade][currentClass].last_updated || '未知时间'}`;
+            } else {
+                document.getElementById('lastUpdated').textContent = '最后更新: 未知时间';
+            }
         }
 
         // 配置相关功能
@@ -1261,8 +1730,9 @@
         });
 
         // 添加调试信息
-        console.log('教师端已初始化完成');
+        console.log('多班级作业管理系统已初始化完成');
         console.log('存储桶配置:', COS_CONFIG);
+        console.log('年级配置:', gradeConfig);
     </script>
 </body>
 </html>
