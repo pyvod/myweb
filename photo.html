@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>腾讯云COS照片上传工具</title>
+    <style>
+        :root {
+            --primary-color: #006eff;
+            --success-color: #07c160;
+            --danger-color: #ee0a24;
+            --bg-color: #f7f8fa;
+            --card-color: #ffffff;
+            --text-color: #323233;
+            --border-color: #ebedf0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+        }
+        
+        .card {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .config-info {
+            background: #f0f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .config-item {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .config-item strong {
+            color: var(--primary-color);
+            display: inline-block;
+            width: 100px;
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: border-color 0.3s;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary-color);
+        }
+        
+        .upload-area p {
+            margin-bottom: 8px;
+        }
+        
+        .upload-area .hint {
+            font-size: 12px;
+            color: #969799;
+        }
+        
+        .file-list {
+            margin-top: 20px;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        
+        .file-info {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .file-size {
+            font-size: 12px;
+            color: #969799;
+        }
+        
+        .file-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .status-pending {
+            background-color: #fff7e6;
+            color: #fa8c16;
+        }
+        
+        .status-uploading {
+            background-color: #e6f7ff;
+            color: #1890ff;
+        }
+        
+        .status-success {
+            background-color: #f6ffed;
+            color: #52c41a;
+        }
+        
+        .status-error {
+            background-color: #fff2f0;
+            color: #ff4d4f;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #f0f0f0;
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .url-display {
+            margin-top: 8px;
+            font-size: 12px;
+            word-break: break-all;
+            color: var(--primary-color);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background-color: #005ce6;
+        }
+        
+        .btn:disabled {
+            background-color: #c8c9cc;
+            cursor: not-allowed;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #06ae56;
+        }
+        
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .message {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .message.success {
+            background-color: #f6ffed;
+            border: 1px solid #b7eb8f;
+            color: #52c41a;
+        }
+        
+        .message.error {
+            background-color: #fff2f0;
+            border: 1px solid #ffccc7;
+            color: #ff4d4f;
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 16px;
+            }
+            
+            .upload-area {
+                padding: 30px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>腾讯云COS照片上传工具</h1>
+            <p>简单、安全、高效的照片上传解决方案</p>
+        </div>
+        
+        <div id="messageArea"></div>
+        
+        <div class="card">
+            <div class="card-title">配置信息</div>
+            <div class="config-info">
+                <div class="config-item"><strong>存储桶：</strong>class-homework-1257663765</div>
+                <div class="config-item"><strong>地域：</strong>北京 (ap-beijing)</div>
+                <div class="config-item"><strong>状态：</strong><span id="sdkStatus">初始化中...</span></div>
+            </div>
+            <div class="config-info">
+                <div class="config-item"><strong>文件前缀：</strong></div>
+                <input type="text" id="prefix" placeholder="例如：photos/2024/" value="photos/" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <small style="color: #666; display: block; margin-top: 5px;">设置文件在COS中的存储路径</small>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">上传照片</div>
+            
+            <div class="upload-area" id="uploadArea">
+                <p>点击选择或拖拽照片到此处</p>
+                <p class="hint">支持 JPG、PNG、GIF 格式，单文件最大 10MB</p>
+            </div>
+            
+            <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif" multiple style="display: none;">
+            
+            <div class="file-list" id="fileList">
+                <p style="text-align: center; color: #969799;">暂无文件</p>
+            </div>
+            
+            <button class="btn btn-success" id="uploadBtn" disabled>开始上传</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/cos-js-sdk-v5/dist/cos-js-sdk-v5.min.js"></script>
+    <script>
+        // 固定配置信息
+        const COS_CONFIG = {
+            SecretId: 'AKIDXsyve7LJ4bu0wc4GExue8PRDvOcaIm36',
+            SecretKey: 'tXw61g5FBsKZYIm10jDTYO4UfaGgqlQp',
+            Bucket: 'class-homework-1257663765',
+            Region: 'ap-beijing'
+        };
+
+        // 显示消息
+        function showMessage(message, type = 'success') {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.innerHTML = `<div class="message ${type}">${message}</div>`;
+            
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 5000);
+        }
+
+        // DOM元素
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const sdkStatus = document.getElementById('sdkStatus');
+        
+        // 文件列表和状态
+        let files = [];
+        let cosClient = null;
+
+        // 初始化COS客户端
+        function initCOSClient() {
+            try {
+                cosClient = new COS({
+                    SecretId: COS_CONFIG.SecretId,
+                    SecretKey: COS_CONFIG.SecretKey
+                });
+                
+                sdkStatus.textContent = '已就绪';
+                sdkStatus.style.color = '#52c41a';
+                showMessage('COS客户端初始化成功！');
+                
+                console.log('COS客户端初始化成功');
+            } catch (error) {
+                sdkStatus.textContent = '初始化失败';
+                sdkStatus.style.color = '#ff4d4f';
+                showMessage('COS客户端初始化失败：' + error.message, 'error');
+                console.error('COS客户端初始化失败:', error);
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查COS SDK是否加载
+            if (window.COS) {
+                initCOSClient();
+            } else {
+                sdkStatus.textContent = 'SDK加载失败';
+                sdkStatus.style.color = '#ff4d4f';
+                showMessage('COS SDK加载失败，请刷新页面重试', 'error');
+            }
+        });
+        
+        // 点击上传区域触发文件选择
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        // 拖放功能
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length > 0) {
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+        
+        // 文件选择处理
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                handleFiles(fileInput.files);
+            }
+        });
+        
+        // 处理选择的文件
+        function handleFiles(selectedFiles) {
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                
+                // 检查文件类型
+                if (!file.type.match('image.*')) {
+                    showMessage('请选择图片文件！', 'error');
+                    continue;
+                }
+                
+                // 检查文件大小 (10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    showMessage(`文件 ${file.name} 超过10MB限制！`, 'error');
+                    continue;
+                }
+                
+                // 添加到文件列表
+                files.push({
+                    file: file,
+                    status: 'pending',
+                    progress: 0,
+                    url: ''
+                });
+            }
+            
+            renderFileList();
+            updateUploadButton();
+        }
+        
+        // 渲染文件列表
+        function renderFileList() {
+            fileList.innerHTML = '';
+            
+            if (files.length === 0) {
+                fileList.innerHTML = '<p style="text-align: center; color: #969799;">暂无文件</p>';
+                return;
+            }
+            
+            files.forEach((fileObj, index) => {
+                const file = fileObj.file;
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                // 文件信息
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'file-info';
+                
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                fileName.textContent = file.name;
+                
+                const fileSize = document.createElement('div');
+                fileSize.className = 'file-size';
+                fileSize.textContent = formatFileSize(file.size);
+                
+                fileInfo.appendChild(fileName);
+                fileInfo.appendChild(fileSize);
+                
+                // 文件状态
+                const fileStatus = document.createElement('div');
+                fileStatus.className = `file-status status-${fileObj.status}`;
+                
+                if (fileObj.status === 'pending') {
+                    fileStatus.textContent = '等待上传';
+                } else if (fileObj.status === 'uploading') {
+                    fileStatus.textContent = `上传中 ${fileObj.progress}%`;
+                } else if (fileObj.status === 'success') {
+                    fileStatus.textContent = '上传成功';
+                } else if (fileObj.status === 'error') {
+                    fileStatus.textContent = '上传失败';
+                }
+                
+                fileItem.appendChild(fileInfo);
+                fileItem.appendChild(fileStatus);
+                
+                // 进度条
+                if (fileObj.status === 'uploading') {
+                    const progressBar = document.createElement('div');
+                    progressBar.className = 'progress-bar';
+                    
+                    const progress = document.createElement('div');
+                    progress.className = 'progress';
+                    progress.style.width = `${fileObj.progress}%`;
+                    
+                    progressBar.appendChild(progress);
+                    fileItem.appendChild(progressBar);
+                }
+                
+                // 显示URL（上传成功后）
+                if (fileObj.status === 'success' && fileObj.url) {
+                    const urlDisplay = document.createElement('div');
+                    urlDisplay.className = 'url-display';
+                    urlDisplay.textContent = fileObj.url;
+                    urlDisplay.title = '点击复制';
+                    urlDisplay.style.cursor = 'pointer';
+                    urlDisplay.onclick = function() {
+                        navigator.clipboard.writeText(fileObj.url).then(() => {
+                            showMessage('URL已复制到剪贴板');
+                        });
+                    };
+                    fileItem.appendChild(urlDisplay);
+                }
+                
+                fileList.appendChild(fileItem);
+            });
+        }
+        
+        // 更新上传按钮状态
+        function updateUploadButton() {
+            const hasPendingFiles = files.some(file => file.status === 'pending');
+            uploadBtn.disabled = !hasPendingFiles;
+        }
+        
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // 记录上传的文件信息到COS中的记录文件
+        async function recordUploadedFile(fileInfo) {
+            const recordKey = 'photo_records.json';
+            
+            try {
+                // 先尝试获取现有的记录文件
+                let existingRecords = [];
+                try {
+                    const recordResponse = await new Promise((resolve, reject) => {
+                        cosClient.getObject({
+                            Bucket: COS_CONFIG.Bucket,
+                            Region: COS_CONFIG.Region,
+                            Key: recordKey
+                        }, (err, data) => {
+                            if (err) reject(err);
+                            else resolve(data);
+                        });
+                    });
+                    
+                    const recordText = recordResponse.Body.toString();
+                    existingRecords = JSON.parse(recordText);
+                } catch (e) {
+                    // 如果记录文件不存在，就创建新的
+                    console.log('创建新的记录文件');
+                    existingRecords = [];
+                }
+                
+                // 添加新记录
+                existingRecords.push(fileInfo);
+                
+                // 上传更新后的记录文件
+                await new Promise((resolve, reject) => {
+                    cosClient.putObject({
+                        Bucket: COS_CONFIG.Bucket,
+                        Region: COS_CONFIG.Region,
+                        Key: recordKey,
+                        Body: JSON.stringify(existingRecords, null, 2),
+                        ContentType: 'application/json'
+                    }, (err, data) => {
+                        if (err) reject(err);
+                        else resolve(data);
+                    });
+                });
+                
+                console.log('文件记录已更新');
+            } catch (error) {
+                console.error('记录文件失败:', error);
+            }
+        }
+        
+        // 上传单个文件到COS
+        function uploadFileToCOS(fileObj, index) {
+            return new Promise((resolve, reject) => {
+                if (!cosClient) {
+                    reject(new Error('COS客户端未初始化'));
+                    return;
+                }
+                
+                const prefix = document.getElementById('prefix').value || 'photos/';
+                
+                // 生成文件名
+                const timestamp = Date.now();
+                const randomStr = Math.random().toString(36).substring(2, 8);
+                const fileExtension = fileObj.file.name.split('.').pop();
+                const key = `${prefix}${timestamp}_${randomStr}.${fileExtension}`;
+                
+                console.log(`开始上传文件: ${fileObj.file.name} -> ${key}`);
+                
+                // 开始上传
+                cosClient.putObject({
+                    Bucket: COS_CONFIG.Bucket,
+                    Region: COS_CONFIG.Region,
+                    Key: key,
+                    Body: fileObj.file,
+                    onProgress: function(progressData) {
+                        const progress = Math.round(progressData.percent * 100);
+                        fileObj.progress = progress;
+                        renderFileList();
+                    }
+                }, async (err, data) => {
+                    if (err) {
+                        console.error(`上传失败: ${fileObj.file.name}`, err);
+                        fileObj.status = 'error';
+                        reject(err);
+                    } else {
+                        console.log(`上传成功: ${fileObj.file.name}`, data);
+                        fileObj.status = 'success';
+                        fileObj.url = `https://${data.Location}`;
+                        
+                        // 记录上传的文件信息到记录文件
+                        await recordUploadedFile({
+                            key: key,
+                            url: `https://${data.Location}`,
+                            name: fileObj.file.name,
+                            size: fileObj.file.size,
+                            uploadTime: new Date().toISOString(),
+                            status: 'pending' // 初始状态为待审核
+                        });
+                        
+                        resolve(data);
+                    }
+                    renderFileList();
+                });
+            });
+        }
+        
+        // 上传所有文件
+        uploadBtn.addEventListener('click', async () => {
+            if (!cosClient) {
+                showMessage('COS客户端未初始化，请刷新页面重试', 'error');
+                return;
+            }
+            
+            // 检查是否有待上传的文件
+            const pendingFiles = files.filter(file => file.status === 'pending');
+            if (pendingFiles.length === 0) {
+                showMessage('没有待上传的文件！', 'error');
+                return;
+            }
+            
+            // 更新按钮状态
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = '上传中...';
+            uploadBtn.classList.add('loading');
+            
+            try {
+                // 上传所有待上传的文件
+                const uploadPromises = [];
+                
+                for (let i = 0; i < files.length; i++) {
+                    if (files[i].status === 'pending') {
+                        files[i].status = 'uploading';
+                        uploadPromises.push(uploadFileToCOS(files[i], i));
+                    }
+                }
+                
+                // 等待所有上传完成
+                await Promise.all(uploadPromises);
+                showMessage('所有文件上传完成！');
+                
+            } catch (error) {
+                console.error('上传出错:', error);
+                showMessage('部分文件上传失败，请查看控制台详情', 'error');
+            } finally {
+                // 恢复按钮状态
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = '开始上传';
+                uploadBtn.classList.remove('loading');
+                updateUploadButton();
+            }
+        });
+        
+        // 初始化文件列表
+        renderFileList();
+    </script>
+</body>
+</html>
