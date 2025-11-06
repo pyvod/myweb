@@ -514,53 +514,99 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
         
-        // 记录上传的文件信息到COS中的记录文件
+        // 记录上传的文件信息到COS中的记录文件（使用带重试的原子操作）
         async function recordUploadedFile(fileInfo) {
             const recordKey = 'photo_records.json';
             
             try {
-                // 先尝试获取现有的记录文件
-                let existingRecords = [];
-                try {
-                    const recordResponse = await new Promise((resolve, reject) => {
-                        cosClient.getObject({
+                // 使用重试机制处理并发冲突
+                let retries = 3;
+                let success = false;
+                
+                while (retries > 0 && !success) {
+                    try {
+                        // 先尝试获取现有的记录文件和其ETag（用于并发控制）
+                        let existingRecords = [];
+                        let recordETag = null;
+                        
+                        try {
+                            const recordResponse = await new Promise((resolve, reject) => {
+                                cosClient.getObject({
+                                    Bucket: COS_CONFIG.Bucket,
+                                    Region: COS_CONFIG.Region,
+                                    Key: recordKey
+                                }, (err, data) => {
+                                    if (err) reject(err);
+                                    else resolve(data);
+                                });
+                            });
+                            
+                            const recordText = recordResponse.Body.toString();
+                            existingRecords = JSON.parse(recordText);
+                            recordETag = recordResponse.ETag; // 获取ETag用于并发控制
+                            console.log('找到现有记录文件，记录数:', existingRecords.length);
+                        } catch (e) {
+                            // 如果记录文件不存在，就创建新的
+                            console.log('创建新的记录文件');
+                            existingRecords = [];
+                        }
+                        
+                        // 添加新记录
+                        existingRecords.push(fileInfo);
+                        console.log('添加新记录后，总记录数:', existingRecords.length);
+                        
+                        // 上传更新后的记录文件，使用ETag进行条件更新
+                        const uploadParams = {
                             Bucket: COS_CONFIG.Bucket,
                             Region: COS_CONFIG.Region,
-                            Key: recordKey
-                        }, (err, data) => {
-                            if (err) reject(err);
-                            else resolve(data);
+                            Key: recordKey,
+                            Body: JSON.stringify(existingRecords, null, 2),
+                            ContentType: 'application/json'
+                        };
+                        
+                        // 如果存在ETag，添加条件更新
+                        if (recordETag) {
+                            uploadParams.IfMatch = recordETag;
+                        }
+                        
+                        await new Promise((resolve, reject) => {
+                            cosClient.putObject(uploadParams, (err, data) => {
+                                if (err) {
+                                    // 如果是条件更新失败（ETag不匹配），说明文件已被其他进程修改
+                                    if (err.statusCode === 412) {
+                                        reject(new Error('CONCURRENT_MODIFICATION'));
+                                    } else {
+                                        reject(err);
+                                    }
+                                } else {
+                                    resolve(data);
+                                }
+                            });
                         });
-                    });
-                    
-                    const recordText = recordResponse.Body.toString();
-                    existingRecords = JSON.parse(recordText);
-                } catch (e) {
-                    // 如果记录文件不存在，就创建新的
-                    console.log('创建新的记录文件');
-                    existingRecords = [];
+                        
+                        success = true;
+                        console.log('文件记录已成功更新，当前记录数:', existingRecords.length);
+                        
+                    } catch (error) {
+                        if (error.message === 'CONCURRENT_MODIFICATION') {
+                            console.log(`检测到并发冲突，重试中... (剩余重试次数: ${retries - 1})`);
+                            retries--;
+                            // 等待一小段时间后重试
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                        } else {
+                            throw error;
+                        }
+                    }
                 }
                 
-                // 添加新记录
-                existingRecords.push(fileInfo);
+                if (!success) {
+                    throw new Error('记录文件更新失败：并发冲突重试次数用尽');
+                }
                 
-                // 上传更新后的记录文件
-                await new Promise((resolve, reject) => {
-                    cosClient.putObject({
-                        Bucket: COS_CONFIG.Bucket,
-                        Region: COS_CONFIG.Region,
-                        Key: recordKey,
-                        Body: JSON.stringify(existingRecords, null, 2),
-                        ContentType: 'application/json'
-                    }, (err, data) => {
-                        if (err) reject(err);
-                        else resolve(data);
-                    });
-                });
-                
-                console.log('文件记录已更新');
             } catch (error) {
                 console.error('记录文件失败:', error);
+                // 这里可以选择将失败的记录存储到本地，稍后重试
+                showMessage(`文件 ${fileInfo.name} 上传成功，但记录保存失败: ${error.message}`, 'error');
             }
         }
         
