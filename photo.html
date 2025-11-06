@@ -514,99 +514,79 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
         
-        // 记录上传的文件信息到COS中的记录文件（使用带重试的原子操作）
-        async function recordUploadedFile(fileInfo) {
+        // 获取当前记录文件内容
+        async function getCurrentRecords() {
             const recordKey = 'photo_records.json';
             
             try {
-                // 使用重试机制处理并发冲突
-                let retries = 3;
-                let success = false;
+                const recordResponse = await new Promise((resolve, reject) => {
+                    cosClient.getObject({
+                        Bucket: COS_CONFIG.Bucket,
+                        Region: COS_CONFIG.Region,
+                        Key: recordKey
+                    }, (err, data) => {
+                        if (err) reject(err);
+                        else resolve(data);
+                    });
+                });
                 
-                while (retries > 0 && !success) {
-                    try {
-                        // 先尝试获取现有的记录文件和其ETag（用于并发控制）
-                        let existingRecords = [];
-                        let recordETag = null;
-                        
-                        try {
-                            const recordResponse = await new Promise((resolve, reject) => {
-                                cosClient.getObject({
-                                    Bucket: COS_CONFIG.Bucket,
-                                    Region: COS_CONFIG.Region,
-                                    Key: recordKey
-                                }, (err, data) => {
-                                    if (err) reject(err);
-                                    else resolve(data);
-                                });
-                            });
-                            
-                            const recordText = recordResponse.Body.toString();
-                            existingRecords = JSON.parse(recordText);
-                            recordETag = recordResponse.ETag; // 获取ETag用于并发控制
-                            console.log('找到现有记录文件，记录数:', existingRecords.length);
-                        } catch (e) {
-                            // 如果记录文件不存在，就创建新的
-                            console.log('创建新的记录文件');
-                            existingRecords = [];
-                        }
-                        
-                        // 添加新记录
-                        existingRecords.push(fileInfo);
-                        console.log('添加新记录后，总记录数:', existingRecords.length);
-                        
-                        // 上传更新后的记录文件，使用ETag进行条件更新
-                        const uploadParams = {
-                            Bucket: COS_CONFIG.Bucket,
-                            Region: COS_CONFIG.Region,
-                            Key: recordKey,
-                            Body: JSON.stringify(existingRecords, null, 2),
-                            ContentType: 'application/json'
-                        };
-                        
-                        // 如果存在ETag，添加条件更新
-                        if (recordETag) {
-                            uploadParams.IfMatch = recordETag;
-                        }
-                        
-                        await new Promise((resolve, reject) => {
-                            cosClient.putObject(uploadParams, (err, data) => {
-                                if (err) {
-                                    // 如果是条件更新失败（ETag不匹配），说明文件已被其他进程修改
-                                    if (err.statusCode === 412) {
-                                        reject(new Error('CONCURRENT_MODIFICATION'));
-                                    } else {
-                                        reject(err);
-                                    }
-                                } else {
-                                    resolve(data);
-                                }
-                            });
-                        });
-                        
-                        success = true;
-                        console.log('文件记录已成功更新，当前记录数:', existingRecords.length);
-                        
-                    } catch (error) {
-                        if (error.message === 'CONCURRENT_MODIFICATION') {
-                            console.log(`检测到并发冲突，重试中... (剩余重试次数: ${retries - 1})`);
-                            retries--;
-                            // 等待一小段时间后重试
-                            await new Promise(resolve => setTimeout(resolve, 500));
-                        } else {
-                            throw error;
-                        }
-                    }
-                }
+                const recordText = recordResponse.Body.toString();
+                return JSON.parse(recordText);
+            } catch (e) {
+                // 如果记录文件不存在，返回空数组
+                console.log('记录文件不存在，创建新的记录文件');
+                return [];
+            }
+        }
+        
+        // 更新记录文件
+        async function updateRecords(records) {
+            const recordKey = 'photo_records.json';
+            
+            try {
+                await new Promise((resolve, reject) => {
+                    cosClient.putObject({
+                        Bucket: COS_CONFIG.Bucket,
+                        Region: COS_CONFIG.Region,
+                        Key: recordKey,
+                        Body: JSON.stringify(records, null, 2),
+                        ContentType: 'application/json'
+                    }, (err, data) => {
+                        if (err) reject(err);
+                        else resolve(data);
+                    });
+                });
+                
+                console.log('记录文件更新成功，当前记录数:', records.length);
+                return true;
+            } catch (error) {
+                console.error('更新记录文件失败:', error);
+                return false;
+            }
+        }
+        
+        // 记录上传的文件信息到COS中的记录文件
+        async function recordUploadedFile(fileInfo) {
+            try {
+                // 先获取当前所有记录
+                let records = await getCurrentRecords();
+                
+                // 添加新记录
+                records.push(fileInfo);
+                
+                // 更新记录文件
+                const success = await updateRecords(records);
                 
                 if (!success) {
-                    throw new Error('记录文件更新失败：并发冲突重试次数用尽');
+                    throw new Error('记录文件更新失败');
                 }
                 
+                console.log('文件记录已成功添加，当前总记录数:', records.length);
+                return true;
             } catch (error) {
                 console.error('记录文件失败:', error);
-                // 这里可以选择将失败的记录存储到本地，稍后重试
                 showMessage(`文件 ${fileInfo.name} 上传成功，但记录保存失败: ${error.message}`, 'error');
+                return false;
             }
         }
         
@@ -650,14 +630,16 @@
                         fileObj.url = `https://${data.Location}`;
                         
                         // 记录上传的文件信息到记录文件
-                        await recordUploadedFile({
+                        const fileInfo = {
                             key: key,
                             url: `https://${data.Location}`,
                             name: fileObj.file.name,
                             size: fileObj.file.size,
                             uploadTime: new Date().toISOString(),
                             status: 'pending' // 初始状态为待审核
-                        });
+                        };
+                        
+                        await recordUploadedFile(fileInfo);
                         
                         resolve(data);
                     }
@@ -666,8 +648,8 @@
             });
         }
         
-        // 上传所有文件
-        uploadBtn.addEventListener('click', async () => {
+        // 顺序上传所有文件
+        async function uploadFilesSequentially() {
             if (!cosClient) {
                 showMessage('COS客户端未初始化，请刷新页面重试', 'error');
                 return;
@@ -685,24 +667,39 @@
             uploadBtn.textContent = '上传中...';
             uploadBtn.classList.add('loading');
             
+            let successCount = 0;
+            let errorCount = 0;
+            
             try {
-                // 上传所有待上传的文件
-                const uploadPromises = [];
+                // 先获取一次记录文件，确保我们能访问
+                await getCurrentRecords();
                 
+                // 顺序上传每个文件
                 for (let i = 0; i < files.length; i++) {
                     if (files[i].status === 'pending') {
-                        files[i].status = 'uploading';
-                        uploadPromises.push(uploadFileToCOS(files[i], i));
+                        try {
+                            files[i].status = 'uploading';
+                            renderFileList();
+                            
+                            await uploadFileToCOS(files[i], i);
+                            successCount++;
+                        } catch (error) {
+                            console.error(`文件 ${files[i].file.name} 上传失败:`, error);
+                            errorCount++;
+                        }
                     }
                 }
                 
-                // 等待所有上传完成
-                await Promise.all(uploadPromises);
-                showMessage('所有文件上传完成！');
+                if (errorCount === 0) {
+                    showMessage(`所有文件上传完成！成功: ${successCount} 个文件`);
+                } else {
+                    showMessage(`上传完成！成功: ${successCount} 个文件，失败: ${errorCount} 个文件`, 
+                               errorCount === files.length ? 'error' : 'success');
+                }
                 
             } catch (error) {
                 console.error('上传出错:', error);
-                showMessage('部分文件上传失败，请查看控制台详情', 'error');
+                showMessage('上传过程中出现错误，请查看控制台详情', 'error');
             } finally {
                 // 恢复按钮状态
                 uploadBtn.disabled = false;
@@ -710,7 +707,10 @@
                 uploadBtn.classList.remove('loading');
                 updateUploadButton();
             }
-        });
+        }
+        
+        // 上传所有文件
+        uploadBtn.addEventListener('click', uploadFilesSequentially);
         
         // 初始化文件列表
         renderFileList();
