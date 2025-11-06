@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>照片审核系统</title>
+    <title>瓶窑一中LED审核系统</title>
     <style>
         :root {
             --primary-color: #006eff;
@@ -35,6 +35,93 @@
             margin: 0 auto;
         }
         
+        /* 认证界面样式 */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+        
+        .auth-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .auth-box h2 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .auth-form {
+            margin-top: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+        
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .auth-btn:hover {
+            background: #0051d4;
+        }
+        
+        .auth-error {
+            color: var(--danger-color);
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .auth-info {
+            color: #666;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        /* 主内容区域 */
+        .main-content {
+            display: none;
+        }
+        
         .header {
             text-align: center;
             margin-bottom: 30px;
@@ -42,6 +129,29 @@
             background: linear-gradient(135deg, var(--primary-color), #0051d4);
             color: white;
             border-radius: 12px;
+            position: relative;
+        }
+        
+        .header-buttons {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .header-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
         
         .header h1 {
@@ -246,6 +356,65 @@
             opacity: 0.5;
         }
         
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .modal-header h3 {
+            color: var(--primary-color);
+            font-size: 1.5em;
+        }
+        
+        .modal-footer {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .modal-btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .modal-btn-secondary {
+            background: #f0f0f0;
+            color: var(--text-color);
+        }
+        
         @media (max-width: 768px) {
             .photo-grid {
                 grid-template-columns: 1fr;
@@ -254,49 +423,111 @@
             .stats {
                 grid-template-columns: 1fr;
             }
+            
+            .header-buttons {
+                position: static;
+                justify-content: center;
+                margin-top: 15px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>📸 照片审核系统</h1>
-            <p>审核待处理照片，管理已审核内容</p>
-        </div>
-        
-        <div id="messageArea"></div>
-        
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number stat-pending" id="pendingCount">0</div>
-                <div>待审核</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number stat-approved" id="approvedCount">0</div>
-                <div>已审核</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number stat-total" id="totalCount">0</div>
-                <div>总计</div>
-            </div>
-        </div>
-        
-        <div class="filters">
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="all">全部照片</button>
-                <button class="filter-btn" data-filter="pending">待审核</button>
-                <button class="filter-btn" data-filter="approved">已审核</button>
+        <!-- 认证界面（登录/设置密码） -->
+        <div class="auth-container" id="authContainer">
+            <div class="auth-box">
+                <h2>🔐 照片审核系统</h2>
+                <p id="authDescription">请输入密码登录系统</p>
+                <div class="auth-form">
+                    <div class="form-group">
+                        <label for="password">密码</label>
+                        <input type="password" id="password" placeholder="请输入密码">
+                    </div>
+                    <div class="form-group" id="confirmPasswordGroup" style="display: none;">
+                        <label for="confirmPassword">确认密码</label>
+                        <input type="password" id="confirmPassword" placeholder="请再次输入密码">
+                    </div>
+                    <button class="auth-btn" id="authButton" onclick="handleAuth()">登录</button>
+                    <div class="auth-error" id="authError"></div>
+                    <div class="auth-info" id="authInfo">首次使用需要设置密码</div>
+                </div>
             </div>
         </div>
         
-        <div class="photo-grid" id="photoGrid">
-            <!-- 照片卡片将在这里动态生成 -->
+        <!-- 主内容区域 -->
+        <div class="main-content" id="mainContent">
+            <div class="header">
+                <div class="header-buttons">
+                    <button class="header-btn" onclick="showChangePasswordModal()">修改密码</button>
+                    <button class="header-btn" onclick="logout()">退出登录</button>
+                </div>
+                <h1>📸 照片审核系统</h1>
+                <p>审核待处理照片，管理已审核内容</p>
+            </div>
+            
+            <div id="messageArea"></div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number stat-pending" id="pendingCount">0</div>
+                    <div>待审核</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number stat-approved" id="approvedCount">0</div>
+                    <div>已审核</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number stat-total" id="totalCount">0</div>
+                    <div>总计</div>
+                </div>
+            </div>
+            
+            <div class="filters">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">全部照片</button>
+                    <button class="filter-btn" data-filter="pending">待审核</button>
+                    <button class="filter-btn" data-filter="approved">已审核</button>
+                </div>
+            </div>
+            
+            <div class="photo-grid" id="photoGrid">
+                <!-- 照片卡片将在这里动态生成 -->
+            </div>
+            
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23969979' d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM5 4.5h14c.3 0 .5.2.5.5v8.4l-3-2.9c-.3-.3-.8-.3-1.1 0L11.9 14 9 11.5c-.3-.2-.7-.2-1 0L5.5 13V5c0-.3.2-.5.5-.5zm14 15H5c-.3 0-.5-.2-.5-.5v-2.4l4.1-3.8 2.8 2.1c.3.2.7.2 1 0l4.1-3.2 4.1 3.9V19c0 .3-.2.5-.5.5z'/%3E%3C/svg%3E" alt="No photos">
+                <h3>暂无照片</h3>
+                <p>当前筛选条件下没有照片</p>
+            </div>
         </div>
-        
-        <div class="empty-state" id="emptyState" style="display: none;">
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23969979' d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM5 4.5h14c.3 0 .5.2.5.5v8.4l-3-2.9c-.3-.3-.8-.3-1.1 0L11.9 14 9 11.5c-.3-.2-.7-.2-1 0L5.5 13V5c0-.3.2-.5.5-.5zm14 15H5c-.3 0-.5-.2-.5-.5v-2.4l4.1-3.8 2.8 2.1c.3.2.7.2 1 0l4.1-3.2 4.1 3.9V19c0 .3-.2.5-.5.5z'/%3E%3C/svg%3E" alt="No photos">
-            <h3>暂无照片</h3>
-            <p>当前筛选条件下没有照片</p>
+    </div>
+    
+    <!-- 修改密码模态框 -->
+    <div class="modal" id="changePasswordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>修改密码</h3>
+            </div>
+            <div class="auth-form">
+                <div class="form-group">
+                    <label for="currentPassword">当前密码</label>
+                    <input type="password" id="currentPassword" placeholder="请输入当前密码">
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">新密码</label>
+                    <input type="password" id="newPassword" placeholder="请输入新密码">
+                </div>
+                <div class="form-group">
+                    <label for="confirmNewPassword">确认新密码</label>
+                    <input type="password" id="confirmNewPassword" placeholder="请再次输入新密码">
+                </div>
+                <div class="auth-error" id="changePasswordError"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" onclick="hideChangePasswordModal()">取消</button>
+                <button class="modal-btn modal-btn-primary" onclick="changePassword()">确认修改</button>
+            </div>
         </div>
     </div>
 
@@ -314,6 +545,7 @@
         let cosClient = null;
         let allPhotos = [];
         let currentFilter = 'all';
+        let isFirstTime = false;
 
         // 显示消息
         function showMessage(message, type = 'success') {
@@ -338,6 +570,271 @@
                 console.error('COS客户端初始化失败:', error);
                 showMessage('COS客户端初始化失败', 'error');
                 return false;
+            }
+        }
+
+        // 检查密码是否存在
+        async function checkPasswordExists() {
+            if (!cosClient) {
+                console.error('COS客户端未初始化');
+                return false;
+            }
+
+            try {
+                const passwordResponse = await new Promise((resolve, reject) => {
+                    cosClient.getObject({
+                        Bucket: COS_CONFIG.Bucket,
+                        Region: COS_CONFIG.Region,
+                        Key: 'system_password.json'
+                    }, (err, data) => {
+                        if (err) reject(err);
+                        else resolve(data);
+                    });
+                });
+
+                // 密码文件存在
+                const passwordData = JSON.parse(passwordResponse.Body.toString());
+                return passwordData && passwordData.password;
+            } catch (error) {
+                console.log('密码文件不存在或读取失败:', error);
+                return false;
+            }
+        }
+
+        // 保存密码到云端
+        async function savePasswordToCloud(password) {
+            if (!cosClient) {
+                console.error('COS客户端未初始化');
+                return false;
+            }
+
+            try {
+                await new Promise((resolve, reject) => {
+                    cosClient.putObject({
+                        Bucket: COS_CONFIG.Bucket,
+                        Region: COS_CONFIG.Region,
+                        Key: 'system_password.json',
+                        Body: JSON.stringify({ password: password }),
+                        ContentType: 'application/json'
+                    }, (err, data) => {
+                        if (err) reject(err);
+                        else resolve(data);
+                    });
+                });
+                console.log('密码已保存到云端');
+                return true;
+            } catch (error) {
+                console.error('保存密码失败:', error);
+                return false;
+            }
+        }
+
+        // 验证密码
+        async function verifyPassword(password) {
+            if (!cosClient) {
+                console.error('COS客户端未初始化');
+                return false;
+            }
+
+            try {
+                const passwordResponse = await new Promise((resolve, reject) => {
+                    cosClient.getObject({
+                        Bucket: COS_CONFIG.Bucket,
+                        Region: COS_CONFIG.Region,
+                        Key: 'system_password.json'
+                    }, (err, data) => {
+                        if (err) reject(err);
+                        else resolve(data);
+                    });
+                });
+
+                const passwordData = JSON.parse(passwordResponse.Body.toString());
+                return passwordData.password === password;
+            } catch (error) {
+                console.error('验证密码失败:', error);
+                return false;
+            }
+        }
+
+        // 处理认证（登录或设置密码）
+        async function handleAuth() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const authError = document.getElementById('authError');
+            const authButton = document.getElementById('authButton');
+
+            authError.style.display = 'none';
+            authButton.disabled = true;
+
+            try {
+                if (isFirstTime) {
+                    // 设置密码流程
+                    if (!password) {
+                        authError.textContent = '密码不能为空';
+                        authError.style.display = 'block';
+                        return;
+                    }
+                    
+                    if (password !== confirmPassword) {
+                        authError.textContent = '两次输入的密码不一致';
+                        authError.style.display = 'block';
+                        return;
+                    }
+                    
+                    if (password.length < 4) {
+                        authError.textContent = '密码长度至少为4位';
+                        authError.style.display = 'block';
+                        return;
+                    }
+                    
+                    // 保存密码到云端
+                    const success = await savePasswordToCloud(password);
+                    if (success) {
+                        // 密码保存成功，进入主界面
+                        document.getElementById('authContainer').style.display = 'none';
+                        document.getElementById('mainContent').style.display = 'block';
+                        
+                        // 加载照片记录
+                        loadPhotoRecords();
+                    } else {
+                        authError.textContent = '密码保存失败，请重试';
+                        authError.style.display = 'block';
+                    }
+                } else {
+                    // 登录流程
+                    if (!password) {
+                        authError.textContent = '密码不能为空';
+                        authError.style.display = 'block';
+                        return;
+                    }
+                    
+                    // 验证密码
+                    const isValid = await verifyPassword(password);
+                    if (isValid) {
+                        // 密码正确，进入主界面
+                        document.getElementById('authContainer').style.display = 'none';
+                        document.getElementById('mainContent').style.display = 'block';
+                        
+                        // 加载照片记录
+                        loadPhotoRecords();
+                    } else {
+                        authError.textContent = '密码错误，请重试';
+                        authError.style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                console.error('认证过程出错:', error);
+                authError.textContent = '认证过程出错，请重试';
+                authError.style.display = 'block';
+            } finally {
+                authButton.disabled = false;
+            }
+        }
+
+        // 退出登录
+        function logout() {
+            document.getElementById('authContainer').style.display = 'flex';
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('password').value = '';
+            document.getElementById('confirmPassword').value = '';
+            document.getElementById('authError').style.display = 'none';
+            
+            // 重置认证界面为登录模式
+            setupAuthUI(false);
+        }
+
+        // 设置认证界面UI
+        function setupAuthUI(firstTime) {
+            isFirstTime = firstTime;
+            
+            const authDescription = document.getElementById('authDescription');
+            const confirmPasswordGroup = document.getElementById('confirmPasswordGroup');
+            const authButton = document.getElementById('authButton');
+            const authInfo = document.getElementById('authInfo');
+            
+            if (firstTime) {
+                authDescription.textContent = '首次使用，请设置密码';
+                confirmPasswordGroup.style.display = 'block';
+                authButton.textContent = '设置密码';
+                authInfo.textContent = '密码将保存在云端，用于后续登录';
+            } else {
+                authDescription.textContent = '请输入密码登录系统';
+                confirmPasswordGroup.style.display = 'none';
+                authButton.textContent = '登录';
+                authInfo.textContent = '忘记密码？请联系管理员重置';
+            }
+        }
+
+        // 显示修改密码模态框
+        function showChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'flex';
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+            document.getElementById('changePasswordError').style.display = 'none';
+        }
+
+        // 隐藏修改密码模态框
+        function hideChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'none';
+        }
+
+        // 修改密码
+        async function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+            const changePasswordError = document.getElementById('changePasswordError');
+            
+            changePasswordError.style.display = 'none';
+            
+            // 验证输入
+            if (!currentPassword) {
+                changePasswordError.textContent = '请输入当前密码';
+                changePasswordError.style.display = 'block';
+                return;
+            }
+            
+            if (!newPassword) {
+                changePasswordError.textContent = '请输入新密码';
+                changePasswordError.style.display = 'block';
+                return;
+            }
+            
+            if (newPassword.length < 4) {
+                changePasswordError.textContent = '新密码长度至少为4位';
+                changePasswordError.style.display = 'block';
+                return;
+            }
+            
+            if (newPassword !== confirmNewPassword) {
+                changePasswordError.textContent = '两次输入的新密码不一致';
+                changePasswordError.style.display = 'block';
+                return;
+            }
+            
+            try {
+                // 验证当前密码
+                const isCurrentPasswordValid = await verifyPassword(currentPassword);
+                if (!isCurrentPasswordValid) {
+                    changePasswordError.textContent = '当前密码错误';
+                    changePasswordError.style.display = 'block';
+                    return;
+                }
+                
+                // 保存新密码
+                const success = await savePasswordToCloud(newPassword);
+                if (success) {
+                    showMessage('密码修改成功');
+                    hideChangePasswordModal();
+                } else {
+                    changePasswordError.textContent = '密码修改失败，请重试';
+                    changePasswordError.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('修改密码过程出错:', error);
+                changePasswordError.textContent = '修改密码过程出错，请重试';
+                changePasswordError.style.display = 'block';
             }
         }
 
@@ -455,10 +952,8 @@
             return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'});
         }
 
-        // 审核通过照片
+        // 审核通过照片 - 移除确认步骤
         async function approvePhoto(index) {
-            if (!confirm('确定要通过这张照片吗？')) return;
-
             allPhotos[index].status = 'approved';
             await updatePhotoRecords();
             showMessage('照片已通过审核');
@@ -466,11 +961,10 @@
             renderPhotoGrid();
         }
 
-        // 拒绝/删除照片
+        // 拒绝/删除照片 - 移除确认步骤
         async function rejectPhoto(index) {
             const photo = allPhotos[index];
-            if (!confirm(`确定要删除照片 "${photo.name}" 吗？此操作将永久删除云端文件！`)) return;
-
+            
             try {
                 // 从COS删除文件
                 await new Promise((resolve, reject) => {
@@ -520,11 +1014,19 @@
         }
 
         // 初始化
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             // 初始化COS客户端
             if (initCOSClient()) {
-                // 加载照片记录
-                loadPhotoRecords();
+                // 检查密码是否存在
+                const passwordExists = await checkPasswordExists();
+                
+                if (passwordExists) {
+                    // 密码存在，显示登录界面
+                    setupAuthUI(false);
+                } else {
+                    // 密码不存在，显示设置密码界面
+                    setupAuthUI(true);
+                }
             }
 
             // 筛选按钮事件
@@ -535,6 +1037,27 @@
                     currentFilter = this.dataset.filter;
                     renderPhotoGrid();
                 });
+            });
+            
+            // 密码输入框回车认证
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleAuth();
+                }
+            });
+            
+            // 确认密码输入框回车认证
+            document.getElementById('confirmPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleAuth();
+                }
+            });
+            
+            // 修改密码模态框中的回车确认
+            document.getElementById('confirmNewPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    changePassword();
+                }
             });
         });
     </script>
