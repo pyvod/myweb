@@ -88,6 +88,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            text-decoration: none;
         }
 
         .btn-primary {
@@ -107,6 +108,16 @@
 
         .btn-danger {
             background: #dc3545;
+            color: white;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-announcement {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
             color: white;
         }
 
@@ -352,7 +363,7 @@
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-            max-width: 500px;
+            max-width: 600px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
@@ -493,6 +504,10 @@
             .selector-row {
                 flex-direction: column;
             }
+            
+            .modal-content {
+                padding: 20px;
+            }
         }
     </style>
 </head>
@@ -500,7 +515,7 @@
     <div class="container">
         <div class="header">
             <h1>瓶窑第一中学作业管理系统</h1>
-            <div class="subtitle">教师端 - 简洁操作版</div>
+            <div class="subtitle">教师端</div>
         </div>
 
         <div class="status-bar">
@@ -515,9 +530,12 @@
                 <button class="btn btn-success" onclick="saveAll()">
                     💾 保存全部
                 </button>
-                <button class="btn btn-primary" onclick="showConfigModal()">
-                    ⚙️ 设置
+                <button class="btn btn-info" onclick="showConfigModal()">
+                    ⚙️ 系统设置
                 </button>
+                <a class="btn btn-announcement" href="http://10.59.14.251:5000" target="_blank">
+                    📢 教师喊话
+                </a>
             </div>
         </div>
 
@@ -724,6 +742,7 @@
         // 初始化应用
         function initializeApp() {
             loadConfig();
+            loadClassSelection();
             initializeGradeSelect();
             initializeClassSelect();
             initializeSubjectButtons();
@@ -732,12 +751,36 @@
             loadHomeworkData();
         }
 
+        // 加载班级选择记忆
+        function loadClassSelection() {
+            const savedGrade = localStorage.getItem('selectedGrade');
+            const savedClass = localStorage.getItem('selectedClass');
+            
+            if (savedGrade) {
+                currentGrade = savedGrade;
+            }
+            
+            if (savedClass) {
+                currentClass = savedClass;
+            }
+        }
+
+        // 保存班级选择记忆
+        function saveClassSelection() {
+            localStorage.setItem('selectedGrade', currentGrade);
+            localStorage.setItem('selectedClass', currentClass);
+        }
+
         // 初始化年级选择下拉框
         function initializeGradeSelect() {
             const gradeSelect = document.getElementById('gradeSelect');
             
+            // 设置已保存的年级
+            gradeSelect.value = currentGrade;
+            
             gradeSelect.addEventListener('change', function() {
                 currentGrade = this.value;
+                saveClassSelection();
                 initializeClassSelect();
                 loadCurrentClassContent();
             });
@@ -760,6 +803,7 @@
             // 添加事件监听器
             classSelect.addEventListener('change', function() {
                 currentClass = this.value;
+                saveClassSelection();
                 loadCurrentClassContent();
             });
         }
@@ -1381,7 +1425,7 @@
         });
 
         // 添加调试信息
-        console.log('多班级作业管理系统已初始化完成');
+        console.log('作业管理系统已初始化完成');
         console.log('存储桶配置:', COS_CONFIG);
         console.log('年级配置:', gradeConfig);
     </script>
