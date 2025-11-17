@@ -88,6 +88,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            text-decoration: none;
         }
 
         .btn-primary {
@@ -466,171 +467,6 @@
             font-size: 0.9em;
         }
 
-        /* 喊话系统样式 */
-        .announcement-info-box {
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            line-height: 1.4;
-        }
-
-        .announcement-info-box strong {
-            color: #1976d2;
-            display: block;
-            margin-bottom: 6px;
-            font-size: 14px;
-        }
-
-        .announcement-form-group {
-            margin-bottom: 15px;
-        }
-
-        .announcement-label {
-            display: block;
-            margin-bottom: 6px;
-            color: #2c3e50;
-            font-weight: bold;
-            font-size: 13px;
-        }
-
-        .announcement-textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            background: #fafafa;
-            resize: vertical;
-            min-height: 100px;
-            font-family: inherit;
-        }
-
-        .announcement-textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .announcement-send-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
-            margin-top: 10px;
-        }
-
-        .announcement-send-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
-        }
-
-        .announcement-send-btn:active {
-            transform: translateY(0);
-        }
-
-        .announcement-send-btn:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .announcement-status {
-            text-align: center;
-            padding: 12px;
-            margin: 15px 0;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 13px;
-            transition: all 0.3s ease;
-            opacity: 0;
-            transform: scale(0.9);
-        }
-
-        .announcement-status.show {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .announcement-status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .announcement-status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .announcement-status.sending {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-
-        .announcement-server-info {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 20px;
-            font-size: 11px;
-        }
-
-        .announcement-server-info strong {
-            color: #856404;
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .announcement-url-item {
-            margin: 4px 0;
-            word-break: break-all;
-        }
-
-        .announcement-character-count {
-            text-align: right;
-            font-size: 11px;
-            color: #7f8c8d;
-            margin-top: 4px;
-        }
-
-        .announcement-character-count.warning {
-            color: #e74c3c;
-        }
-
-        .announcement-connection-test {
-            margin-top: 12px;
-            padding: 8px;
-            border-radius: 6px;
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-        }
-
-        .announcement-pulse {
-            animation: announcementPulse 1.5s infinite;
-        }
-
-        @keyframes announcementPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
         /* 响应式设计 */
         @media (max-width: 1024px) {
             .content {
@@ -679,7 +515,7 @@
     <div class="container">
         <div class="header">
             <h1>瓶窑第一中学作业管理系统</h1>
-            <div class="subtitle">教师端 - 集成喊话功能</div>
+            <div class="subtitle">教师端</div>
         </div>
 
         <div class="status-bar">
@@ -697,9 +533,9 @@
                 <button class="btn btn-info" onclick="showConfigModal()">
                     ⚙️ 系统设置
                 </button>
-                <button class="btn btn-announcement" onclick="showAnnouncementModal()">
+                <a class="btn btn-announcement" href="http://10.59.14.251:5000" target="_blank">
                     📢 教师喊话
-                </button>
+                </a>
             </div>
         </div>
 
@@ -861,68 +697,6 @@
         </div>
     </div>
 
-    <!-- 喊话模态框 -->
-    <div class="modal" id="announcementModal">
-        <div class="modal-content">
-            <h3 class="modal-title">教师喊话系统</h3>
-            
-            <div class="announcement-info-box">
-                <strong>📢 喊话系统说明</strong>
-                1. 填写发送者姓名和喊话内容<br>
-                2. 点击"发送喊话"按钮<br>
-                3. 班级大屏将弹出窗口并用语音朗读
-            </div>
-
-            <div class="config-form">
-                <div class="announcement-form-group">
-                    <label class="announcement-label">👤 发送者姓名</label>
-                    <input type="text" id="announcementTeacherName" class="form-input" 
-                           placeholder="请输入您的姓名" value="老师" required>
-                </div>
-
-                <div class="announcement-form-group">
-                    <label class="announcement-label">💬 喊话内容</label>
-                    <textarea id="announcementMessage" class="announcement-textarea" 
-                              placeholder="请输入要喊话的内容..." required></textarea>
-                    <div class="announcement-character-count" id="announcementCharCount">0/500</div>
-                </div>
-
-                <button type="button" class="announcement-send-btn" id="announcementSendBtn">
-                    🚀 发送喊话
-                </button>
-            </div>
-
-            <div class="announcement-status" id="announcementStatus"></div>
-
-            <div class="announcement-server-info">
-                <strong>🌐 喊话服务器信息</strong>
-                <div class="announcement-url-item">
-                    <strong>服务器地址:</strong> 
-                    <span id="announcementServerUrl">http://172.17.238.23:5000</span>
-                    <span id="announcementServerStatus"></span>
-                </div>
-                
-                <div class="announcement-connection-test">
-                    <strong>连接测试:</strong>
-                    <div id="announcementConnectionResult">点击测试按钮检查连接</div>
-                    <button class="btn" id="announcementTestConnectionBtn" style="margin-top: 5px; padding: 6px 12px; font-size: 12px;">
-                        测试连接
-                    </button>
-                </div>
-                
-                <div style="margin-top: 8px; font-size: 10px; color: #e74c3c;">
-                    请确保班级大屏已打开喊话接收程序
-                </div>
-            </div>
-
-            <div class="form-actions">
-                <button class="btn btn-danger" onclick="hideAnnouncementModal()">
-                    ❌ 关闭
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script>
         // 全局变量
         let homeworkData = null;
@@ -960,15 +734,9 @@
             { id: '晨读', name: '晨读' }
         ];
 
-        // 喊话系统配置
-        const ANNOUNCEMENT_CONFIG = {
-            serverUrl: 'http://172.17.238.23:5000'
-        };
-
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
             initializeApp();
-            initializeAnnouncementSystem();
         });
 
         // 初始化应用
@@ -1003,184 +771,6 @@
             localStorage.setItem('selectedClass', currentClass);
         }
 
-        // 初始化喊话系统
-        function initializeAnnouncementSystem() {
-            // 设置服务器链接
-            document.getElementById('announcementServerUrl').onclick = () => 
-                window.open(ANNOUNCEMENT_CONFIG.serverUrl, '_blank');
-            
-            // 测试连接按钮
-            document.getElementById('announcementTestConnectionBtn').addEventListener('click', 
-                checkAnnouncementServerStatus);
-            
-            // 监听字符输入
-            document.getElementById('announcementMessage').addEventListener('input', 
-                updateAnnouncementCharCount);
-            
-            // 发送喊话按钮
-            document.getElementById('announcementSendBtn').addEventListener('click', 
-                sendAnnouncement);
-            
-            // 初始化字符计数
-            updateAnnouncementCharCount();
-            
-            // 检查服务器状态
-            checkAnnouncementServerStatus();
-            
-            // 每30秒检查一次服务器状态
-            setInterval(checkAnnouncementServerStatus, 30000);
-        }
-
-        // 喊话系统字符计数
-        function updateAnnouncementCharCount() {
-            const message = document.getElementById('announcementMessage');
-            const charCount = document.getElementById('announcementCharCount');
-            const count = message.value.length;
-            
-            charCount.textContent = `${count}/500`;
-            
-            if (count > 450) {
-                charCount.classList.add('warning');
-            } else {
-                charCount.classList.remove('warning');
-            }
-            
-            if (count > 500) {
-                message.value = message.value.substring(0, 500);
-                updateAnnouncementCharCount();
-            }
-        }
-
-        // 显示喊话系统状态信息
-        function showAnnouncementStatus(message, type) {
-            const status = document.getElementById('announcementStatus');
-            status.textContent = message;
-            status.className = `announcement-status ${type} show`;
-            
-            // 3秒后自动隐藏成功和错误消息
-            if (type === 'success' || type === 'error') {
-                setTimeout(() => {
-                    status.classList.remove('show');
-                }, 3000);
-            }
-        }
-
-        // 检查喊话服务器连接状态
-        async function checkAnnouncementServerStatus() {
-            const serverStatus = document.getElementById('announcementServerStatus');
-            const connectionResult = document.getElementById('announcementConnectionResult');
-            
-            try {
-                serverStatus.innerHTML = '<span style="color: #f39c12;">🔄 检查中...</span>';
-                connectionResult.innerHTML = '正在测试连接...';
-                
-                const response = await fetch(`${ANNOUNCEMENT_CONFIG.serverUrl}/status`, {
-                    method: 'GET',
-                    mode: 'cors',
-                    cache: 'no-cache'
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    serverStatus.innerHTML = '<span style="color: #27ae60;">✅ 在线</span>';
-                    connectionResult.innerHTML = `✅ 连接成功！服务器状态: ${data.status}`;
-                    return true;
-                } else {
-                    serverStatus.innerHTML = '<span style="color: #e74c3c;">❌ 离线</span>';
-                    connectionResult.innerHTML = `❌ 服务器返回错误: ${response.status}`;
-                    return false;
-                }
-            } catch (error) {
-                console.error('喊话服务器连接失败:', error);
-                serverStatus.innerHTML = '<span style="color: #e74c3c;">❌ 连接失败</span>';
-                
-                if (error.name === 'TypeError') {
-                    connectionResult.innerHTML = '❌ 网络错误：无法连接到服务器。请检查：<br>' +
-                        '1. 服务器地址是否正确<br>' +
-                        '2. 服务器是否已启动<br>' +
-                        '3. 网络连接是否正常';
-                } else {
-                    connectionResult.innerHTML = `❌ 连接错误: ${error.message}`;
-                }
-                return false;
-            }
-        }
-
-        // 发送喊话
-        async function sendAnnouncement() {
-            const teacherName = document.getElementById('announcementTeacherName').value.trim();
-            const message = document.getElementById('announcementMessage').value.trim();
-            const sendBtn = document.getElementById('announcementSendBtn');
-            const originalText = sendBtn.textContent;
-            
-            if (!teacherName) {
-                showAnnouncementStatus('❌ 请输入发送者姓名', 'error');
-                document.getElementById('announcementTeacherName').focus();
-                return;
-            }
-            
-            if (!message) {
-                showAnnouncementStatus('❌ 请输入喊话内容', 'error');
-                document.getElementById('announcementMessage').focus();
-                return;
-            }
-            
-            if (message.length > 500) {
-                showAnnouncementStatus('❌ 喊话内容不能超过500字', 'error');
-                return;
-            }
-            
-            try {
-                // 禁用按钮并显示发送中状态
-                sendBtn.disabled = true;
-                sendBtn.textContent = '🔄 发送中...';
-                sendBtn.classList.add('announcement-pulse');
-                
-                showAnnouncementStatus('正在发送喊话...', 'sending');
-                
-                const response = await fetch(`${ANNOUNCEMENT_CONFIG.serverUrl}/announce`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    mode: 'cors',
-                    body: JSON.stringify({
-                        message: message,
-                        sender: teacherName
-                    })
-                });
-                
-                // 检查响应状态
-                if (!response.ok) {
-                    throw new Error(`HTTP错误: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showAnnouncementStatus('✅ 喊话已发送！班级大屏将播报此消息。', 'success');
-                    document.getElementById('announcementMessage').value = '';
-                    updateAnnouncementCharCount();
-                } else {
-                    showAnnouncementStatus(`❌ 发送失败：${data.message}`, 'error');
-                }
-                
-            } catch (error) {
-                console.error('喊话发送失败:', error);
-                if (error.name === 'TypeError') {
-                    showAnnouncementStatus('❌ 网络错误：无法连接到服务器。请检查服务器状态。', 'error');
-                } else {
-                    showAnnouncementStatus(`❌ 发送失败：${error.message}`, 'error');
-                }
-            } finally {
-                // 恢复按钮状态
-                sendBtn.disabled = false;
-                sendBtn.textContent = originalText;
-                sendBtn.classList.remove('announcement-pulse');
-            }
-        }
-
-        // 以下是原有的作业管理系统函数
         // 初始化年级选择下拉框
         function initializeGradeSelect() {
             const gradeSelect = document.getElementById('gradeSelect');
@@ -1773,14 +1363,6 @@
             document.getElementById('configModal').classList.remove('show');
         }
 
-        function showAnnouncementModal() {
-            document.getElementById('announcementModal').classList.add('show');
-        }
-
-        function hideAnnouncementModal() {
-            document.getElementById('announcementModal').classList.remove('show');
-        }
-
         async function testConnection() {
             try {
                 showNotification('正在测试连接...', 'warning');
@@ -1843,10 +1425,9 @@
         });
 
         // 添加调试信息
-        console.log('集成喊话功能的作业管理系统已初始化完成');
+        console.log('作业管理系统已初始化完成');
         console.log('存储桶配置:', COS_CONFIG);
         console.log('年级配置:', gradeConfig);
-        console.log('喊话服务器:', ANNOUNCEMENT_CONFIG.serverUrl);
     </script>
 </body>
 </html>
