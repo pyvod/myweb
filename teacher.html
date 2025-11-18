@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>瓶窑第一中学班级作业管理系统 - 教师端</title>
     <style>
-        /* 保持所有其他样式不变，只修改班级选择部分 */
-        
+        /* 保持所有原有样式不变 */
         /* 班级选择样式 - 改为复选框形式 */
         .class-selection-container {
             margin: 15px 0;
@@ -677,6 +676,381 @@
             flex-wrap: wrap;
         }
 
+        /* 新增样式：注册页面和用户管理 */
+        .register-container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            display: none;
+        }
+
+        .register-header {
+            margin-bottom: 30px;
+        }
+
+        .register-header h1 {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .register-header .subtitle {
+            color: #7f8c8d;
+            font-size: 1em;
+        }
+
+        .register-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .register-input {
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .register-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+        }
+
+        .register-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .register-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .register-btn:active {
+            transform: translateY(0);
+        }
+
+        .register-status {
+            color: #dc3545;
+            margin-top: 15px;
+            min-height: 20px;
+            font-size: 0.9em;
+        }
+
+        .notice-box {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .notice-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .notice-box p {
+            color: #856404;
+            margin: 5px 0;
+        }
+
+        /* 用户管理样式 */
+        .user-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px;
+            background: #f8f9fa;
+            margin-bottom: 15px;
+        }
+
+        .user-item {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .user-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .user-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .user-basic-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .user-real-name {
+            color: #495057;
+            font-size: 14px;
+            background: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .user-role {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .user-status {
+            background: #f8f9fa;
+            color: #6c757d;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .user-status.approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .user-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .user-details-expanded {
+            margin-top: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .user-detail-row {
+            display: flex;
+            margin-bottom: 8px;
+        }
+
+        .user-detail-label {
+            font-weight: bold;
+            color: #2c3e50;
+            min-width: 120px;
+        }
+
+        .user-detail-value {
+            color: #495057;
+            flex: 1;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .edit-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .edit-btn:hover {
+            background: #138496;
+            transform: translateY(-1px);
+        }
+
+        .approve-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .approve-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .reject-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .reject-btn:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .delete-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .delete-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        /* 编辑用户模态框 */
+        .edit-user-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-user-modal.show {
+            display: flex;
+        }
+
+        .edit-user-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .edit-user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+        }
+
+        .edit-user-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .close-edit {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-edit:hover {
+            color: #000;
+        }
+
+        .edit-user-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .cancel-edit-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .cancel-edit-btn:hover {
+            background: #5a6268;
+        }
+
+        .save-edit-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .save-edit-btn:hover {
+            background: #218838;
+        }
+
         @media (max-width: 1024px) {
             .content {
                 grid-template-columns: 1fr;
@@ -731,6 +1105,57 @@
         </form>
         
         <div class="login-status" id="loginStatus"></div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="javascript:void(0)" onclick="showRegisterPage()" style="color: #007bff; text-decoration: none;">
+                还没有账号？立即注册
+            </a>
+        </div>
+    </div>
+
+    <!-- 注册页面 -->
+    <div id="registerPage" class="register-container">
+        <div class="register-header">
+            <h1>用户注册</h1>
+            <div class="subtitle">请填写注册信息</div>
+        </div>
+        
+        <div class="notice-box">
+            <h3>注册须知</h3>
+            <p>注册后需要管理员审核才能登录使用</p>
+            <p>请耐心等待管理员审核您的申请</p>
+        </div>
+        
+        <form class="register-form" id="registerForm">
+            <input type="text" class="register-input" id="regUsername" placeholder="用户名（至少3个字符）" required>
+            <input type="text" class="register-input" id="regRealName" placeholder="真实姓名（如：张三）" required>
+            <input type="password" class="register-input" id="regPassword" placeholder="密码（至少6个字符）" required>
+            <input type="password" class="register-input" id="regConfirmPassword" placeholder="确认密码" required>
+            
+            <select class="register-input" id="regRole" required>
+                <option value="normal">普通老师</option>
+                <option value="teacher">子管理员</option>
+            </select>
+            
+            <div style="text-align: left;">
+                <label style="font-weight: bold; color: #2c3e50; margin-bottom: 8px; display: block;">绑定班级 (可多选):</label>
+                <div class="class-grid-container" style="max-height: 200px;">
+                    <div class="class-grid" id="registerClassGrid">
+                        <div class="empty-state">正在加载班级列表...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="register-btn" id="registerBtn">提交注册申请</button>
+        </form>
+        
+        <div class="register-status" id="registerStatus"></div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="javascript:void(0)" onclick="showLoginPage()" style="color: #007bff; text-decoration: none;">
+                已有账号？立即登录
+            </a>
+        </div>
     </div>
 
     <!-- 主应用页面 -->
@@ -768,7 +1193,7 @@
             <div class="editor-section">
                 <h2 class="section-title">作业编辑</h2>
                 
-                <!-- 班级选择区域 - 改为复选框形式 -->
+                <!-- 班级选择区域 -->
                 <div class="class-selection-container">
                     <div class="class-selection-header">
                         <div class="header-box select-all-box">
@@ -835,6 +1260,8 @@
 
     <!-- 通知消息和模态框 -->
     <div class="notification" id="notification"></div>
+    
+    <!-- 系统设置模态框 -->
     <div class="modal" id="configModal">
         <div class="modal-content">
             <h3 class="modal-title">系统设置</h3>
@@ -842,6 +1269,7 @@
             <div class="modal-tabs">
                 <button class="modal-tab active" data-tab="storage">云存储设置</button>
                 <button class="modal-tab" data-tab="links">班级链接生成</button>
+                <button class="modal-tab" data-tab="userManagement">用户管理</button>
             </div>
             
             <!-- 云存储设置标签页 -->
@@ -918,6 +1346,82 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- 用户管理标签页 -->
+            <div class="modal-tab-content" id="userManagementTab">
+                <div class="config-form">
+                    <div class="form-group">
+                        <h4>用户管理</h4>
+                        <p style="color: #6c757d; margin-bottom: 15px;">
+                            只有超级管理员和管理员可以管理用户。您可以审核注册申请、编辑用户信息和删除用户。
+                        </p>
+                        
+                        <!-- 待审核用户 -->
+                        <div class="form-group">
+                            <h5>待审核注册申请</h5>
+                            <div class="user-list" id="pendingUsersList">
+                                <div class="empty-state">正在加载待审核用户...</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 已审核用户 -->
+                        <div class="form-group">
+                            <h5>已审核用户</h5>
+                            <div class="user-list" id="approvedUsersList">
+                                <div class="empty-state">正在加载用户列表...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑用户模态框 -->
+    <div class="edit-user-modal" id="editUserModal">
+        <div class="edit-user-content">
+            <div class="edit-user-header">
+                <div class="edit-user-title">编辑用户信息</div>
+                <span class="close-edit" onclick="closeEditUserModal()">&times;</span>
+            </div>
+            
+            <div class="config-form">
+                <input type="hidden" id="editUsername">
+                
+                <div class="form-group">
+                    <label class="form-label">真实姓名:</label>
+                    <input type="text" class="form-input" id="editRealName" placeholder="请输入真实姓名">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">新密码 (留空不修改):</label>
+                    <input type="password" class="form-input" id="editPassword" placeholder="输入新密码">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">角色:</label>
+                    <select class="form-input" id="editRole">
+                        <option value="normal">普通老师</option>
+                        <option value="teacher">子管理员</option>
+                        <option value="admin">管理员</option>
+                        <option value="super_admin">超级管理员</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">绑定班级 (可多选):</label>
+                    <div class="class-grid-container" style="max-height: 200px;">
+                        <div class="class-grid" id="editClassGrid">
+                            <div class="empty-state">正在加载班级列表...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="edit-user-footer">
+                <button class="cancel-edit-btn" onclick="closeEditUserModal()">取消</button>
+                <button class="save-edit-btn" onclick="saveUserChanges()">保存</button>
+            </div>
         </div>
     </div>
 
@@ -938,6 +1442,7 @@
         // 用户信息
         let currentUser = null;
         let userClasses = [];
+        let allClasses = [];
         
         // 存储桶配置
         const COS_CONFIG = {
@@ -949,6 +1454,13 @@
             secretId: 'AKIDXsyve7LJ4bu0wc4GExue8PRDvOcaIm36',
             secretKey: 'tXw61g5FBsKZYIm10jDTYO4UfaGgqlQp',
             ...COS_CONFIG
+        };
+
+        // 用户数据
+        let usersData = {
+            users: {},
+            pending_registrations: {},
+            last_updated: new Date().toLocaleString('zh-CN')
         };
 
         // 科目列表
@@ -965,6 +1477,7 @@
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
             checkLoginStatus();
+            loadAllClasses();
         });
 
         // 检查登录状态
@@ -982,6 +1495,7 @@
         // 显示登录页面
         function showLoginPage() {
             document.getElementById('loginPage').style.display = 'block';
+            document.getElementById('registerPage').style.display = 'none';
             document.getElementById('appPage').style.display = 'none';
             
             document.getElementById('loginForm').addEventListener('submit', function(e) {
@@ -990,15 +1504,223 @@
             });
         }
 
+        // 显示注册页面
+        function showRegisterPage() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('registerPage').style.display = 'block';
+            document.getElementById('appPage').style.display = 'none';
+            
+            // 初始化注册班级选择
+            initializeRegisterClassGrid();
+            
+            document.getElementById('registerForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                register();
+            });
+        }
+
         // 显示应用页面
         function showAppPage() {
             document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('registerPage').style.display = 'none';
             document.getElementById('appPage').style.display = 'block';
             
             document.getElementById('userInfo').textContent = 
                 `欢迎, ${currentUser.real_name || currentUser.username} (${getRoleDisplayName(currentUser.role)})`;
             
             initializeApp();
+        }
+
+        // 初始化注册班级选择网格
+        function initializeRegisterClassGrid() {
+            const classGrid = document.getElementById('registerClassGrid');
+            classGrid.innerHTML = '';
+            
+            if (allClasses.length === 0) {
+                classGrid.innerHTML = '<div class="empty-state">正在加载班级列表...</div>';
+                return;
+            }
+            
+            allClasses.forEach(className => {
+                const classItem = document.createElement('div');
+                classItem.className = 'class-item-compact';
+                
+                classItem.innerHTML = `
+                    <input type="checkbox" value="${className}">
+                    <div class="class-info">
+                        <div class="class-name-main" title="${className}">
+                            ${className}
+                        </div>
+                    </div>
+                `;
+                
+                // 点击整个项也可以选择
+                classItem.addEventListener('click', function(e) {
+                    if (e.target.type !== 'checkbox') {
+                        const checkbox = this.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked;
+                    }
+                });
+                
+                classGrid.appendChild(classItem);
+            });
+        }
+
+        // 用户注册
+        async function register() {
+            const username = document.getElementById('regUsername').value.trim();
+            const realName = document.getElementById('regRealName').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const role = document.getElementById('regRole').value;
+            const statusDiv = document.getElementById('registerStatus');
+            const registerBtn = document.getElementById('registerBtn');
+            
+            // 获取选中的班级
+            const checkboxes = document.querySelectorAll('#registerClassGrid input[type="checkbox"]:checked');
+            const classes = Array.from(checkboxes).map(checkbox => checkbox.value);
+            
+            if (!username || !realName || !password) {
+                statusDiv.textContent = '请填写所有必填字段';
+                return;
+            }
+            
+            if (username.length < 3) {
+                statusDiv.textContent = '用户名至少需要3个字符';
+                return;
+            }
+            
+            if (password.length < 6) {
+                statusDiv.textContent = '密码至少需要6个字符';
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                statusDiv.textContent = '两次输入的密码不一致';
+                return;
+            }
+            
+            if (classes.length === 0) {
+                statusDiv.textContent = '请至少选择一个班级';
+                return;
+            }
+            
+            registerBtn.disabled = true;
+            registerBtn.textContent = '提交中...';
+            statusDiv.textContent = '';
+            
+            try {
+                // 加载现有用户数据
+                await loadUsersDataFromCOS();
+                
+                // 检查用户名是否已存在
+                if (usersData.users[username] || usersData.pending_registrations[username]) {
+                    statusDiv.textContent = '用户名已存在';
+                    registerBtn.disabled = false;
+                    registerBtn.textContent = '提交注册申请';
+                    return;
+                }
+                
+                // 创建待审核用户
+                const hashedPassword = await sha256(password);
+                usersData.pending_registrations[username] = {
+                    username: username,
+                    real_name: realName,
+                    password: hashedPassword,
+                    role: role,
+                    classes: classes,
+                    created_time: new Date().toLocaleString('zh-CN'),
+                    status: 'pending'
+                };
+                
+                // 保存到云端
+                await saveUsersDataToCOS();
+                
+                statusDiv.textContent = '注册申请已提交，请等待管理员审核！审核通过后即可登录使用。';
+                statusDiv.style.color = '#28a745';
+                
+                // 清空表单
+                document.getElementById('registerForm').reset();
+                document.querySelectorAll('#registerClassGrid input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                
+            } catch (error) {
+                console.error('注册错误:', error);
+                statusDiv.textContent = '注册失败: ' + error.message;
+            } finally {
+                registerBtn.disabled = false;
+                registerBtn.textContent = '提交注册申请';
+            }
+        }
+
+        // 从COS加载用户数据
+        async function loadUsersDataFromCOS() {
+            try {
+                const response = await fetch(
+                    `https://${COS_CONFIG.bucket}.cos.${COS_CONFIG.region}.myqcloud.com/users_data.json?t=${Date.now()}`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+                
+                if (!response.ok) {
+                    // 如果文件不存在，创建默认结构
+                    if (response.status === 404) {
+                        usersData = {
+                            users: {},
+                            pending_registrations: {},
+                            last_updated: new Date().toLocaleString('zh-CN')
+                        };
+                        return;
+                    }
+                    throw new Error(`网络错误: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                usersData = data;
+                
+            } catch (error) {
+                console.error('加载用户数据失败:', error);
+                // 创建默认结构
+                usersData = {
+                    users: {},
+                    pending_registrations: {},
+                    last_updated: new Date().toLocaleString('zh-CN')
+                };
+            }
+        }
+
+        // 保存用户数据到COS
+        async function saveUsersDataToCOS() {
+            try {
+                usersData.last_updated = new Date().toLocaleString('zh-CN');
+                
+                const jsonData = JSON.stringify(usersData, null, 2);
+                
+                const response = await fetch(
+                    `https://${config.bucket}.cos.${config.region}.myqcloud.com/users_data.json`,
+                    {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: jsonData
+                    }
+                );
+                
+                if (!response.ok) {
+                    throw new Error(`上传失败: ${response.status}`);
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('保存用户数据失败:', error);
+                throw new Error('无法保存用户数据到云端');
+            }
         }
 
         // 用户登录
@@ -1018,15 +1740,14 @@
             statusDiv.textContent = '';
             
             try {
-                const usersData = await loadUsersDataFromCOS();
+                await loadUsersDataFromCOS();
                 
                 if (!usersData || !usersData.users) {
                     statusDiv.textContent = '加载用户数据失败，请检查网络连接';
                     return;
                 }
                 
-                const allUsers = Object.values(usersData.users);
-                const user = allUsers.find(u => u.username === username);
+                const user = usersData.users[username];
                 
                 if (!user) {
                     statusDiv.textContent = '用户不存在';
@@ -1066,30 +1787,6 @@
             }
         }
 
-        // 从COS加载用户数据
-        async function loadUsersDataFromCOS() {
-            try {
-                const response = await fetch(
-                    `https://${COS_CONFIG.bucket}.cos.${COS_CONFIG.region}.myqcloud.com/users_data.json?t=${Date.now()}`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
-                
-                if (!response.ok) {
-                    throw new Error(`网络错误: ${response.status}`);
-                }
-                
-                return await response.json();
-            } catch (error) {
-                console.error('加载用户数据失败:', error);
-                throw new Error('无法连接到用户数据库');
-            }
-        }
-
         // 获取角色显示名称
         function getRoleDisplayName(role) {
             const roleNames = {
@@ -1101,14 +1798,52 @@
             return roleNames[role] || role;
         }
 
-        // 退出登录
-        function logout() {
-            if (confirm('确定要退出登录吗？')) {
-                localStorage.removeItem('currentUser');
-                currentUser = null;
-                userClasses = [];
-                showLoginPage();
+        // 加载所有班级
+        async function loadAllClasses() {
+            try {
+                const response = await fetch(
+                    `https://${COS_CONFIG.bucket}.cos.${COS_CONFIG.region}.myqcloud.com/homework_data.json?t=${Date.now()}`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    // 从作业数据中提取所有班级
+                    const classes = [];
+                    for (const grade in data) {
+                        for (const classNum in data[grade]) {
+                            classes.push(`${grade}${classNum}班`);
+                        }
+                    }
+                    allClasses = classes.sort();
+                } else {
+                    // 如果无法加载，使用默认班级
+                    allClasses = generateDefaultClasses();
+                }
+            } catch (error) {
+                console.error('加载班级列表失败:', error);
+                allClasses = generateDefaultClasses();
             }
+        }
+
+        // 生成默认班级列表
+        function generateDefaultClasses() {
+            const classes = [];
+            for (let i = 1; i <= 26; i++) {
+                classes.push(`初一${i}班`);
+            }
+            for (let i = 1; i <= 23; i++) {
+                classes.push(`初二${i}班`);
+            }
+            for (let i = 1; i <= 23; i++) {
+                classes.push(`初三${i}班`);
+            }
+            return classes;
         }
 
         // 初始化应用
@@ -1118,6 +1853,11 @@
             initializeSubjectButtons();
             initializeModalTabs();
             loadHomeworkData();
+            
+            // 如果是管理员，加载用户管理数据
+            if (currentUser.role === 'admin' || currentUser.role === 'super_admin') {
+                loadUserManagementData();
+            }
         }
 
         // 初始化班级网格 - 只显示绑定的班级
@@ -1250,82 +1990,347 @@
                         content.classList.remove('active');
                     });
                     document.getElementById(`${tabId}Tab`).classList.add('active');
+                    
+                    // 如果切换到用户管理标签页，重新加载数据
+                    if (tabId === 'userManagement') {
+                        loadUserManagementData();
+                    }
                 });
             });
         }
 
-        // 生成班级链接
-        function generateClassLink() {
-            const grade = document.getElementById('linkGrade').value;
-            const classNum = document.getElementById('linkClass').value;
-            const className = `${grade}${classNum}班`;
-            
-            // 检查权限
-            if (currentUser.role !== 'super_admin' && !userClasses.includes('all') && !userClasses.includes(className)) {
-                showNotification(`您没有权限访问班级 ${className}`, 'error');
+        // 加载用户管理数据
+        async function loadUserManagementData() {
+            if (currentUser.role !== 'admin' && currentUser.role !== 'super_admin') {
                 return;
             }
             
-            const baseUrl = window.location.href.split('?')[0];
-            const parentPage = baseUrl.replace('teacher', 'parent') || baseUrl.replace(/teacher\.html$/, 'parent.html');
-            
-            const parentUrl = `${parentPage}?grade=${encodeURIComponent(grade)}&class=${classNum}`;
-            
-            document.getElementById('classLinkText').textContent = parentUrl;
-            document.getElementById('generatedLink').style.display = 'block';
-            
-            showNotification(`已生成${className}家长端链接`, 'success');
+            try {
+                await loadUsersDataFromCOS();
+                updateUserManagementLists();
+            } catch (error) {
+                console.error('加载用户管理数据失败:', error);
+                showNotification('加载用户数据失败', 'error');
+            }
         }
 
-        // 生成所有班级链接
-        function generateAllClassLinks() {
-            const baseUrl = window.location.href.split('?')[0];
-            const parentPage = baseUrl.replace('teacher', 'parent') || baseUrl.replace(/teacher\.html$/, 'parent.html');
+        // 更新用户管理列表
+        function updateUserManagementLists() {
+            // 更新待审核用户列表
+            const pendingList = document.getElementById('pendingUsersList');
+            const pendingUsers = Object.values(usersData.pending_registrations || {});
             
-            let allLinks = '';
-            userClasses.forEach(className => {
-                // 解析年级和班级号
-                const grade = className.substring(0, 2);
-                const classNum = className.substring(2, className.length - 1);
-                const link = `${parentPage}?grade=${encodeURIComponent(grade)}&class=${classNum}`;
-                allLinks += `${className}: ${link}\n`;
+            if (pendingUsers.length === 0) {
+                pendingList.innerHTML = '<div class="empty-state">暂无待审核用户</div>';
+            } else {
+                pendingList.innerHTML = '';
+                pendingUsers.forEach(user => {
+                    const userItem = createUserItem(user, true);
+                    pendingList.appendChild(userItem);
+                });
+            }
+            
+            // 更新已审核用户列表
+            const approvedList = document.getElementById('approvedUsersList');
+            const approvedUsers = Object.values(usersData.users || {});
+            
+            if (approvedUsers.length === 0) {
+                approvedList.innerHTML = '<div class="empty-state">暂无用户数据</div>';
+            } else {
+                approvedList.innerHTML = '';
+                approvedUsers.forEach(user => {
+                    const userItem = createUserItem(user, false);
+                    approvedList.appendChild(userItem);
+                });
+            }
+        }
+
+        // 创建用户项
+        function createUserItem(user, isPending) {
+            const userItem = document.createElement('div');
+            userItem.className = 'user-item';
+            
+            const userHeader = document.createElement('div');
+            userHeader.className = 'user-header';
+            
+            const userBasicInfo = document.createElement('div');
+            userBasicInfo.className = 'user-basic-info';
+            
+            const userName = document.createElement('div');
+            userName.className = 'user-name';
+            userName.textContent = user.username;
+            
+            const userRealName = document.createElement('div');
+            userRealName.className = 'user-real-name';
+            userRealName.textContent = user.real_name || '未设置';
+            
+            const userRole = document.createElement('div');
+            userRole.className = 'user-role';
+            userRole.textContent = getRoleDisplayName(user.role);
+            
+            const userStatus = document.createElement('div');
+            userStatus.className = `user-status ${isPending ? 'pending' : 'approved'}`;
+            userStatus.textContent = isPending ? '待审核' : '已审核';
+            
+            userBasicInfo.appendChild(userName);
+            userBasicInfo.appendChild(userRealName);
+            userBasicInfo.appendChild(userRole);
+            userBasicInfo.appendChild(userStatus);
+            
+            const userActions = document.createElement('div');
+            userActions.className = 'user-actions';
+            
+            if (isPending) {
+                const approveBtn = document.createElement('button');
+                approveBtn.className = 'approve-btn';
+                approveBtn.textContent = '通过';
+                approveBtn.onclick = () => approveUser(user.username);
+                
+                const rejectBtn = document.createElement('button');
+                rejectBtn.className = 'reject-btn';
+                rejectBtn.textContent = '拒绝';
+                rejectBtn.onclick = () => rejectUser(user.username);
+                
+                userActions.appendChild(approveBtn);
+                userActions.appendChild(rejectBtn);
+            } else {
+                const editBtn = document.createElement('button');
+                editBtn.className = 'edit-btn';
+                editBtn.textContent = '编辑';
+                editBtn.onclick = () => openEditUserModal(user);
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = '删除';
+                deleteBtn.onclick = () => deleteUser(user.username);
+                
+                userActions.appendChild(editBtn);
+                userActions.appendChild(deleteBtn);
+            }
+            
+            userHeader.appendChild(userBasicInfo);
+            userHeader.appendChild(userActions);
+            
+            const userDetails = document.createElement('div');
+            userDetails.className = 'user-details-expanded';
+            
+            const classesRow = document.createElement('div');
+            classesRow.className = 'user-detail-row';
+            
+            const classesLabel = document.createElement('div');
+            classesLabel.className = 'user-detail-label';
+            classesLabel.textContent = '绑定班级:';
+            
+            const classesValue = document.createElement('div');
+            classesValue.className = 'user-detail-value';
+            classesValue.textContent = user.classes.join(', ');
+            
+            classesRow.appendChild(classesLabel);
+            classesRow.appendChild(classesValue);
+            
+            const timeRow = document.createElement('div');
+            timeRow.className = 'user-detail-row';
+            
+            const timeLabel = document.createElement('div');
+            timeLabel.className = 'user-detail-label';
+            timeLabel.textContent = '注册时间:';
+            
+            const timeValue = document.createElement('div');
+            timeValue.className = 'user-detail-value';
+            timeValue.textContent = user.created_time;
+            
+            timeRow.appendChild(timeLabel);
+            timeRow.appendChild(timeValue);
+            
+            userDetails.appendChild(classesRow);
+            userDetails.appendChild(timeRow);
+            
+            userItem.appendChild(userHeader);
+            userItem.appendChild(userDetails);
+            
+            return userItem;
+        }
+
+        // 审核通过用户
+        async function approveUser(username) {
+            if (!confirm(`确定要通过用户 "${username}" 的注册申请吗？`)) {
+                return;
+            }
+            
+            try {
+                const userData = usersData.pending_registrations[username];
+                if (!userData) {
+                    showNotification('未找到该用户', 'error');
+                    return;
+                }
+                
+                // 将用户从待审核移动到正式用户
+                userData.status = 'approved';
+                usersData.users[username] = userData;
+                delete usersData.pending_registrations[username];
+                
+                // 保存到云端
+                await saveUsersDataToCOS();
+                
+                showNotification('用户审核通过', 'success');
+                loadUserManagementData();
+                
+            } catch (error) {
+                console.error('审核用户失败:', error);
+                showNotification('审核失败: ' + error.message, 'error');
+            }
+        }
+
+        // 拒绝用户注册
+        async function rejectUser(username) {
+            if (!confirm(`确定要拒绝用户 "${username}" 的注册申请吗？`)) {
+                return;
+            }
+            
+            try {
+                if (!usersData.pending_registrations[username]) {
+                    showNotification('未找到该用户', 'error');
+                    return;
+                }
+                
+                // 删除待审核用户
+                delete usersData.pending_registrations[username];
+                
+                // 保存到云端
+                await saveUsersDataToCOS();
+                
+                showNotification('用户注册申请已拒绝', 'success');
+                loadUserManagementData();
+                
+            } catch (error) {
+                console.error('拒绝用户失败:', error);
+                showNotification('操作失败: ' + error.message, 'error');
+            }
+        }
+
+        // 打开编辑用户模态框
+        function openEditUserModal(user) {
+            document.getElementById('editUsername').value = user.username;
+            document.getElementById('editRealName').value = user.real_name || '';
+            document.getElementById('editPassword').value = '';
+            document.getElementById('editRole').value = user.role;
+            
+            // 更新班级选择网格
+            const editClassGrid = document.getElementById('editClassGrid');
+            editClassGrid.innerHTML = '';
+            
+            allClasses.forEach(className => {
+                const classItem = document.createElement('div');
+                classItem.className = 'class-item-compact';
+                const isSelected = user.classes.includes(className);
+                
+                classItem.innerHTML = `
+                    <input type="checkbox" value="${className}" ${isSelected ? 'checked' : ''}>
+                    <div class="class-info">
+                        <div class="class-name-main">${className}</div>
+                    </div>
+                `;
+                
+                // 点击整个项也可以选择
+                classItem.addEventListener('click', function(e) {
+                    if (e.target.type !== 'checkbox') {
+                        const checkbox = this.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked;
+                    }
+                });
+                
+                editClassGrid.appendChild(classItem);
             });
             
-            const linksWindow = window.open('', '_blank');
-            linksWindow.document.write(`
-                <html>
-                    <head><title>所有班级链接</title></head>
-                    <body style="font-family: 'Microsoft YaHei'; padding: 20px;">
-                        <h1>所有班级家长端链接</h1>
-                        <pre style="background: #f5f5f5; padding: 20px; border-radius: 5px; white-space: pre-wrap;">${allLinks}</pre>
-                        <button onclick="window.print()">打印链接列表</button>
-                    </body>
-                </html>
-            `);
+            document.getElementById('editUserModal').classList.add('show');
         }
 
-        // 复制班级链接
-        function copyClassLink() {
-            const linkText = document.getElementById('classLinkText').textContent;
-            navigator.clipboard.writeText(linkText).then(() => {
-                showNotification('链接已复制到剪贴板', 'success');
-            }).catch(() => {
-                const textArea = document.createElement('textarea');
-                textArea.value = linkText;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                showNotification('链接已复制到剪贴板', 'success');
-            });
+        // 关闭编辑用户模态框
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').classList.remove('show');
         }
 
-        // 测试班级链接
-        function testClassLink() {
-            const linkText = document.getElementById('classLinkText').textContent;
-            window.open(linkText, '_blank');
+        // 保存用户更改
+        async function saveUserChanges() {
+            const username = document.getElementById('editUsername').value;
+            const realName = document.getElementById('editRealName').value;
+            const password = document.getElementById('editPassword').value;
+            const role = document.getElementById('editRole').value;
+            
+            // 获取选中的班级
+            const checkboxes = document.querySelectorAll('#editClassGrid input[type="checkbox"]:checked');
+            const classes = Array.from(checkboxes).map(checkbox => checkbox.value);
+            
+            try {
+                if (!usersData.users[username]) {
+                    showNotification('用户不存在', 'error');
+                    return;
+                }
+                
+                // 更新用户信息
+                if (realName) {
+                    usersData.users[username].real_name = realName;
+                }
+                
+                if (password) {
+                    usersData.users[username].password = await sha256(password);
+                }
+                
+                if (role) {
+                    usersData.users[username].role = role;
+                }
+                
+                if (classes) {
+                    usersData.users[username].classes = classes;
+                }
+                
+                // 保存到云端
+                await saveUsersDataToCOS();
+                
+                showNotification('用户信息更新成功', 'success');
+                closeEditUserModal();
+                loadUserManagementData();
+                
+            } catch (error) {
+                console.error('保存用户更改失败:', error);
+                showNotification('更新失败: ' + error.message, 'error');
+            }
         }
 
+        // 删除用户
+        async function deleteUser(username) {
+            if (!confirm(`确定要删除用户 "${username}" 吗？此操作不可恢复！`)) {
+                return;
+            }
+            
+            // 不能删除自己
+            if (username === currentUser.username) {
+                showNotification('不能删除自己的账户', 'error');
+                return;
+            }
+            
+            try {
+                if (!usersData.users[username]) {
+                    showNotification('用户不存在', 'error');
+                    return;
+                }
+                
+                // 删除用户
+                delete usersData.users[username];
+                
+                // 保存到云端
+                await saveUsersDataToCOS();
+                
+                showNotification('用户删除成功', 'success');
+                loadUserManagementData();
+                
+            } catch (error) {
+                console.error('删除用户失败:', error);
+                showNotification('删除失败: ' + error.message, 'error');
+            }
+        }
+
+        // 原有的作业管理功能保持不变
         // 切换科目
         function switchSubject(subjectId) {
             currentSubject = subjectId;
@@ -1339,34 +2344,6 @@
                 `${subjectId}作业内容：`;
             
             loadCurrentSubjectContent();
-        }
-
-        // 加载当前班级内容
-        function loadCurrentClassContent() {
-            const selectedClasses = getSelectedClasses();
-            if (selectedClasses.length === 0) {
-                document.getElementById('homeworkEditor').value = '';
-                return;
-            }
-            
-            // 使用第一个选中的班级作为当前编辑的班级
-            const firstClass = selectedClasses[0];
-            const [grade, classNum] = parseClassName(firstClass);
-            
-            if (homeworkData && homeworkData[grade] && 
-                homeworkData[grade][classNum]) {
-                const classData = homeworkData[grade][classNum];
-                
-                if (classData[currentSubject]) {
-                    document.getElementById('homeworkEditor').value = classData[currentSubject];
-                } else {
-                    document.getElementById('homeworkEditor').value = '';
-                }
-            } else {
-                document.getElementById('homeworkEditor').value = '';
-            }
-            
-            updatePreview();
         }
 
         // 加载当前科目内容到编辑器
@@ -1430,6 +2407,34 @@
             } finally {
                 hideLoading();
             }
+        }
+
+        // 加载当前班级内容
+        function loadCurrentClassContent() {
+            const selectedClasses = getSelectedClasses();
+            if (selectedClasses.length === 0) {
+                document.getElementById('homeworkEditor').value = '';
+                return;
+            }
+            
+            // 使用第一个选中的班级作为当前编辑的班级
+            const firstClass = selectedClasses[0];
+            const [grade, classNum] = parseClassName(firstClass);
+            
+            if (homeworkData && homeworkData[grade] && 
+                homeworkData[grade][classNum]) {
+                const classData = homeworkData[grade][classNum];
+                
+                if (classData[currentSubject]) {
+                    document.getElementById('homeworkEditor').value = classData[currentSubject];
+                } else {
+                    document.getElementById('homeworkEditor').value = '';
+                }
+            } else {
+                document.getElementById('homeworkEditor').value = '';
+            }
+            
+            updatePreview();
         }
 
         // 加载本地数据
@@ -1729,6 +2734,16 @@
             }
         }
 
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                localStorage.removeItem('currentUser');
+                currentUser = null;
+                userClasses = [];
+                showLoginPage();
+            }
+        }
+
         // 工具函数
         function showLoading() {
             updateSyncStatus('加载中...');
@@ -1767,6 +2782,75 @@
                 saveAll();
             }
         });
+
+        // 原有的班级链接生成功能
+        function generateClassLink() {
+            const grade = document.getElementById('linkGrade').value;
+            const classNum = document.getElementById('linkClass').value;
+            const className = `${grade}${classNum}班`;
+            
+            // 检查权限
+            if (currentUser.role !== 'super_admin' && !userClasses.includes('all') && !userClasses.includes(className)) {
+                showNotification(`您没有权限访问班级 ${className}`, 'error');
+                return;
+            }
+            
+            const baseUrl = window.location.href.split('?')[0];
+            const parentPage = baseUrl.replace('teacher', 'parent') || baseUrl.replace(/teacher\.html$/, 'parent.html');
+            
+            const parentUrl = `${parentPage}?grade=${encodeURIComponent(grade)}&class=${classNum}`;
+            
+            document.getElementById('classLinkText').textContent = parentUrl;
+            document.getElementById('generatedLink').style.display = 'block';
+            
+            showNotification(`已生成${className}家长端链接`, 'success');
+        }
+
+        function generateAllClassLinks() {
+            const baseUrl = window.location.href.split('?')[0];
+            const parentPage = baseUrl.replace('teacher', 'parent') || baseUrl.replace(/teacher\.html$/, 'parent.html');
+            
+            let allLinks = '';
+            userClasses.forEach(className => {
+                // 解析年级和班级号
+                const grade = className.substring(0, 2);
+                const classNum = className.substring(2, className.length - 1);
+                const link = `${parentPage}?grade=${encodeURIComponent(grade)}&class=${classNum}`;
+                allLinks += `${className}: ${link}\n`;
+            });
+            
+            const linksWindow = window.open('', '_blank');
+            linksWindow.document.write(`
+                <html>
+                    <head><title>所有班级链接</title></head>
+                    <body style="font-family: 'Microsoft YaHei'; padding: 20px;">
+                        <h1>所有班级家长端链接</h1>
+                        <pre style="background: #f5f5f5; padding: 20px; border-radius: 5px; white-space: pre-wrap;">${allLinks}</pre>
+                        <button onclick="window.print()">打印链接列表</button>
+                    </body>
+                </html>
+            `);
+        }
+
+        function copyClassLink() {
+            const linkText = document.getElementById('classLinkText').textContent;
+            navigator.clipboard.writeText(linkText).then(() => {
+                showNotification('链接已复制到剪贴板', 'success');
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = linkText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showNotification('链接已复制到剪贴板', 'success');
+            });
+        }
+
+        function testClassLink() {
+            const linkText = document.getElementById('classLinkText').textContent;
+            window.open(linkText, '_blank');
+        }
 
         console.log('作业管理系统已初始化完成');
     </script>
