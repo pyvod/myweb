@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>瓶窑镇第一中学班级作业通知 - 家长端</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .class-info {
+            background: rgba(255,255,255,0.1);
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 1.1em;
+            display: inline-block;
+        }
+
+        .datetime {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+
+        .status-bar {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sync-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .subject-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #3498db;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .subject-card.morning-reading {
+            border-left-color: #e74c3c;
+            background: linear-gradient(135deg, #fff5f5, #fed7d7);
+        }
+
+        .subject-card.morning-reading .subject-header {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .subject-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .subject-header h3 {
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+        .subject-content {
+            padding: 20px;
+            min-height: 120px;
+        }
+
+        .homework-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #2c3e50;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .empty-content {
+            color: #7f8c8d;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: #28a745;
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+        .error-container {
+            text-align: center;
+            padding: 40px;
+            color: #dc3545;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .datetime {
+                position: static;
+                margin-top: 10px;
+            }
+            
+            .status-bar {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .subjects-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .subject-content {
+                min-height: 100px;
+            }
+        }
+
+        /* 打印样式 */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .btn, .datetime {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>瓶窑第一中学班级作业通知</h1>
+            <div class="subtitle">家长端 - 实时作业查看</div>
+            <div class="class-info" id="classInfo">
+                <!-- 班级信息动态显示 -->
+            </div>
+            <div class="datetime" id="currentDateTime">
+                <!-- 日期时间将通过JavaScript动态更新 -->
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="sync-status">
+                <div class="sync-indicator"></div>
+                <span id="syncStatus">正在检查更新...</span>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="loadHomeworkData()">
+                    🔄 刷新作业
+                </button>
+                <button class="btn btn-success" onclick="printPage()">
+                    🖨️ 打印作业
+                </button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>正在加载作业数据...</p>
+            </div>
+
+            <div id="subjectsContainer" class="subjects-grid" style="display: none;">
+                <!-- 科目卡片将通过JavaScript动态生成 -->
+            </div>
+
+            <div class="last-updated" id="lastUpdated">
+                <!-- 最后更新时间将通过JavaScript动态更新 -->
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <!-- 通知消息 -->
+    </div>
+
+    <script>
+        // 全局变量
+        let homeworkData = null;
+        let currentClassInfo = null;
+
+        // 存储桶配置
+        const COS_CONFIG = {
+            bucket: 'class-homework-1257663765',
+            region: 'ap-beijing'
+        };
+
+        // 从URL参数获取班级信息
+        function getClassFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const grade = urlParams.get('grade') || '初一';
+            const classNum = urlParams.get('class') || '1';
+            return { grade, class: classNum };
+        }
+
+        // 获取完整的班级名称
+        function getFullClassName(classInfo) {
+            return `${classInfo.grade}${classInfo.class}班`;
+        }
+
+        // 验证班级信息
+        function validateClassInfo(classInfo) {
+            const validGrades = ['初一', '初二', '初三'];
+            const gradeConfig = {
+                '初一': 26,
+                '初二': 23,
+                '初三': 23
+            };
+            
+            if (!validGrades.includes(classInfo.grade)) {
+                return false;
+            }
+            
+            const classNumber = parseInt(classInfo.class);
+            return classNumber >= 1 && classNumber <= gradeConfig[classInfo.grade];
+        }
+
+        // 更新页面标题和班级信息
+        function updateClassInfo() {
+            currentClassInfo = getClassFromURL();
+            
+            if (!validateClassInfo(currentClassInfo)) {
+                showError('无效的班级访问链接，请检查链接是否正确');
+                return false;
+            }
+            
+            const fullClassName = getFullClassName(currentClassInfo);
+            
+            document.title = `${fullClassName}作业通知 - 家长端`;
+            document.querySelector('h1').textContent = `${fullClassName}作业通知`;
+            document.getElementById('classInfo').textContent = `班级：${fullClassName}`;
+            
+            return true;
+        }
+
+        // 显示错误信息
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('subjectsContainer').innerHTML = `
+                <div class="error-container" style="grid-column: 1 / -1;">
+                    <h3>❌ 加载失败</h3>
+                    <p>${message}</p>
+                    <p>请向班主任获取正确的班级链接</p>
+                </div>
+            `;
+            document.getElementById('subjectsContainer').style.display = 'grid';
+            document.getElementById('lastUpdated').textContent = '链接错误，无法加载数据';
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDateTime();
+            
+            if (updateClassInfo()) {
+                loadHomeworkData();
+                startAutoRefresh();
+            }
+            
+            // 每分钟更新一次时间
+            setInterval(updateDateTime, 60000);
+        });
+
+        // 更新日期时间显示
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                weekday: 'long',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('currentDateTime').textContent = 
+                now.toLocaleDateString('zh-CN', options);
+        }
+
+        // 从COS加载作业数据 - 修改为加载单独的班级文件
+        async function loadHomeworkData() {
+            if (!currentClassInfo) return;
+            
+            showLoading();
+            updateSyncStatus('正在同步作业数据...');
+            
+            try {
+                const fullClassName = getFullClassName(currentClassInfo);
+                const filename = `homework_${fullClassName}.json`;
+                
+                const response = await fetch(
+                    `https://${COS_CONFIG.bucket}.cos.${COS_CONFIG.region}.myqcloud.com/${filename}?t=${Date.now()}`
+                );
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('该班级暂无作业数据');
+                    }
+                    throw new Error(`网络错误: ${response.status}`);
+                }
+                
+                homeworkData = await response.json();
+                displayHomeworkData();
+                updateSyncStatus('数据同步成功');
+                showNotification('作业数据已更新', 'success');
+                
+                // 检查晨读提醒
+                checkMorningReading();
+                
+            } catch (error) {
+                console.error('加载作业数据失败:', error);
+                updateSyncStatus('同步失败: ' + error.message);
+                showNotification('加载作业失败: ' + error.message, 'error');
+                
+                // 显示错误状态
+                document.getElementById('subjectsContainer').innerHTML = `
+                    <div class="error-container" style="grid-column: 1 / -1;">
+                        <h3>❌ 加载作业失败</h3>
+                        <p>${error.message}</p>
+                        <p>请检查网络连接后重试，或联系班主任</p>
+                    </div>
+                `;
+                document.getElementById('subjectsContainer').style.display = 'grid';
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // 显示作业数据
+        function displayHomeworkData() {
+            if (!homeworkData) return;
+            
+            const container = document.getElementById('subjectsContainer');
+            const subjects = [
+                { name: '语文', key: '语文' },
+                { name: '数学', key: '数学' },
+                { name: '英语', key: '英语' },
+                { name: '科学', key: '科学' },
+                { name: '道法', key: '道法' },
+                { name: '社会', key: '社会' },
+                { name: '晨读', key: '晨读', isMorningReading: true }
+            ];
+            
+            let html = '';
+            
+            subjects.forEach(subject => {
+                const content = homeworkData[subject.key] || '暂无内容';
+                const isEmpty = !content || content === '暂无作业' || content === '暂无晨读任务';
+                
+                html += `
+                    <div class="subject-card ${subject.isMorningReading ? 'morning-reading' : ''}">
+                        <div class="subject-header">
+                            <h3>${subject.name}</h3>
+                        </div>
+                        <div class="subject-content">
+                            ${isEmpty ? 
+                                `<div class="empty-content">${subject.isMorningReading ? '暂无晨读任务' : '暂无作业'}</div>` :
+                                `<div class="homework-text">${escapeHtml(content)}</div>`
+                            }
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            container.style.display = 'grid';
+            
+            // 更新最后同步时间
+            const lastUpdated = homeworkData.last_updated || '未知时间';
+            document.getElementById('lastUpdated').textContent = 
+                `最后更新: ${lastUpdated}`;
+        }
+
+        // 检查晨读提醒
+        function checkMorningReading() {
+            if (!homeworkData) return;
+            
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            
+            // 在7:00-7:50之间显示晨读提醒
+            if (currentHour === 7 && currentMinute <= 50) {
+                const morningReading = homeworkData['晨读'];
+                if (morningReading && morningReading !== '暂无晨读任务') {
+                    showNotification('⏰ 晨读时间到！请查看今日晨读内容', 'success');
+                }
+            }
+        }
+
+        // 显示加载状态
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('subjectsContainer').style.display = 'none';
+        }
+
+        // 隐藏加载状态
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // 更新同步状态
+        function updateSyncStatus(message) {
+            document.getElementById('syncStatus').textContent = message;
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification';
+            notification.classList.add(type === 'error' ? 'error' : 'success');
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // HTML转义函数
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 打印页面
+        function printPage() {
+            window.print();
+        }
+
+        // 开始自动刷新
+        function startAutoRefresh() {
+            // 每5分钟自动刷新一次
+            setInterval(loadHomeworkData, 300000);
+        }
+
+        // 页面可见性变化处理
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // 页面变为可见时刷新数据
+                loadHomeworkData();
+            }
+        });
+
+        // 添加键盘快捷键
+        document.addEventListener('keydown', function(event) {
+            // F5 刷新
+            if (event.key === 'F5') {
+                event.preventDefault();
+                loadHomeworkData();
+            }
+            // Ctrl+P 打印
+            if (event.ctrlKey && event.key === 'p') {
+                event.preventDefault();
+                printPage();
+            }
+        });
+
+        console.log('家长端已初始化完成');
+        console.log('当前班级:', currentClassInfo);
+    </script>
+</body>
+</html>
