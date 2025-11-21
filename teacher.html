@@ -1106,15 +1106,10 @@
         <div class="login-status" id="loginStatus"></div>
         
         <div style="margin-top: 20px; text-align: center;">
-    <a href="http://10.59.14.251:5000/register" style="color: #007bff; text-decoration: none;">
-        还没有账号？立即注册
-    </a>
-</div>
-        <div style="margin-top: 20px; text-align: center;">
-    <a href="http://10.59.14.251:5000/register" style="color: #007bff; text-decoration: none;">
-        注册账号需要链接学校的网络
-    </a>
-</div>
+            <a href="javascript:void(0)" onclick="showRegisterPage()" style="color: #007bff; text-decoration: none;">
+                还没有账号？立即注册
+            </a>
+        </div>
     </div>
 
     <!-- 注册页面 -->
@@ -1430,7 +1425,7 @@
     </div>
 
     <script>
-        // SHA256 哈希函数 - 与喊话系统相同
+        // SHA256 哈希函数
         async function sha256(message) {
             const msgBuffer = new TextEncoder().encode(message);
             const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -1448,19 +1443,19 @@
         let userClasses = [];
         let allClasses = [];
         
-        // 存储桶配置
+        // 存储桶配置 - 使用默认密钥
         const COS_CONFIG = {
             bucket: 'class-homework-1257663765',
-            region: 'ap-beijing'
-        };
-        
-        let config = {
+            region: 'ap-beijing',
             secretId: 'AKIDXsyve7LJ4bu0wc4GExue8PRDvOcaIm36',
-            secretKey: 'tXw61g5FBsKZYIm10jDTYO4UfaGgqlQp',
+            secretKey: 'tXw61g5FBsKZYIm10jDTYO4UfaGgqlQp'
+        };
+
+        let config = {
             ...COS_CONFIG
         };
 
-        // 用户数据 - 不再使用统一的usersData变量
+        // 用户数据
         let usersData = {
             users: {},
             last_updated: new Date().toLocaleString('zh-CN')
@@ -1499,8 +1494,14 @@
                     }
                 );
                 console.log('COS连接测试结果:', response.status);
+                if (response.ok || response.status === 404) {
+                    updateSyncStatus('云端连接正常');
+                } else {
+                    updateSyncStatus('云端连接异常');
+                }
             } catch (error) {
                 console.error('COS连接测试失败:', error);
+                updateSyncStatus('云端连接失败');
             }
         }
 
@@ -1599,7 +1600,7 @@
             });
         }
 
-        // 用户注册 - 修改为写入独立的pending_registrations.json文件
+        // 用户注册
         async function register() {
             const username = document.getElementById('regUsername').value.trim();
             const realName = document.getElementById('regRealName').value.trim();
@@ -1648,7 +1649,7 @@
             statusDiv.textContent = '';
             
             try {
-                // 检查用户名是否已存在 - 分别检查已审核用户和待审核用户
+                // 检查用户名是否已存在
                 console.log('检查用户名是否重复...', username);
                 
                 // 加载已审核用户数据
@@ -1681,7 +1682,7 @@
                 console.log('创建新用户...');
                 const hashedPassword = await sha256(password);
                 
-                // 创建新用户数据 - 符合pending_registrations.json的数据结构
+                // 创建新用户数据
                 const newUser = {
                     username: username,
                     real_name: realName,
@@ -1805,7 +1806,7 @@
             }
         }
 
-        // 保存用户数据到COS - 修改为只保存users_data.json
+        // 保存用户数据到COS
         async function saveUsersDataToCOS(usersData) {
             try {
                 console.log('开始保存用户数据到COS...');
@@ -1849,7 +1850,7 @@
             }
         }
 
-        // 用户登录 - 修改为只检查users_data.json
+        // 用户登录
         async function login() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
@@ -1866,7 +1867,7 @@
             statusDiv.textContent = '';
             
             try {
-                // 只从users_data.json加载用户数据
+                // 从users_data.json加载用户数据
                 const response = await fetch(
                     `https://${COS_CONFIG.bucket}.cos.${COS_CONFIG.region}.myqcloud.com/users_data.json?t=${Date.now()}`
                 );
@@ -2125,11 +2126,53 @@
                     });
                     document.getElementById(`${tabId}Tab`).classList.add('active');
                     
+                    // 如果切换到链接生成标签页，初始化班级选择
+                    if (tabId === 'links') {
+                        initializeLinkClassSelect();
+                    }
+                    
                     // 如果切换到用户管理标签页，重新加载数据
                     if (tabId === 'userManagement') {
                         loadUserManagementData();
                     }
                 });
+            });
+        }
+
+        // 初始化链接生成的班级选择
+        function initializeLinkClassSelect() {
+            const gradeSelect = document.getElementById('linkGrade');
+            const classSelect = document.getElementById('linkClass');
+            
+            // 清空班级选项
+            classSelect.innerHTML = '';
+            
+            // 获取当前年级
+            const currentGrade = gradeSelect.value;
+            
+            // 过滤出当前用户绑定的该年级班级
+            const gradeClasses = userClasses.filter(className => 
+                className.startsWith(currentGrade)
+            );
+            
+            if (gradeClasses.length === 0) {
+                classSelect.innerHTML = '<option value="">暂无绑定班级</option>';
+                return;
+            }
+            
+            // 添加班级选项
+            gradeClasses.forEach(className => {
+                // 提取班级号（去掉"班"字）
+                const classNum = className.replace(currentGrade, '').replace('班', '');
+                const option = document.createElement('option');
+                option.value = classNum;
+                option.textContent = className;
+                classSelect.appendChild(option);
+            });
+            
+            // 监听年级变化
+            gradeSelect.addEventListener('change', function() {
+                initializeLinkClassSelect();
             });
         }
 
@@ -2295,7 +2338,7 @@
             return userItem;
         }
 
-        // 审核通过用户 - 修改为从pending_registrations.json移动到users_data.json
+        // 审核通过用户
         async function approveUser(username) {
             if (!confirm(`确定要通过用户 "${username}" 的注册申请吗？`)) {
                 return;
@@ -2345,7 +2388,7 @@
             }
         }
 
-        // 拒绝用户注册 - 修改为从pending_registrations.json中删除
+        // 拒绝用户注册
         async function rejectUser(username) {
             if (!confirm(`确定要拒绝用户 "${username}" 的注册申请吗？`)) {
                 return;
@@ -2515,7 +2558,6 @@
             }
         }
 
-        // 原有的作业管理功能保持不变
         // 切换科目
         function switchSubject(subjectId) {
             currentSubject = subjectId;
@@ -2541,17 +2583,10 @@
             
             // 使用第一个选中的班级作为当前编辑的班级
             const firstClass = selectedClasses[0];
-            const [grade, classNum] = parseClassName(firstClass);
+            const classData = getClassDataFromMemory(firstClass);
             
-            if (homeworkData && homeworkData[grade] && 
-                homeworkData[grade][classNum]) {
-                const classData = homeworkData[grade][classNum];
-                
-                if (classData[currentSubject]) {
-                    document.getElementById('homeworkEditor').value = classData[currentSubject];
-                } else {
-                    document.getElementById('homeworkEditor').value = '';
-                }
+            if (classData && classData[currentSubject]) {
+                document.getElementById('homeworkEditor').value = classData[currentSubject];
             } else {
                 document.getElementById('homeworkEditor').value = '';
             }
@@ -2559,28 +2594,57 @@
             updatePreview();
         }
 
-        // 从COS加载作业数据
+        // 从内存中获取班级数据
+        function getClassDataFromMemory(className) {
+            const [grade, classNum] = parseClassName(className);
+            
+            if (homeworkData && homeworkData[grade] && homeworkData[grade][classNum]) {
+                return homeworkData[grade][classNum];
+            }
+            return null;
+        }
+
+        // 从COS加载作业数据 - 修改为按班级分别加载
         async function loadHomeworkData() {
             showLoading();
             updateSyncStatus('正在加载作业数据...');
             
             try {
-                const response = await fetch(
-                    `https://${config.bucket}.cos.${config.region}.myqcloud.com/homework_data.json?t=${Date.now()}`,
-                    {
-                        method: 'GET',
-                        mode: 'cors',
-                        headers: {
-                            'Content-Type': 'application/json'
+                // 获取用户绑定的班级
+                const userClasses = currentUser?.classes || [];
+                
+                // 为每个班级加载数据
+                const loadPromises = userClasses.map(async (className) => {
+                    try {
+                        const response = await fetch(
+                            `https://${config.bucket}.cos.${config.region}.myqcloud.com/homework_${className}.json?t=${Date.now()}`
+                        );
+                        
+                        if (response.ok) {
+                            const classData = await response.json();
+                            return { className, classData, success: true };
+                        } else {
+                            return { className, classData: null, success: false };
                         }
+                    } catch (error) {
+                        return { className, classData: null, success: false };
                     }
-                );
+                });
                 
-                if (!response.ok) {
-                    throw new Error(`网络错误: ${response.status}`);
-                }
+                const results = await Promise.all(loadPromises);
                 
-                homeworkData = await response.json();
+                // 重构数据结构
+                homeworkData = {};
+                results.forEach(result => {
+                    if (result.success && result.classData) {
+                        const [grade, classNum] = parseClassName(result.className);
+                        if (!homeworkData[grade]) {
+                            homeworkData[grade] = {};
+                        }
+                        homeworkData[grade][classNum] = result.classData;
+                    }
+                });
+                
                 loadCurrentClassContent();
                 updatePreview();
                 updateSyncStatus('数据加载成功');
@@ -2588,7 +2652,8 @@
                 
             } catch (error) {
                 console.error('加载作业数据失败:', error);
-                loadLocalData();
+                homeworkData = initializeEmptyData();
+                updateSyncStatus('初始化新数据');
             } finally {
                 hideLoading();
             }
@@ -2604,37 +2669,15 @@
             
             // 使用第一个选中的班级作为当前编辑的班级
             const firstClass = selectedClasses[0];
-            const [grade, classNum] = parseClassName(firstClass);
+            const classData = getClassDataFromMemory(firstClass);
             
-            if (homeworkData && homeworkData[grade] && 
-                homeworkData[grade][classNum]) {
-                const classData = homeworkData[grade][classNum];
-                
-                if (classData[currentSubject]) {
-                    document.getElementById('homeworkEditor').value = classData[currentSubject];
-                } else {
-                    document.getElementById('homeworkEditor').value = '';
-                }
+            if (classData && classData[currentSubject]) {
+                document.getElementById('homeworkEditor').value = classData[currentSubject];
             } else {
                 document.getElementById('homeworkEditor').value = '';
             }
             
             updatePreview();
-        }
-
-        // 加载本地数据
-        function loadLocalData() {
-            const localData = localStorage.getItem('homeworkData');
-            if (localData) {
-                homeworkData = JSON.parse(localData);
-                loadCurrentClassContent();
-                updatePreview();
-                updateSyncStatus('已加载本地备份数据');
-                showNotification('已加载本地备份数据', 'warning');
-            } else {
-                homeworkData = initializeEmptyData();
-                updateSyncStatus('初始化新数据');
-            }
         }
 
         // 初始化空数据
@@ -2671,7 +2714,7 @@
             return [grade, classNum];
         }
 
-        // 保存所有内容
+        // 保存所有内容 - 修改为按班级分别保存
         async function saveAll() {
             if (!homeworkData) return;
             
@@ -2687,43 +2730,95 @@
                 return;
             }
             
-            // 保存到所有选中的班级
-            selectedClasses.forEach(className => {
-                const [grade, classNum] = parseClassName(className);
-                
-                // 确保数据结构存在
-                if (!homeworkData[grade]) {
-                    homeworkData[grade] = {};
-                }
-                if (!homeworkData[grade][classNum]) {
-                    homeworkData[grade][classNum] = {};
-                }
-                
-                homeworkData[grade][classNum][currentSubject] = content || '暂无作业';
-                homeworkData[grade][classNum].last_updated = new Date().toLocaleString('zh-CN');
-            });
-            
-            updatePreview();
-            
-            // 先保存到本地
-            localStorage.setItem('homeworkData', JSON.stringify(homeworkData));
-            
-            // 然后尝试上传到云端
-            updateSyncStatus('正在上传到云端...');
+            showLoading();
+            updateSyncStatus('正在保存到云端...');
             
             try {
-                const result = await uploadToCOS(homeworkData);
+                // 为每个选中的班级分别保存
+                const savePromises = selectedClasses.map(async (className) => {
+                    const [grade, classNum] = parseClassName(className);
+                    
+                    // 获取该班级的当前数据
+                    let classData = getClassDataFromMemory(className) || {};
+                    
+                    // 更新当前科目的内容
+                    classData[currentSubject] = content || '暂无作业';
+                    classData.last_updated = new Date().toLocaleString('zh-CN');
+                    
+                    // 确保包含所有科目
+                    const defaultData = {
+                        "语文": "暂无作业",
+                        "数学": "暂无作业",
+                        "英语": "暂无作业",
+                        "科学": "暂无作业",
+                        "道法": "暂无作业",
+                        "社会": "暂无作业",
+                        "晨读": "暂无晨读任务"
+                    };
+                    
+                    // 合并数据
+                    const finalData = { ...defaultData, ...classData };
+                    
+                    // 保存到单独的班级文件
+                    return await saveClassDataToCloud(className, finalData);
+                });
                 
-                if (result.success) {
+                // 等待所有保存操作完成
+                const results = await Promise.allSettled(savePromises);
+                const successCount = results.filter(result => result.status === 'fulfilled' && result.value).length;
+                
+                if (successCount > 0) {
                     updateSyncStatus('云端保存成功');
-                    showNotification(`作业已保存到 ${selectedClasses.length} 个班级的本地和云端！`, 'success');
+                    showNotification(`作业已保存到 ${successCount}/${selectedClasses.length} 个班级！`, 'success');
+                    
+                    // 更新内存中的数据
+                    selectedClasses.forEach(className => {
+                        const [grade, classNum] = parseClassName(className);
+                        if (!homeworkData[grade]) {
+                            homeworkData[grade] = {};
+                        }
+                        if (!homeworkData[grade][classNum]) {
+                            homeworkData[grade][classNum] = {};
+                        }
+                        homeworkData[grade][classNum][currentSubject] = content || '暂无作业';
+                        homeworkData[grade][classNum].last_updated = new Date().toLocaleString('zh-CN');
+                    });
                 } else {
-                    updateSyncStatus('云端保存失败，已保存到本地');
-                    showNotification('作业已保存到本地，但云端上传失败: ' + result.message, 'warning');
+                    updateSyncStatus('云端保存失败');
+                    showNotification('所有班级保存失败，请检查网络连接', 'error');
                 }
+                
             } catch (error) {
-                updateSyncStatus('云端保存失败，已保存到本地');
-                showNotification('作业已保存到本地，但云端上传失败: ' + error.message, 'warning');
+                console.error('保存过程中出错:', error);
+                updateSyncStatus('保存过程中出错');
+                showNotification('保存过程中出错: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+                updatePreview();
+            }
+        }
+
+        // 保存单个班级数据到云端
+        async function saveClassDataToCloud(className, classData) {
+            try {
+                const jsonData = JSON.stringify(classData, null, 2);
+                const filename = `homework_${className}.json`;
+                
+                const response = await fetch(
+                    `https://${config.bucket}.cos.${config.region}.myqcloud.com/${filename}`,
+                    {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: jsonData
+                    }
+                );
+                
+                return response.ok;
+            } catch (error) {
+                console.error(`保存班级 ${className} 数据失败:`, error);
+                return false;
             }
         }
 
@@ -2756,10 +2851,14 @@
             const gradeClasses = userClasses.filter(className => className.startsWith(grade));
             
             if (confirm(`确定要将当前内容复制到${grade}所有${gradeClasses.length}个班级吗？`)) {
+                // 更新内存中的数据
                 gradeClasses.forEach(className => {
                     const [grade, classNum] = parseClassName(className);
                     
                     // 确保数据结构存在
+                    if (!homeworkData[grade]) {
+                        homeworkData[grade] = {};
+                    }
                     if (!homeworkData[grade][classNum]) {
                         homeworkData[grade][classNum] = {};
                     }
@@ -2770,34 +2869,21 @@
                 
                 updatePreview();
                 showNotification(`已成功复制到${grade}所有${gradeClasses.length}个班级`, 'success');
-            }
-        }
-
-        // 上传到腾讯云COS
-        async function uploadToCOS(data) {
-            const jsonData = JSON.stringify(data, null, 2);
-            
-            try {
-                const response = await fetch(
-                    `https://${config.bucket}.cos.${config.region}.myqcloud.com/homework_data.json`,
-                    {
-                        method: 'PUT',
-                        mode: 'cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: jsonData
-                    }
-                );
                 
-                if (response.ok) {
-                    return { success: true, message: '直接上传成功' };
-                } else {
-                    return { success: false, message: `上传失败: ${response.status}` };
-                }
-            } catch (error) {
-                console.error('直接上传错误:', error);
-                return { success: false, message: error.message };
+                // 异步保存到云端
+                setTimeout(async () => {
+                    const savePromises = gradeClasses.map(className => {
+                        const classData = getClassDataFromMemory(className) || {};
+                        return saveClassDataToCloud(className, classData);
+                    });
+                    
+                    const results = await Promise.allSettled(savePromises);
+                    const successCount = results.filter(result => result.status === 'fulfilled' && result.value).length;
+                    
+                    if (successCount > 0) {
+                        showNotification(`${successCount}/${gradeClasses.length} 个班级数据已同步到云端`, 'success');
+                    }
+                }, 0);
             }
         }
 
@@ -2823,11 +2909,9 @@
             } else {
                 // 显示第一个选中的班级的预览
                 const firstClass = selectedClasses[0];
-                const [grade, classNum] = parseClassName(firstClass);
+                const classData = getClassDataFromMemory(firstClass);
                 
-                if (homeworkData[grade] && homeworkData[grade][classNum]) {
-                    const classData = homeworkData[grade][classNum];
-                    
+                if (classData) {
                     subjects.forEach(subject => {
                         const content = classData[subject.id] || '暂无内容';
                         const isEmpty = !content || content === '暂无作业' || content === '暂无晨读任务';
@@ -2857,11 +2941,11 @@
             // 更新最后更新时间
             if (selectedClasses.length > 0) {
                 const firstClass = selectedClasses[0];
-                const [grade, classNum] = parseClassName(firstClass);
+                const classData = getClassDataFromMemory(firstClass);
                 
-                if (homeworkData[grade] && homeworkData[grade][classNum]) {
+                if (classData) {
                     document.getElementById('lastUpdated').textContent = 
-                        `最后更新: ${homeworkData[grade][classNum].last_updated || '未知时间'}`;
+                        `最后更新: ${classData.last_updated || '未知时间'}`;
                 } else {
                     document.getElementById('lastUpdated').textContent = '最后更新: 未知时间';
                 }
@@ -2902,7 +2986,7 @@
                 showNotification('正在测试连接...', 'warning');
                 
                 const response = await fetch(
-                    `https://${config.bucket}.cos.${config.region}.myqcloud.com/homework_data.json`,
+                    `https://${config.bucket}.cos.${config.region}.myqcloud.com/homework_初一1班.json`,
                     {
                         method: 'HEAD',
                         mode: 'cors'
@@ -2968,39 +3052,62 @@
             }
         });
 
-        // 原有的班级链接生成功能
+        // 班级链接生成功能
         function generateClassLink() {
             const grade = document.getElementById('linkGrade').value;
             const classNum = document.getElementById('linkClass').value;
+            
+            if (!classNum) {
+                showNotification('请选择有效的班级', 'error');
+                return;
+            }
+            
             const className = `${grade}${classNum}班`;
             
             // 检查权限
-            if (currentUser.role !== 'super_admin' && !userClasses.includes('all') && !userClasses.includes(className)) {
+            if (!userClasses.includes(className)) {
                 showNotification(`您没有权限访问班级 ${className}`, 'error');
                 return;
             }
             
-            const baseUrl = window.location.href.split('?')[0];
-            const parentPage = baseUrl.replace('teacher', 'parent') || baseUrl.replace(/teacher\.html$/, 'parent.html');
+            // 生成家长端链接
+            const currentUrl = window.location.href;
+            let parentUrl = '';
             
-            const parentUrl = `${parentPage}?grade=${encodeURIComponent(grade)}&class=${classNum}`;
+            if (currentUrl.includes('teacher')) {
+                parentUrl = currentUrl.replace('teacher', 'parent');
+            } else {
+                // 如果URL中没有teacher，则假设在同一目录下
+                const basePath = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
+                parentUrl = basePath + 'parent.html';
+            }
             
-            document.getElementById('classLinkText').textContent = parentUrl;
+            // 添加参数
+            const fullUrl = `${parentUrl}?grade=${encodeURIComponent(grade)}&class=${encodeURIComponent(classNum)}`;
+            
+            document.getElementById('classLinkText').textContent = fullUrl;
             document.getElementById('generatedLink').style.display = 'block';
             
             showNotification(`已生成${className}家长端链接`, 'success');
         }
 
         function generateAllClassLinks() {
-            const baseUrl = window.location.href.split('?')[0];
-            const parentPage = baseUrl.replace('teacher', 'parent') || baseUrl.replace(/teacher\.html$/, 'parent.html');
+            const currentUrl = window.location.href;
+            let parentUrl = '';
+            
+            if (currentUrl.includes('teacher')) {
+                parentUrl = currentUrl.replace('teacher', 'parent');
+            } else {
+                const basePath = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
+                parentUrl = basePath + 'parent.html';
+            }
             
             let allLinks = '';
             userClasses.forEach(className => {
                 // 解析年级和班级号
                 const grade = className.substring(0, 2);
                 const classNum = className.substring(2, className.length - 1);
-                const link = `${parentPage}?grade=${encodeURIComponent(grade)}&class=${classNum}`;
+                const link = `${parentUrl}?grade=${encodeURIComponent(grade)}&class=${encodeURIComponent(classNum)}`;
                 allLinks += `${className}: ${link}\n`;
             });
             
