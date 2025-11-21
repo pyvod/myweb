@@ -357,7 +357,12 @@
             const urlParams = new URLSearchParams(window.location.search);
             const grade = urlParams.get('grade') || '初一';
             const classNum = urlParams.get('class') || '1';
-            return { grade, class: `${classNum}班` };
+            return { grade, class: classNum };
+        }
+
+        // 获取完整的班级名称
+        function getFullClassName(classInfo) {
+            return `${classInfo.grade}${classInfo.class}班`;
         }
 
         // 验证班级信息
@@ -373,7 +378,7 @@
                 return false;
             }
             
-            const classNumber = parseInt(classInfo.class.replace('班', ''));
+            const classNumber = parseInt(classInfo.class);
             return classNumber >= 1 && classNumber <= gradeConfig[classInfo.grade];
         }
 
@@ -386,11 +391,11 @@
                 return false;
             }
             
-            const classDisplay = `${currentClassInfo.grade}${currentClassInfo.class}`;
+            const fullClassName = getFullClassName(currentClassInfo);
             
-            document.title = `${classDisplay}作业通知 - 家长端`;
-            document.querySelector('h1').textContent = `${classDisplay}作业通知`;
-            document.getElementById('classInfo').textContent = `班级：${classDisplay}`;
+            document.title = `${fullClassName}作业通知 - 家长端`;
+            document.querySelector('h1').textContent = `${fullClassName}作业通知`;
+            document.getElementById('classInfo').textContent = `班级：${fullClassName}`;
             
             return true;
         }
@@ -438,7 +443,7 @@
                 now.toLocaleDateString('zh-CN', options);
         }
 
-        // 从COS加载作业数据
+        // 从COS加载作业数据 - 修改为加载单独的班级文件
         async function loadHomeworkData() {
             if (!currentClassInfo) return;
             
@@ -446,28 +451,27 @@
             updateSyncStatus('正在同步作业数据...');
             
             try {
+                const fullClassName = getFullClassName(currentClassInfo);
+                const filename = `homework_${fullClassName}.json`;
+                
                 const response = await fetch(
-                    `https://${COS_CONFIG.bucket}.cos.${COS_CONFIG.region}.myqcloud.com/homework_data.json?t=${Date.now()}`
+                    `https://${COS_CONFIG.bucket}.cos.${COS_CONFIG.region}.myqcloud.com/${filename}?t=${Date.now()}`
                 );
                 
                 if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('该班级暂无作业数据');
+                    }
                     throw new Error(`网络错误: ${response.status}`);
                 }
                 
-                const allData = await response.json();
+                homeworkData = await response.json();
+                displayHomeworkData();
+                updateSyncStatus('数据同步成功');
+                showNotification('作业数据已更新', 'success');
                 
-                // 根据班级筛选数据
-                if (allData[currentClassInfo.grade] && allData[currentClassInfo.grade][currentClassInfo.class]) {
-                    homeworkData = allData[currentClassInfo.grade][currentClassInfo.class];
-                    displayHomeworkData();
-                    updateSyncStatus('数据同步成功');
-                    showNotification('作业数据已更新', 'success');
-                    
-                    // 检查晨读提醒
-                    checkMorningReading();
-                } else {
-                    throw new Error('未找到该班级的作业数据');
-                }
+                // 检查晨读提醒
+                checkMorningReading();
                 
             } catch (error) {
                 console.error('加载作业数据失败:', error);
