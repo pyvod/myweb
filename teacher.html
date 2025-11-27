@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>瓶窑第一中学班级作业管理系统 - 教师端</title>
     <style>
-        /* 所有样式保持不变 */
         * {
             margin: 0;
             padding: 0;
@@ -1050,6 +1049,97 @@
             background: #218838;
         }
 
+        /* 审核开关样式 */
+        .approval-switch {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .switch-label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #28a745;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .switch-status {
+            font-size: 0.9em;
+            color: #6c757d;
+            font-weight: bold;
+        }
+
+        .switch-status.on {
+            color: #28a745;
+        }
+
+        .switch-status.off {
+            color: #dc3545;
+        }
+
+        /* 通知消息样式更新 */
+        .notice-box.info {
+            background: #d1ecf1;
+            border: 2px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .notice-box.info h3 {
+            color: #0c5460;
+        }
+
+        .notice-box.info p {
+            color: #0c5460;
+        }
+
         @media (max-width: 1024px) {
             .content {
                 grid-template-columns: 1fr;
@@ -1119,7 +1209,8 @@
             <div class="subtitle">请填写注册信息</div>
         </div>
         
-        <div class="notice-box">
+        <!-- 审核状态通知 -->
+        <div class="notice-box" id="approvalNoticeBox">
             <h3>注册须知</h3>
             <p>注册后需要管理员审核才能登录使用</p>
             <p>请耐心等待管理员审核您的申请</p>
@@ -1268,6 +1359,7 @@
             <div class="modal-tabs">
                 <button class="modal-tab active" data-tab="storage">云存储设置</button>
                 <button class="modal-tab" data-tab="links">班级链接生成</button>
+                <button class="modal-tab" data-tab="approval">审核设置</button>
                 <button class="modal-tab" data-tab="userManagement">用户管理</button>
             </div>
             
@@ -1340,6 +1432,38 @@
                             </button>
                             <button class="btn btn-primary" onclick="testClassLink()">
                                 🔍 测试链接
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 新增：审核设置标签页 -->
+            <div class="modal-tab-content" id="approvalTab">
+                <div class="config-form">
+                    <div class="form-group">
+                        <h4>用户注册审核设置</h4>
+                        <p style="color: #6c757d; margin-bottom: 15px;">
+                            控制新用户注册是否需要管理员审核。关闭审核后，新用户注册将自动通过。
+                        </p>
+                        
+                        <div class="approval-switch">
+                            <div class="switch-label">注册审核:</div>
+                            <label class="switch">
+                                <input type="checkbox" id="approvalSwitch" onchange="toggleApprovalSetting()">
+                                <span class="slider"></span>
+                            </label>
+                            <div class="switch-status" id="approvalStatus">开启</div>
+                        </div>
+                        
+                        <div class="notice-box info" id="approvalSettingNotice">
+                            <p>当前设置: <strong>需要审核</strong></p>
+                            <p>新用户注册后需要管理员审核才能登录</p>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-success" onclick="saveApprovalSetting()">
+                                💾 保存设置
                             </button>
                         </div>
                     </div>
@@ -1443,6 +1567,11 @@
         let userClasses = [];
         let allClasses = [];
         
+        // 系统配置
+        let systemConfig = {
+            require_approval: true // 默认需要审核
+        };
+        
         // 存储桶配置 - 使用默认密钥
         const COS_CONFIG = {
             bucket: 'class-homework-1257663765',
@@ -1478,10 +1607,65 @@
             console.log('页面加载完成，开始初始化...');
             checkLoginStatus();
             loadAllClasses();
+            loadSystemConfig(); // 新增：加载系统配置
             
             // 测试COS连接
             testCOSConnection();
         });
+
+        // 新增：加载系统配置
+        async function loadSystemConfig() {
+            try {
+                console.log('开始加载系统配置...');
+                const response = await fetch(
+                    `https://${COS_CONFIG.bucket}.cos.${COS_CONFIG.region}.myqcloud.com/system_config.json?t=${Date.now()}`
+                );
+                
+                if (response.ok) {
+                    const config = await response.json();
+                    systemConfig = { ...systemConfig, ...config };
+                    console.log('系统配置加载成功:', systemConfig);
+                } else {
+                    console.log('系统配置文件不存在，使用默认配置');
+                }
+            } catch (error) {
+                console.error('加载系统配置失败:', error);
+            }
+        }
+
+        // 新增：保存系统配置
+        async function saveSystemConfig() {
+            try {
+                console.log('开始保存系统配置...');
+                
+                const jsonData = JSON.stringify(systemConfig, null, 2);
+                console.log('要保存的系统配置:', jsonData);
+                
+                const url = `https://${config.bucket}.cos.${config.region}.myqcloud.com/system_config.json`;
+                console.log('保存URL:', url);
+                
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: jsonData
+                });
+                
+                console.log('保存响应状态:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    throw new Error(`上传失败: ${response.status}`);
+                }
+                
+                console.log('系统配置保存成功！');
+                return true;
+                
+            } catch (error) {
+                console.error('保存系统配置失败:', error);
+                throw new Error('无法保存系统配置到云端: ' + error.message);
+            }
+        }
 
         // 测试COS连接
         async function testCOSConnection() {
@@ -1537,6 +1721,9 @@
             
             console.log('显示注册页面，当前班级列表:', allClasses);
             
+            // 更新审核状态通知
+            updateApprovalNotice();
+            
             // 初始化注册班级选择
             initializeRegisterClassGrid();
             
@@ -1545,6 +1732,26 @@
                 console.log('注册表单提交');
                 register();
             });
+        }
+
+        // 新增：更新审核状态通知
+        function updateApprovalNotice() {
+            const noticeBox = document.getElementById('approvalNoticeBox');
+            if (systemConfig.require_approval) {
+                noticeBox.innerHTML = `
+                    <h3>注册须知</h3>
+                    <p>注册后需要管理员审核才能登录使用</p>
+                    <p>请耐心等待管理员审核您的申请</p>
+                `;
+                noticeBox.className = 'notice-box';
+            } else {
+                noticeBox.innerHTML = `
+                    <h3>注册须知</h3>
+                    <p>当前系统设置为<strong>自动审核通过</strong></p>
+                    <p>注册后将立即可以登录使用</p>
+                `;
+                noticeBox.className = 'notice-box info';
+            }
         }
 
         // 显示应用页面
@@ -1678,7 +1885,7 @@
                     return;
                 }
                 
-                // 创建待审核用户
+                // 创建用户
                 console.log('创建新用户...');
                 const hashedPassword = await sha256(password);
                 
@@ -1693,18 +1900,24 @@
                     status: 'pending'
                 };
                 
-                // 添加到待审核数据中
-                pendingData[username] = newUser;
-                
-                console.log('新用户数据:', newUser);
-                console.log('准备保存的待审核数据:', pendingData);
-                
-                // 保存到独立的pending_registrations.json文件
-                console.log('正在保存到pending_registrations.json...');
-                const saveResult = await savePendingRegistrationsToCOS(pendingData);
-                
-                if (saveResult) {
-                    statusDiv.textContent = '注册申请已提交，请等待管理员审核！审核通过后即可登录使用。';
+                // 根据审核设置决定处理方式
+                if (!systemConfig.require_approval) {
+                    // 不需要审核，直接添加到正式用户
+                    console.log('自动审核通过 - 直接添加到正式用户');
+                    newUser.status = 'approved';
+                    
+                    // 确保users对象存在
+                    if (!usersData.users) {
+                        usersData.users = {};
+                    }
+                    
+                    usersData.users[username] = newUser;
+                    usersData.last_updated = new Date().toLocaleString('zh-CN');
+                    
+                    // 保存到正式用户文件
+                    await saveUsersDataToCOS(usersData);
+                    
+                    statusDiv.textContent = '注册成功！您现在可以登录使用系统。';
                     statusDiv.style.color = '#28a745';
                     
                     // 清空表单
@@ -1714,9 +1927,37 @@
                         checkbox.checked = false;
                     });
                     
-                    console.log('注册成功！用户数据已保存到pending_registrations.json');
+                    console.log('注册成功！用户已自动审核通过');
+                    
                 } else {
-                    throw new Error('保存到云端失败');
+                    // 需要审核，添加到待审核列表
+                    console.log('需要审核 - 添加到待审核列表');
+                    
+                    // 添加到待审核数据中
+                    pendingData[username] = newUser;
+                    
+                    console.log('新用户数据:', newUser);
+                    console.log('准备保存的待审核数据:', pendingData);
+                    
+                    // 保存到独立的pending_registrations.json文件
+                    console.log('正在保存到pending_registrations.json...');
+                    const saveResult = await savePendingRegistrationsToCOS(pendingData);
+                    
+                    if (saveResult) {
+                        statusDiv.textContent = '注册申请已提交，请等待管理员审核！审核通过后即可登录使用。';
+                        statusDiv.style.color = '#28a745';
+                        
+                        // 清空表单
+                        document.getElementById('registerForm').reset();
+                        // 清空所有班级选择
+                        document.querySelectorAll('#registerClassGrid input[type="checkbox"]').forEach(checkbox => {
+                            checkbox.checked = false;
+                        });
+                        
+                        console.log('注册成功！用户数据已保存到pending_registrations.json');
+                    } else {
+                        throw new Error('保存到云端失败');
+                    }
                 }
                 
             } catch (error) {
@@ -1824,7 +2065,7 @@
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                    },
+                        },
                     body: jsonData
                 });
                 
@@ -2131,12 +2372,86 @@
                         initializeLinkClassSelect();
                     }
                     
+                    // 如果切换到审核设置标签页，初始化审核设置
+                    if (tabId === 'approval') {
+                        initializeApprovalSettings();
+                    }
+                    
                     // 如果切换到用户管理标签页，重新加载数据
                     if (tabId === 'userManagement') {
                         loadUserManagementData();
                     }
                 });
             });
+        }
+
+        // 新增：初始化审核设置
+        function initializeApprovalSettings() {
+            // 只有超级管理员和管理员可以访问审核设置
+            if (currentUser.role !== 'admin' && currentUser.role !== 'super_admin') {
+                document.getElementById('approvalTab').innerHTML = `
+                    <div class="config-form">
+                        <div class="form-group">
+                            <h4>权限不足</h4>
+                            <p style="color: #dc3545;">
+                                只有管理员和超级管理员可以访问审核设置。
+                            </p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 设置开关状态
+            const approvalSwitch = document.getElementById('approvalSwitch');
+            const approvalStatus = document.getElementById('approvalStatus');
+            const approvalSettingNotice = document.getElementById('approvalSettingNotice');
+            
+            approvalSwitch.checked = systemConfig.require_approval;
+            updateApprovalUI();
+        }
+
+        // 新增：更新审核设置UI
+        function updateApprovalUI() {
+            const approvalStatus = document.getElementById('approvalStatus');
+            const approvalSettingNotice = document.getElementById('approvalSettingNotice');
+            
+            if (systemConfig.require_approval) {
+                approvalStatus.textContent = '开启';
+                approvalStatus.className = 'switch-status on';
+                approvalSettingNotice.innerHTML = `
+                    <p>当前设置: <strong>需要审核</strong></p>
+                    <p>新用户注册后需要管理员审核才能登录</p>
+                `;
+            } else {
+                approvalStatus.textContent = '关闭';
+                approvalStatus.className = 'switch-status off';
+                approvalSettingNotice.innerHTML = `
+                    <p>当前设置: <strong>自动审核通过</strong></p>
+                    <p>新用户注册后将立即可以登录使用</p>
+                `;
+            }
+        }
+
+        // 新增：切换审核设置
+        function toggleApprovalSetting() {
+            const approvalSwitch = document.getElementById('approvalSwitch');
+            systemConfig.require_approval = approvalSwitch.checked;
+            updateApprovalUI();
+        }
+
+        // 新增：保存审核设置
+        async function saveApprovalSetting() {
+            try {
+                await saveSystemConfig();
+                showNotification('审核设置已保存', 'success');
+                
+                // 更新注册页面的通知
+                updateApprovalNotice();
+            } catch (error) {
+                console.error('保存审核设置失败:', error);
+                showNotification('保存失败: ' + error.message, 'error');
+            }
         }
 
         // 初始化链接生成的班级选择
