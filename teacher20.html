@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- 引入腾讯云COS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/cos-js-sdk-v5/dist/cos-js-sdk-v5.min.js"></script>
-  <style>
+    <style>
         :root {
             --primary-color: #4a6fa5;
             --secondary-color: #6b8cbc;
@@ -2912,7 +2912,7 @@
 
     // 初始学生数据（保持不变）
     const initialStudents = [
-         { id: 1, name: "刘嘉琪", score: 0, weekDeductions: 0, homeworkBonus: 0 },
+        { id: 1, name: "刘嘉琪", score: 0, weekDeductions: 0, homeworkBonus: 0 },
         { id: 2, name: "张邹奕辕", score: 0, weekDeductions: 0, homeworkBonus: 0 },
         { id: 3, name: "袁子杰", score: 0, weekDeductions: 0, homeworkBonus: 0 },
         { id: 4, name: "陈紫嫣", score: 0, weekDeductions: 0, homeworkBonus: 0 },
@@ -3013,6 +3013,40 @@
     // 积分兑换功能变量
     let selectedPrize = null;
     let selectedStudentId = null;
+
+    // ============================================
+    // 核心工具函数
+    // ============================================
+
+    // 获取本周开始日期
+    function getWeekStartDate() {
+        const now = new Date();
+        const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // 如果是周日，则向前6天
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - diff);
+        return monday.toDateString();
+    }
+
+    // 获取指定日期的周开始日期
+    function getWeekStartDateForDate(date) {
+        const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // 如果是周日，则向前6天
+        const monday = new Date(date);
+        monday.setDate(date.getDate() - diff);
+        return monday.toDateString();
+    }
+
+    // 显示游戏消息
+    function showGameMessage(message) {
+        const gameMessage = document.getElementById('gameMessage');
+        gameMessage.textContent = message;
+        gameMessage.classList.add('show');
+        
+        setTimeout(() => {
+            gameMessage.classList.remove('show');
+        }, 2000);
+    }
 
     // ============================================
     // 数据管理函数（修改版）
@@ -3164,9 +3198,716 @@
         if (!settings.weekStartDate) settings.weekStartDate = getWeekStartDate();
     }
 
+    // 检查日期重置
+    function checkDateReset() {
+        // 检查是否需要重置当日变动计数
+        const today = new Date().toDateString();
+        if (settings.todayDate !== today) {
+            settings.todayChanges = 0;
+            settings.todayDate = today;
+            settings.todayHomeworkBonus = 0; // 重置今日作业奖励计数
+        }
+        
+        // 检查是否需要重置周扣分计数
+        const weekStart = getWeekStartDate();
+        if (settings.weekStartDate !== weekStart) {
+            resetWeekDeductions();
+            settings.weekStartDate = weekStart;
+        }
+    }
+
+    // 重置本周扣分计数
+    function resetWeekDeductions() {
+        students.forEach(student => {
+            student.weekDeductions = 0;
+        });
+    }
+
+    // 更新最后保存时间
+    function updateLastSaveTime() {
+        const lastSaveTimeElement = document.getElementById('lastSaveTime');
+        if (lastSaveTimeElement) {
+            lastSaveTimeElement.textContent = settings.lastUpdate || '-';
+        }
+    }
+
+    // ============================================
+    // 统计与更新函数
+    // ============================================
+
+    // 更新统计数据
+    function updateStatistics() {
+        const totalPoints = students.reduce((sum, student) => sum + student.score, 0);
+        const avgPoints = students.length > 0 ? (totalPoints / students.length).toFixed(1) : 0;
+        
+        document.getElementById('totalPoints').textContent = totalPoints;
+        document.getElementById('avgPoints').textContent = avgPoints;
+        document.getElementById('todayChanges').textContent = settings.todayChanges || 0;
+        document.getElementById('homeworkBonusToday').textContent = settings.todayHomeworkBonus || 0;
+        
+        const homeworkBonusTodayFooter = document.getElementById('homeworkBonusTodayFooter');
+        if (homeworkBonusTodayFooter) {
+            homeworkBonusTodayFooter.textContent = settings.todayHomeworkBonus || 0;
+        }
+    }
+
+    // 更新游戏统计数据
+    function updateGameStats() {
+        const currentSubject = gameState.currentSubject;
+        const subjectState = gameState.subjects[currentSubject];
+        const completedCount = subjectState.completedStudents.length;
+        const remainingCount = students.length - completedCount;
+        
+        document.getElementById('gameRemainingStudents').textContent = remainingCount;
+        document.getElementById('gameCompletedStudents').textContent = completedCount;
+        document.getElementById('gameCurrentSubject').textContent = currentSubject;
+        document.getElementById('gameSubjectBonus').textContent = subjectState.subjectBonus;
+        
+        // 更新开始游戏按钮状态
+        const startBtn = document.getElementById('startHomeworkGame');
+        if (subjectState.isActive) {
+            startBtn.innerHTML = '<i class="fas fa-play-circle"></i> 游戏中...';
+            startBtn.classList.remove('btn-success');
+            startBtn.classList.add('btn-warning');
+        } else {
+            startBtn.innerHTML = '<i class="fas fa-play-circle"></i> 开始游戏';
+            startBtn.classList.remove('btn-warning');
+            startBtn.classList.add('btn-success');
+        }
+    }
+
+    // 更新科目进度条
+    function updateSubjectProgress() {
+        const subjects = ["语文", "数学", "英语", "科学", "社会", "道法"];
+        
+        subjects.forEach(subject => {
+            const subjectState = gameState.subjects[subject];
+            const completedCount = subjectState.completedStudents.length;
+            const progressPercent = (completedCount / students.length) * 100;
+            
+            const progressBar = document.getElementById(`progress-${subject}`);
+            if (progressBar) {
+                progressBar.style.width = `${progressPercent}%`;
+            }
+        });
+    }
+
+    // 更新兑换余额显示
+    function updateExchangeBalance() {
+        // 计算所有学生的总积分
+        const totalPoints = students.reduce((sum, student) => sum + student.score, 0);
+        const exchangeBalanceElement = document.getElementById('exchangeBalance');
+        if (exchangeBalanceElement) {
+            exchangeBalanceElement.textContent = totalPoints;
+        }
+    }
+
+    // ============================================
+    // 渲染函数
+    // ============================================
+
+    // 渲染学生表格
+    function renderStudentTable() {
+        const searchInput = document.getElementById('searchInput');
+        const searchTerm = searchInput?.value.toLowerCase() || '';
+        const tableBody = document.getElementById('studentTable');
+        if (!tableBody) return;
+        
+        tableBody.innerHTML = '';
+        
+        const filteredStudents = students.filter(student => 
+            student.name.toLowerCase().includes(searchTerm)
+        );
+        
+        filteredStudents.forEach(student => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${student.id}</td>
+                <td class="student-name">${student.name}</td>
+                <td class="score-display">${student.score}</td>
+                <td>${student.weekDeductions > 0 ? `<span style="color: var(--danger-color); font-weight: bold;">${student.weekDeductions}</span>` : '0'}</td>
+                <td>${student.homeworkBonus > 0 ? `<span style="color: var(--success-color); font-weight: bold;">${student.homeworkBonus}</span>` : '0'}</td>
+                <td>
+                    <div class="score-controls">
+                        <button class="btn btn-success btn-sm btn-icon quick-add" data-id="${student.id}" data-change="1">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm btn-icon quick-subtract" data-id="${student.id}" data-change="1">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+        
+        // 如果没有匹配的学生
+        if (filteredStudents.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td colspan="6" style="text-align: center; color: #6c757d;">未找到匹配的学生</td>`;
+            tableBody.appendChild(row);
+        }
+    }
+
+    // 填充学生选择下拉框
+    function populateStudentSelect() {
+        const studentSelect = document.getElementById('studentSelect');
+        if (!studentSelect) return;
+        
+        studentSelect.innerHTML = '<option value="">请选择学生</option>';
+        
+        students.forEach(student => {
+            const option = document.createElement('option');
+            option.value = student.id;
+            option.textContent = `${student.id}. ${student.name} (当前: ${student.score}分)`;
+            studentSelect.appendChild(option);
+        });
+    }
+
+    // 填充兑换学生选择下拉框
+    function populateExchangeStudentSelect() {
+        const studentSelect = document.getElementById('exchangeStudentSelect');
+        if (!studentSelect) return;
+        
+        studentSelect.innerHTML = '<option value="">请选择学生</option>';
+        
+        students.forEach(student => {
+            const option = document.createElement('option');
+            option.value = student.id;
+            option.textContent = `${student.id}. ${student.name} (积分: ${student.score})`;
+            studentSelect.appendChild(option);
+        });
+    }
+
+    // 渲染学生网格（作业消消乐） - 多科目独立版本
+    function renderStudentGrid() {
+        const studentGrid = document.getElementById('studentGrid');
+        if (!studentGrid) return;
+        
+        studentGrid.innerHTML = '';
+        
+        const currentSubject = gameState.currentSubject;
+        const subjectState = gameState.subjects[currentSubject];
+        const completedStudents = subjectState.completedStudents;
+        
+        // 获取当前科目未完成的学生
+        const availableStudents = students.filter(student => 
+            !completedStudents.includes(student.id)
+        );
+        
+        // 按姓名排序
+        availableStudents.sort((a, b) => a.name.localeCompare(b.name));
+        
+        if (availableStudents.length === 0) {
+            // 所有学生都已完成当前科目
+            studentGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6c757d;">
+                    <i class="fas fa-check-circle fa-3x" style="margin-bottom: 15px; color: #4caf50;"></i>
+                    <h3>${currentSubject}科目所有学生已完成！</h3>
+                    <p>本科目共为 ${completedStudents.length} 名学生添加了 ${subjectState.subjectBonus} 分</p>
+                    <p>请切换到其他科目继续游戏</p>
+                </div>
+            `;
+            return;
+        }
+        
+        availableStudents.forEach(student => {
+            const card = document.createElement('div');
+            card.className = 'student-card';
+            card.dataset.id = student.id;
+            
+            // 根据科目添加不同的颜色标识
+            let subjectBadge = '';
+            switch(currentSubject) {
+                case '语文':
+                    subjectBadge = '<span class="badge badge-danger" style="background-color: #ffcdd2; color: #c62828;">语文</span>';
+                    break;
+                case '数学':
+                    subjectBadge = '<span class="badge badge-primary" style="background-color: #bbdefb; color: #1565c0;">数学</span>';
+                    break;
+                case '英语':
+                    subjectBadge = '<span class="badge badge-success" style="background-color: #c8e6c9; color: #2e7d32;">英语</span>';
+                    break;
+                case '科学':
+                    subjectBadge = '<span class="badge badge-info" style="background-color: #e1bee7; color: #7b1fa2;">科学</span>';
+                    break;
+                case '社会':
+                    subjectBadge = '<span class="badge badge-warning" style="background-color: #fff9c4; color: #f57f17;">社会</span>';
+                    break;
+                case '道法':
+                    subjectBadge = '<span class="badge" style="background-color: #ffccbc; color: #d84315;">道法</span>';
+                    break;
+            }
+            
+            card.innerHTML = `
+                ${subjectBadge}
+                <div class="name">${student.name}</div>
+                <div class="score">${student.score} 分</div>
+                <div class="homework-count">作业奖励: ${student.homeworkBonus}</div>
+            `;
+            
+            // 添加点击事件
+            card.addEventListener('click', function() {
+                if (subjectState.isActive) {
+                    completeHomework(student.id, currentSubject);
+                } else {
+                    showGameMessage(`请先点击"开始游戏"按钮开始${currentSubject}科目游戏`);
+                }
+            });
+            
+            studentGrid.appendChild(card);
+        });
+    }
+
+    // 渲染科目进度总结
+    function renderSubjectProgressSummary() {
+        const summaryContainer = document.getElementById('subjectProgressSummary');
+        if (!summaryContainer) return;
+        
+        summaryContainer.innerHTML = '';
+        
+        const subjects = ["语文", "数学", "英语", "科学", "社会", "道法"];
+        
+        subjects.forEach(subject => {
+            const subjectState = gameState.subjects[subject];
+            const completedCount = subjectState.completedStudents.length;
+            const totalCount = students.length;
+            const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+            const isCurrent = subject === gameState.currentSubject;
+            
+            const progressItem = document.createElement('div');
+            progressItem.className = `subject-progress-item ${completedCount === totalCount ? 'completed' : ''}`;
+            if (isCurrent) {
+                progressItem.style.border = '2px solid #4caf50';
+                progressItem.style.backgroundColor = '#f1f8e9';
+            }
+            
+            progressItem.innerHTML = `
+                <div class="subject-name">${subject} ${isCurrent ? '(当前)' : ''}</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                </div>
+                <div class="progress-text">${completedCount}/${totalCount} (${progressPercent}%)</div>
+                <div style="font-size: 0.8rem; color: #666;">加分: ${subjectState.subjectBonus}</div>
+            `;
+            
+            // 点击切换科目
+            progressItem.addEventListener('click', function() {
+                switchSubject(subject);
+            });
+            
+            summaryContainer.appendChild(progressItem);
+        });
+    }
+
+    // 渲染历史记录
+    function renderHistory() {
+        const historyList = document.getElementById('historyList');
+        const historyFilter = document.getElementById('historyFilter');
+        const filter = historyFilter?.value || 'all';
+        
+        if (!historyList) return;
+        
+        historyList.innerHTML = '';
+        
+        let filteredHistory = [...history];
+        
+        // 应用过滤器
+        if (filter === 'today') {
+            const today = new Date().toDateString();
+            filteredHistory = filteredHistory.filter(record => {
+                const recordDate = new Date(record.timestamp).toDateString();
+                return recordDate === today;
+            });
+        } else if (filter === 'week') {
+            const weekStart = getWeekStartDate();
+            filteredHistory = filteredHistory.filter(record => {
+                const recordDate = new Date(record.timestamp).toDateString();
+                const recordDateObj = new Date(record.timestamp);
+                const recordWeekStart = getWeekStartDateForDate(recordDateObj);
+                return recordWeekStart === weekStart;
+            });
+        } else if (filter === 'positive') {
+            filteredHistory = filteredHistory.filter(record => record.change > 0);
+        } else if (filter === 'negative') {
+            filteredHistory = filteredHistory.filter(record => record.change < 0);
+        } else if (filter === 'homework') {
+            filteredHistory = [...homeworkHistory];
+        }
+        
+        // 限制显示数量
+        filteredHistory = filteredHistory.slice(0, 100);
+        
+        if (filteredHistory.length === 0) {
+            historyList.innerHTML = '<div style="text-align: center; padding: 30px; color: #6c757d;">暂无记录</div>';
+            return;
+        }
+        
+        filteredHistory.forEach(record => {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            
+            const change = record.change || 1; // 对于作业记录，change可能不存在
+            const isPositive = change > 0;
+            const isNegative = change < 0;
+            
+            if (isPositive) historyItem.classList.add('positive');
+            if (isNegative) historyItem.classList.add('negative');
+            if (record.subject) historyItem.classList.add('homework');
+            
+            let reason = record.reason || `${record.subject}作业`;
+            let changeText = record.subject ? '+1' : (isPositive ? `+${change}` : `${change}`);
+            
+            historyItem.innerHTML = `
+                <div class="history-info">
+                    <div class="history-student">${record.studentName}</div>
+                    <div class="history-reason">${reason}</div>
+                    <div class="history-time">${new Date(record.timestamp).toLocaleString('zh-CN')}</div>
+                </div>
+                <div class="history-change ${isPositive ? 'positive' : 'negative'}">${changeText}分</div>
+            `;
+            
+            historyList.appendChild(historyItem);
+        });
+    }
+
+    // 渲染排行榜
+    function renderRanking() {
+        const rankingList = document.getElementById('rankingList');
+        if (!rankingList) return;
+        
+        rankingList.innerHTML = '';
+        
+        // 复制学生数组并按积分排序
+        const sortedStudents = [...students].sort((a, b) => b.score - a.score);
+        
+        const rankingTable = document.createElement('table');
+        rankingTable.innerHTML = `
+            <thead>
+                <tr>
+                    <th>排名</th>
+                    <th>姓名</th>
+                    <th>积分</th>
+                    <th>作业奖励</th>
+                    <th>本周扣分</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${sortedStudents.map((student, index) => `
+                    <tr>
+                        <td>
+                            ${index < 3 ? 
+                                `<span style="color: ${index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : '#cd7f32'}; font-weight: bold;">
+                                    ${index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
+                                </span>` : 
+                                index + 1
+                            }
+                        </td>
+                        <td>${student.name}</td>
+                        <td style="font-weight: bold; color: ${student.score >= 0 ? 'var(--primary-color)' : 'var(--danger-color)'}">
+                            ${student.score}
+                        </td>
+                        <td style="color: var(--success-color); font-weight: ${student.homeworkBonus > 0 ? 'bold' : 'normal'}">
+                            ${student.homeworkBonus}
+                        </td>
+                        <td style="color: ${student.weekDeductions > 0 ? 'var(--danger-color)' : 'var(--success-color)'}">
+                            ${student.weekDeductions}
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+        
+        rankingList.appendChild(rankingTable);
+    }
+
+    // 渲染数据统计
+    function renderDataStats() {
+        const dataStats = document.getElementById('dataStats');
+        if (!dataStats) return;
+        
+        dataStats.innerHTML = '';
+        
+        const statsHTML = `
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 10px;">
+                <div class="stat-box">
+                    <div class="stat-box-value">${students.length}</div>
+                    <div class="stat-box-label">学生总数</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-value">${history.length}</div>
+                    <div class="stat-box-label">积分记录</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-value">${homeworkHistory.length}</div>
+                    <div class="stat-box-label">作业记录</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-value">${exchangeHistory.length}</div>
+                    <div class="stat-box-label">兑换记录</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-value">${traditionalPrizes.reduce((sum, prize) => sum + prize.cost, 0)}</div>
+                    <div class="stat-box-label">奖品总价值</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-value">${exchangeHistory.reduce((sum, record) => sum + record.prizeCost, 0)}</div>
+                    <div class="stat-box-label">已兑换积分</div>
+                </div>
+            </div>
+        `;
+        
+        dataStats.innerHTML = statsHTML;
+    }
+
+    // ============================================
+    // 积分操作函数
+    // ============================================
+
+    // 添加积分变动记录
+    function addHistoryRecord(studentId, change, reason) {
+        const student = students.find(s => s.id === studentId);
+        if (!student) return;
+        
+        // 如果是扣分，更新本周扣分计数
+        if (change < 0) {
+            student.weekDeductions += Math.abs(change);
+        }
+        
+        const record = {
+            id: history.length + 1,
+            studentId: studentId,
+            studentName: student.name,
+            change: change,
+            reason: reason,
+            timestamp: new Date().toISOString()
+        };
+        
+        history.unshift(record); // 添加到开头
+        
+        // 限制历史记录数量
+        if (history.length > 500) {
+            history = history.slice(0, 500);
+        }
+        
+        // 更新当日变动计数
+        settings.todayChanges = (settings.todayChanges || 0) + 1;
+        
+        saveData();
+        renderHistory();
+    }
+
+    // 添加作业奖励记录
+    function addHomeworkRecord(studentId, subject) {
+        const student = students.find(s => s.id === studentId);
+        if (!student) return null;
+        
+        // 更新学生积分和作业奖励计数
+        student.score += 1;
+        student.homeworkBonus += 1;
+        
+        // 添加作业记录
+        const record = {
+            id: homeworkHistory.length + 1,
+            studentId: studentId,
+            studentName: student.name,
+            subject: subject,
+            timestamp: new Date().toISOString()
+        };
+        
+        homeworkHistory.unshift(record);
+        
+        // 更新统计
+        settings.todayHomeworkBonus = (settings.todayHomeworkBonus || 0) + 1;
+        settings.totalHomeworkBonus = (settings.totalHomeworkBonus || 0) + 1;
+        settings.todayChanges = (settings.todayChanges || 0) + 1;
+        
+        // 保存数据
+        saveData();
+        
+        return student.name;
+    }
+
+    // ============================================
+    // 作业消消乐功能
+    // ============================================
+
+    // 完成作业（消消乐核心功能） - 多科目独立版本
+    function completeHomework(studentId, subject) {
+        const student = students.find(s => s.id === studentId);
+        if (!student) return;
+        
+        const subjectState = gameState.subjects[subject];
+        
+        // 检查是否已经完成
+        if (subjectState.completedStudents.includes(studentId)) {
+            showGameMessage(`${student.name} 已经完成${subject}作业了！`);
+            return;
+        }
+        
+        // 添加作业奖励
+        const studentName = addHomeworkRecord(studentId, subject);
+        
+        // 更新科目状态
+        subjectState.completedStudents.push(studentId);
+        subjectState.subjectBonus += 1;
+        
+        // 更新游戏统计
+        updateGameStats();
+        updateSubjectProgress();
+        
+        // 更新学生表格
+        renderStudentTable();
+        
+        // 重新渲染学生网格
+        renderStudentGrid();
+        
+        // 重新渲染科目进度总结
+        renderSubjectProgressSummary();
+        
+        // 重新渲染历史记录和排行榜
+        renderHistory();
+        renderRanking();
+        
+        // 显示成功消息
+        showGameMessage(`✓ ${studentName} ${subject}作业 +1分`);
+        
+        // 检查是否所有学生都已完成当前科目
+        if (subjectState.completedStudents.length === students.length) {
+            setTimeout(() => {
+                showGameMessage(`🎉 ${subject}科目所有学生已完成！共加分 ${subjectState.subjectBonus} 分`);
+                // 自动结束当前科目游戏
+                subjectState.isActive = false;
+                updateGameStats();
+            }, 500);
+        }
+    }
+
+    // 切换科目
+    function switchSubject(subject) {
+        // 更新当前科目
+        gameState.currentSubject = subject;
+        
+        // 更新科目按钮状态
+        document.querySelectorAll('.subject-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        const subjectBtn = document.querySelector(`.subject-btn[data-subject="${subject}"]`);
+        if (subjectBtn) {
+            subjectBtn.classList.add('active');
+        }
+        
+        // 更新显示
+        updateGameStats();
+        updateSubjectProgress();
+        
+        // 重新渲染学生网格
+        renderStudentGrid();
+        
+        showGameMessage(`已切换到 ${subject} 科目`);
+    }
+
+    // 开始游戏（当前科目）
+    function startHomeworkGame() {
+        const currentSubject = gameState.currentSubject;
+        const subjectState = gameState.subjects[currentSubject];
+        
+        // 如果当前科目已经全部完成，提示切换科目
+        if (subjectState.completedStudents.length === students.length) {
+            showGameMessage(`${currentSubject}科目已全部完成，请切换到其他科目`);
+            return;
+        }
+        
+        subjectState.isActive = true;
+        
+        // 更新游戏统计
+        updateGameStats();
+        
+        showGameMessage(`${currentSubject}科目游戏开始！`);
+    }
+
+    // 重置当前科目
+    function resetCurrentSubject() {
+        const currentSubject = gameState.currentSubject;
+        const subjectState = gameState.subjects[currentSubject];
+        
+        if (subjectState.completedStudents.length === 0 && subjectState.subjectBonus === 0) {
+            showGameMessage(`${currentSubject}科目还没有开始游戏`);
+            return;
+        }
+        
+        if (confirm(`确定要重置${currentSubject}科目的游戏进度吗？已完成的加分将保留，但游戏进度会重置。`)) {
+            subjectState.completedStudents = [];
+            subjectState.subjectBonus = 0;
+            subjectState.isActive = false;
+            
+            // 更新游戏统计
+            updateGameStats();
+            updateSubjectProgress();
+            
+            // 重新渲染学生网格
+            renderStudentGrid();
+            
+            // 重新渲染科目进度总结
+            renderSubjectProgressSummary();
+            
+            // 保存数据
+            saveData();
+            
+            showGameMessage(`${currentSubject}科目游戏已重置`);
+        }
+    }
+
+    // 重置所有科目
+    function resetAllSubjects() {
+        if (confirm('确定要重置所有科目的游戏进度吗？已完成的加分将保留，但所有科目的游戏进度会重置。')) {
+            const subjects = ["语文", "数学", "英语", "科学", "社会", "道法"];
+            
+            subjects.forEach(subject => {
+                gameState.subjects[subject].completedStudents = [];
+                gameState.subjects[subject].subjectBonus = 0;
+                gameState.subjects[subject].isActive = false;
+            });
+            
+            // 更新游戏统计
+            updateGameStats();
+            updateSubjectProgress();
+            
+            // 重新渲染学生网格
+            renderStudentGrid();
+            
+            // 重新渲染科目进度总结
+            renderSubjectProgressSummary();
+            
+            // 保存数据
+            saveData();
+            
+            showGameMessage('所有科目游戏已重置');
+        }
+    }
+
     // ============================================
     // 奖品管理系统
     // ============================================
+
+    // 获取分类名称（保持不变）
+    function getCategoryName(category) {
+        const categoryNames = {
+            "candy": "糖果糕点",
+            "pastry": "传统糕点",
+            "nut": "坚果炒货",
+            "drink": "传统饮品",
+            "other": "其他"
+        };
+        return categoryNames[category] || category;
+    }
+
+    // 获取当前选中的分类
+    function getCurrentCategory() {
+        const activeCategoryBtn = document.querySelector('.category-btn.active');
+        return activeCategoryBtn ? activeCategoryBtn.dataset.category : 'all';
+    }
 
     // 渲染奖品网格（修改版）
     function renderPrizeGrid(category = "all") {
@@ -3570,22 +4311,6 @@
         }
     }
 
-    // ============================================
-    // 其他核心函数（需要小修改）
-    // ============================================
-
-    // 获取分类名称（保持不变）
-    function getCategoryName(category) {
-        const categoryNames = {
-            "candy": "糖果糕点",
-            "pastry": "传统糕点",
-            "nut": "坚果炒货",
-            "drink": "传统饮品",
-            "other": "其他"
-        };
-        return categoryNames[category] || category;
-    }
-
     // 更新兑换摘要（修改版）
     function updateExchangeSummary() {
         if (!selectedPrize) return;
@@ -3624,6 +4349,80 @@
         }
     }
 
+    // 渲染兑换历史
+    function renderExchangeHistory() {
+        const historyList = document.getElementById('exchangeHistoryList');
+        if (!historyList) return;
+        
+        historyList.innerHTML = '';
+        
+        // 显示最近10条记录
+        const recentHistory = exchangeHistory.slice(0, 10);
+        
+        if (recentHistory.length === 0) {
+            historyList.innerHTML = `
+                <div style="text-align: center; padding: 30px; color: #6c757d;">
+                    <i class="fas fa-history fa-2x" style="margin-bottom: 10px;"></i>
+                    <p>暂无兑换记录</p>
+                </div>
+            `;
+            return;
+        }
+        
+        recentHistory.forEach(record => {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'exchange-history-item';
+            
+            historyItem.innerHTML = `
+                <div class="exchange-history-info">
+                    <div class="exchange-history-student">${record.studentName}</div>
+                    <div class="exchange-history-snack">${record.prizeName}</div>
+                    <div class="exchange-history-time">${new Date(record.timestamp).toLocaleString('zh-CN')}</div>
+                </div>
+                <div class="exchange-history-cost">-${record.prizeCost}</div>
+            `;
+            
+            historyList.appendChild(historyItem);
+        });
+    }
+
+    // 清空兑换选择
+    function clearExchangeSelection() {
+        selectedPrize = null;
+        selectedStudentId = null;
+        
+        // 重置UI
+        const selectedPrizeContainer = document.getElementById('selectedSnackContainer');
+        if (selectedPrizeContainer) {
+            selectedPrizeContainer.innerHTML = `
+                <div class="no-snack-selected">
+                    <i class="fas fa-search"></i>
+                    <p>请在左侧选择要兑换的零食</p>
+                </div>
+            `;
+        }
+        
+        const exchangeStudentSelect = document.getElementById('exchangeStudentSelect');
+        if (exchangeStudentSelect) exchangeStudentSelect.value = '';
+        
+        const summaryName = document.getElementById('summaryName');
+        const summaryCost = document.getElementById('summaryCost');
+        const summaryBalance = document.getElementById('summaryBalance');
+        const summaryRemaining = document.getElementById('summaryRemaining');
+        const confirmExchangeBtn = document.getElementById('confirmExchangeBtn');
+        
+        if (summaryName) summaryName.textContent = '-';
+        if (summaryCost) summaryCost.textContent = '0';
+        if (summaryBalance) summaryBalance.textContent = '0';
+        if (summaryRemaining) summaryRemaining.textContent = '0';
+        if (confirmExchangeBtn) confirmExchangeBtn.disabled = true;
+        
+        // 移除零食卡片选中状态
+        document.querySelectorAll('.snack-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+    }
+
     // 初始化兑换功能（修改版）
     function initExchange() {
         renderPrizeGrid();
@@ -3645,8 +4444,539 @@
     }
 
     // ============================================
-    // 事件监听器设置（新增奖品管理相关）
+    // 早读模式功能
     // ============================================
+
+    // 获取对比色（用于确定文字颜色）
+    function getContrastColor(hexColor) {
+        // 将十六进制颜色转换为RGB
+        const r = parseInt(hexColor.substr(1, 2), 16);
+        const g = parseInt(hexColor.substr(3, 2), 16);
+        const b = parseInt(hexColor.substr(5, 2), 16);
+        
+        // 计算亮度
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        
+        // 根据亮度返回黑色或白色
+        return brightness > 128 ? '#000' : '#fff';
+    }
+
+    // 渲染46个彩色小球
+    function renderBouncingBalls() {
+        const container = document.getElementById('bouncingBallsContainer');
+        if (!container) return;
+        
+        container.innerHTML = '<div class="bouncing-balls-floor"></div>';
+        
+        // 清空小球数组
+        morningReading.balls = [];
+        
+        // 计算小球的位置
+        const containerWidth = container.offsetWidth;
+        const containerHeight = container.offsetHeight;
+        const ballSize = 30;
+        const margin = 10;
+        
+        // 计算每行可以放多少个小球
+        const ballsPerRow = Math.floor(containerWidth / (ballSize + margin));
+        const rows = Math.ceil(students.length / ballsPerRow);
+        const actualMargin = (containerWidth - (ballsPerRow * ballSize)) / (ballsPerRow + 1);
+        
+        // 创建46个小球
+        students.forEach((student, index) => {
+            const ball = document.createElement('div');
+            ball.className = 'student-ball';
+            ball.dataset.id = student.id;
+            ball.dataset.name = student.name;
+            ball.id = `student-ball-${student.id}`;
+            
+            // 分配颜色
+            const color = morningReading.colors[index % morningReading.colors.length];
+            ball.style.background = color;
+            ball.style.color = getContrastColor(color);
+            
+            // 获取学生名字的首字母（如果是两个字，取第一个字）
+            let initial = student.name.charAt(0);
+            if (student.name.length > 2) {
+                initial = student.name.substring(0, 2);
+            }
+            ball.innerHTML = `<div class="student-initial">${initial}</div>`;
+            
+            // 计算小球位置
+            const row = Math.floor(index / ballsPerRow);
+            const col = index % ballsPerRow;
+            
+            const x = actualMargin + col * (ballSize + actualMargin) + ballSize / 2;
+            const y = containerHeight - 10 - ballSize / 2; // 初始在底部
+            
+            ball.style.left = `${x}px`;
+            ball.style.bottom = `${y}px`;
+            
+            // 添加点击事件
+            ball.addEventListener('click', function() {
+                toggleStudentActive(student.id, student.name);
+            });
+            
+            container.appendChild(ball);
+            
+            // 保存小球状态
+            morningReading.balls.push({
+                element: ball,
+                id: student.id,
+                name: student.name,
+                currentHeight: 0, // 当前高度（从底部算起）
+                targetHeight: 0,  // 目标高度
+                speed: 0,         // 当前速度
+                isActive: false   // 是否被标记为活跃
+            });
+        });
+    }
+
+    // 切换学生活跃状态
+    function toggleStudentActive(studentId, studentName) {
+        const index = morningReading.activeStudents.indexOf(studentId);
+        const ball = document.getElementById(`student-ball-${studentId}`);
+        const ballState = morningReading.balls.find(b => b.id === studentId);
+        
+        if (index === -1) {
+            // 标记为活跃
+            morningReading.activeStudents.push(studentId);
+            if (ball) ball.classList.add('active');
+            if (ballState) ballState.isActive = true;
+            
+            showGameMessage(`✓ ${studentName} 标记为早读活跃`);
+        } else {
+            // 取消活跃
+            morningReading.activeStudents.splice(index, 1);
+            if (ball) ball.classList.remove('active');
+            if (ballState) ballState.isActive = false;
+            
+            showGameMessage(`${studentName} 已取消早读活跃`);
+        }
+        
+        // 更新活跃学生计数
+        const activeStudentsElement = document.getElementById('activeStudents');
+        const morningReadingActiveElement = document.getElementById('morningReadingActive');
+        
+        if (activeStudentsElement) {
+            activeStudentsElement.textContent = morningReading.activeStudents.length;
+        }
+        if (morningReadingActiveElement) {
+            morningReadingActiveElement.textContent = morningReading.activeStudents.length;
+        }
+    }
+
+    // 重置所有活跃状态
+    function resetActiveStudents() {
+        morningReading.activeStudents = [];
+        morningReading.balls.forEach(ball => {
+            ball.element.classList.remove('active');
+            ball.isActive = false;
+        });
+        
+        // 更新活跃学生计数
+        const activeStudentsElement = document.getElementById('activeStudents');
+        const morningReadingActiveElement = document.getElementById('morningReadingActive');
+        
+        if (activeStudentsElement) {
+            activeStudentsElement.textContent = 0;
+        }
+        if (morningReadingActiveElement) {
+            morningReadingActiveElement.textContent = 0;
+        }
+        
+        showGameMessage('已重置所有活跃学生标记');
+    }
+
+    // 初始化声音可视化画布
+    function initSoundCanvas() {
+        const canvas = document.getElementById('soundCanvas');
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        
+        // 设置画布尺寸
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        
+        // 窗口大小改变时重新调整画布尺寸
+        window.addEventListener('resize', function() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        });
+    }
+
+    // 开始早读
+    async function startMorningReading() {
+        try {
+            // 请求麦克风权限
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                    echoCancellation: false,
+                    noiseSuppression: false,
+                    autoGainControl: false
+                } 
+            });
+            
+            // 创建音频上下文
+            morningReading.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            morningReading.analyser = morningReading.audioContext.createAnalyser();
+            
+            // 连接麦克风到分析器
+            morningReading.microphone = morningReading.audioContext.createMediaStreamSource(stream);
+            morningReading.microphone.connect(morningReading.analyser);
+            
+            // 配置分析器
+            morningReading.analyser.fftSize = 256;
+            morningReading.analyser.smoothingTimeConstant = 0.8;
+            
+            // 更新UI状态
+            const micStatus = document.getElementById('micStatus');
+            if (micStatus) {
+                micStatus.className = 'mic-status connected';
+                micStatus.innerHTML = '<i class="fas fa-microphone"></i> <span>麦克风已连接 - 早读进行中</span>';
+            }
+            
+            const startReadingBtn = document.getElementById('startReadingBtn');
+            const stopReadingBtn = document.getElementById('stopReadingBtn');
+            if (startReadingBtn) startReadingBtn.disabled = true;
+            if (stopReadingBtn) stopReadingBtn.disabled = false;
+            
+            morningReading.isActive = true;
+            morningReading.startTime = new Date();
+            morningReading.maxVolume = 0;
+            morningReading.currentVolume = 0;
+            
+            // 开始计时器
+            startReadingTimer();
+            
+            // 开始动画循环
+            morningReading.animationId = requestAnimationFrame(updateMorningReading);
+            
+            showGameMessage('早读模式已开始！请同学们大声朗读');
+            
+        } catch (error) {
+            console.error('无法访问麦克风:', error);
+            alert('无法访问麦克风，请检查权限设置。错误: ' + error.message);
+        }
+    }
+
+    // 停止早读
+    function stopMorningReading() {
+        if (morningReading.animationId) {
+            cancelAnimationFrame(morningReading.animationId);
+            morningReading.animationId = null;
+        }
+        
+        if (morningReading.timerInterval) {
+            clearInterval(morningReading.timerInterval);
+            morningReading.timerInterval = null;
+        }
+        
+        if (morningReading.audioContext) {
+            morningReading.audioContext.close();
+            morningReading.audioContext = null;
+        }
+        
+        // 更新UI状态
+        const micStatus = document.getElementById('micStatus');
+        if (micStatus) {
+            micStatus.className = 'mic-status disconnected';
+            micStatus.innerHTML = '<i class="fas fa-microphone-slash"></i> <span>麦克风未连接 - 点击"开始早读"按钮启用麦克风</span>';
+        }
+        
+        const startReadingBtn = document.getElementById('startReadingBtn');
+        const stopReadingBtn = document.getElementById('stopReadingBtn');
+        if (startReadingBtn) startReadingBtn.disabled = false;
+        if (stopReadingBtn) stopReadingBtn.disabled = true;
+        
+        morningReading.isActive = false;
+        
+        // 重置小球位置（让所有小球慢慢落到底部）
+        morningReading.balls.forEach(ball => {
+            ball.targetHeight = 0;
+        });
+        
+        showGameMessage('早读模式已停止');
+        
+        // 如果有活跃学生，询问是否给予积分奖励
+        if (morningReading.activeStudents.length > 0) {
+            if (confirm(`早读结束！有 ${morningReading.activeStudents.length} 名学生表现活跃，是否给予每人+1积分奖励？`)) {
+                awardMorningReadingBonus();
+            }
+        }
+    }
+
+    // 开始早读计时器
+    function startReadingTimer() {
+        morningReading.timerInterval = setInterval(function() {
+            if (morningReading.startTime) {
+                const readingTimeElement = document.getElementById('readingTime');
+                if (readingTimeElement) {
+                    const now = new Date();
+                    const diff = Math.floor((now - morningReading.startTime) / 1000);
+                    const minutes = Math.floor(diff / 60);
+                    const seconds = diff % 60;
+                    
+                    readingTimeElement.textContent = 
+                        `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }
+            }
+        }, 1000);
+    }
+
+    // 更新早读动画
+    function updateMorningReading() {
+        if (!morningReading.isActive || !morningReading.analyser) {
+            return;
+        }
+        
+        // 获取音频数据
+        const dataArray = new Uint8Array(morningReading.analyser.frequencyBinCount);
+        morningReading.analyser.getByteFrequencyData(dataArray);
+        
+        // 计算平均音量
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+            sum += dataArray[i];
+        }
+        let averageVolume = sum / dataArray.length;
+        
+        // 应用灵敏度设置
+        const normalizedVolume = averageVolume * (morningReading.sensitivity / 50);
+        
+        // 更新当前音量
+        morningReading.currentVolume = normalizedVolume;
+        
+        // 更新最大音量
+        if (normalizedVolume > morningReading.maxVolume) {
+            morningReading.maxVolume = normalizedVolume;
+            const maxVolumeElement = document.getElementById('maxVolume');
+            if (maxVolumeElement) {
+                maxVolumeElement.textContent = Math.round(morningReading.maxVolume);
+            }
+        }
+        
+        // 更新当前音量显示
+        const currentVolumeElement = document.getElementById('currentVolume');
+        if (currentVolumeElement) {
+            currentVolumeElement.textContent = Math.round(normalizedVolume);
+        }
+        
+        // 更新小球跳动
+        updateBouncingBalls(normalizedVolume);
+        
+        // 更新声音可视化
+        updateSoundVisualization(dataArray);
+        
+        // 继续动画循环
+        morningReading.animationId = requestAnimationFrame(updateMorningReading);
+    }
+
+    // 更新小球跳动 - 重新设计
+    function updateBouncingBalls(volume) {
+        const container = document.getElementById('bouncingBallsContainer');
+        if (!container) return;
+        
+        const containerHeight = container.offsetHeight;
+        const maxJumpHeight = containerHeight * 0.8; // 最大跳跃高度为容器高度的80%
+        
+        // 根据音量计算目标高度（0-1之间的值）
+        const targetHeightRatio = Math.min(volume / 255, 1);
+        
+        // 为每个小球设置目标高度，并添加一些随机性使跳动更自然
+        morningReading.balls.forEach((ball, index) => {
+            // 添加一些随机性，使小球跳动不完全一致
+            const randomFactor = 0.8 + (Math.sin(Date.now() / 1000 + index) * 0.4);
+            const individualHeightRatio = targetHeightRatio * randomFactor;
+            
+            // 计算目标高度
+            ball.targetHeight = individualHeightRatio * maxJumpHeight;
+            
+            // 应用物理模拟（弹簧效果）
+            const acceleration = (ball.targetHeight - ball.currentHeight) * 0.1;
+            ball.speed += acceleration;
+            ball.speed *= 0.9; // 阻尼
+            ball.currentHeight += ball.speed;
+            
+            // 确保高度不为负
+            if (ball.currentHeight < 0) {
+                ball.currentHeight = 0;
+                ball.speed = 0;
+            }
+            
+            // 更新小球位置
+            ball.element.style.bottom = `${ball.currentHeight + 10}px`;
+            
+            // 活跃的小球稍微放大
+            if (ball.isActive) {
+                ball.element.style.transform = `translateX(-50%) scale(1.3)`;
+            } else {
+                ball.element.style.transform = `translateX(-50%) scale(1)`;
+            }
+        });
+    }
+
+    // 更新声音可视化
+    function updateSoundVisualization(dataArray) {
+        const canvas = document.getElementById('soundCanvas');
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        // 清除画布
+        ctx.clearRect(0, 0, width, height);
+        
+        // 绘制频谱
+        const barWidth = width / dataArray.length;
+        
+        for (let i = 0; i < dataArray.length; i++) {
+            const barHeight = (dataArray[i] / 255) * height;
+            const x = i * barWidth;
+            const y = height - barHeight;
+            
+            // 创建渐变颜色
+            const gradient = ctx.createLinearGradient(0, y, 0, height);
+            gradient.addColorStop(0, `rgba(255, 64, 129, ${dataArray[i] / 255})`);
+            gradient.addColorStop(1, `rgba(255, 64, 129, ${dataArray[i] / 500})`);
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(x, y, barWidth - 1, barHeight);
+        }
+        
+        // 绘制音量线
+        const averageVolume = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+        const lineHeight = (averageVolume / 255) * height;
+        
+        ctx.beginPath();
+        ctx.moveTo(0, height - lineHeight);
+        ctx.lineTo(width, height - lineHeight);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
+
+    // 给予早读奖励
+    function awardMorningReadingBonus() {
+        let bonusCount = 0;
+        
+        morningReading.activeStudents.forEach(studentId => {
+            const student = students.find(s => s.id === studentId);
+            if (student) {
+                student.score += 1;
+                addHistoryRecord(studentId, 1, '早读活跃奖励');
+                bonusCount++;
+            }
+        });
+        
+        // 更新数据
+        saveData();
+        renderStudentTable();
+        renderRanking();
+        
+        // 清空活跃学生列表
+        resetActiveStudents();
+        
+        showGameMessage(`已为 ${bonusCount} 名早读活跃学生添加积分奖励！`);
+    }
+
+    // 初始化早读模式
+    function initMorningReading() {
+        // 渲染46个彩色小球
+        renderBouncingBalls();
+        
+        // 设置事件监听器
+        setupMorningReadingListeners();
+        
+        // 初始化声音可视化画布
+        initSoundCanvas();
+    }
+
+    // ============================================
+    // 导出数据功能
+    // ============================================
+
+    // 导出数据
+    function exportData() {
+        const data = {
+            students: students,
+            history: history,
+            homeworkHistory: homeworkHistory,
+            gameState: gameState,
+            settings: settings,
+            exchangeHistory: exchangeHistory,
+            traditionalPrizes: traditionalPrizes,
+            exportDate: new Date().toISOString()
+        };
+        
+        const dataStr = JSON.stringify(data, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `720班积分系统_备份_${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        alert('数据导出成功！');
+    }
+
+    // 从文件加载数据
+    function loadFromFile(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    resolve(importedData);
+                } catch (error) {
+                    reject(new Error('文件格式不正确！'));
+                }
+            };
+            reader.onerror = function() {
+                reject(new Error('读取文件失败！'));
+            };
+            reader.readAsText(file);
+        });
+    }
+
+    // ============================================
+    // 事件监听器设置
+    // ============================================
+
+    // 设置游戏事件监听器
+    function setupGameEventListeners() {
+        // 科目选择按钮
+        document.querySelectorAll('.subject-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const subject = this.dataset.subject;
+                switchSubject(subject);
+            });
+        });
+        
+        // 开始游戏按钮
+        const startHomeworkGameBtn = document.getElementById('startHomeworkGame');
+        if (startHomeworkGameBtn) {
+            startHomeworkGameBtn.addEventListener('click', startHomeworkGame);
+        }
+        
+        // 重置当前科目按钮
+        const resetCurrentSubjectBtn = document.getElementById('resetCurrentSubject');
+        if (resetCurrentSubjectBtn) {
+            resetCurrentSubjectBtn.addEventListener('click', resetCurrentSubject);
+        }
+        
+        // 重置所有科目按钮
+        const resetAllSubjectsBtn = document.getElementById('resetAllSubjects');
+        if (resetAllSubjectsBtn) {
+            resetAllSubjectsBtn.addEventListener('click', resetAllSubjects);
+        }
+    }
 
     // 设置兑换事件监听器（修改版）
     function setupExchangeEventListeners() {
@@ -3697,6 +5027,600 @@
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
                     closePrizeManagement();
+                }
+            });
+        }
+    }
+
+    // 设置早读事件监听器
+    function setupMorningReadingListeners() {
+        // 开始早读按钮
+        const startReadingBtn = document.getElementById('startReadingBtn');
+        if (startReadingBtn) {
+            startReadingBtn.addEventListener('click', startMorningReading);
+        }
+        
+        // 停止早读按钮
+        const stopReadingBtn = document.getElementById('stopReadingBtn');
+        if (stopReadingBtn) {
+            stopReadingBtn.addEventListener('click', stopMorningReading);
+        }
+        
+        // 全屏按钮
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        if (fullscreenBtn) {
+            fullscreenBtn.addEventListener('click', function() {
+                const morningReadingTab = document.getElementById('morning-reading');
+                
+                if (!document.fullscreenElement) {
+                    if (morningReadingTab.requestFullscreen) {
+                        morningReadingTab.requestFullscreen();
+                    } else if (morningReadingTab.webkitRequestFullscreen) {
+                        morningReadingTab.webkitRequestFullscreen();
+                    } else if (morningReadingTab.msRequestFullscreen) {
+                        morningReadingTab.msRequestFullscreen();
+                    }
+                    
+                    morningReadingTab.classList.add('fullscreen');
+                    this.innerHTML = '<i class="fas fa-compress"></i> 退出全屏';
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                    
+                    morningReadingTab.classList.remove('fullscreen');
+                    this.innerHTML = '<i class="fas fa-expand"></i> 全屏模式';
+                }
+            });
+        }
+        
+        // 重置活跃按钮
+        const resetActiveBtn = document.getElementById('resetActiveBtn');
+        if (resetActiveBtn) {
+            resetActiveBtn.addEventListener('click', resetActiveStudents);
+        }
+        
+        // 灵敏度滑块
+        const sensitivitySlider = document.getElementById('sensitivitySlider');
+        if (sensitivitySlider) {
+            sensitivitySlider.addEventListener('input', function() {
+                morningReading.sensitivity = this.value;
+            });
+        }
+        
+        // 全屏变化监听
+        document.addEventListener('fullscreenchange', function() {
+            const morningReadingTab = document.getElementById('morning-reading');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            
+            if (!document.fullscreenElement) {
+                if (morningReadingTab) morningReadingTab.classList.remove('fullscreen');
+                if (fullscreenBtn) fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i> 全屏模式';
+            }
+        });
+        
+        // 窗口大小变化时重新布局小球
+        window.addEventListener('resize', function() {
+            const morningReadingTab = document.getElementById('morning-reading');
+            if (morningReadingTab && morningReadingTab.classList.contains('active')) {
+                renderBouncingBalls();
+            }
+        });
+    }
+
+    // 设置主事件监听器
+    function setupEventListeners() {
+        // 导航栏切换
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                
+                // 如果切换离开早读模式，停止早读
+                if (tabId !== 'morning-reading' && morningReading.isActive) {
+                    stopMorningReading();
+                }
+                
+                // 移除所有活动状态
+                document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // 激活当前标签
+                this.classList.add('active');
+                const tabContent = document.getElementById(tabId);
+                if (tabContent) {
+                    tabContent.classList.add('active');
+                }
+                
+                // 如果是早读模式，确保小球布局正确
+                if (tabId === 'morning-reading') {
+                    setTimeout(() => {
+                        renderBouncingBalls();
+                    }, 100);
+                }
+                
+                // 如果是历史记录页面，刷新历史记录
+                if (tabId === 'history') {
+                    renderHistory();
+                }
+                
+                // 如果是排行榜页面，刷新排行榜
+                if (tabId === 'ranking') {
+                    renderRanking();
+                }
+                
+                // 如果是兑换页面，刷新兑换数据
+                if (tabId === 'points-exchange') {
+                    updateExchangeBalance();
+                    populateExchangeStudentSelect();
+                    renderExchangeHistory();
+                }
+            });
+        });
+        
+        // 快速操作按钮（扣分项和加分项）
+        document.querySelectorAll('.quick-action-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const reason = this.getAttribute('data-reason');
+                const change = parseInt(this.getAttribute('data-change'));
+                
+                const reasonTextarea = document.getElementById('reason');
+                if (reasonTextarea) {
+                    reasonTextarea.value = reason;
+                }
+                
+                const pointsChangeInput = document.getElementById('pointsChange');
+                if (pointsChangeInput) {
+                    pointsChangeInput.value = Math.abs(change);
+                }
+                
+                // 自动选择学生选择框
+                if (change > 0) {
+                    const addPointsBtn = document.getElementById('addPointsBtn');
+                    if (addPointsBtn) addPointsBtn.click();
+                } else {
+                    const subtractPointsBtn = document.getElementById('subtractPointsBtn');
+                    if (subtractPointsBtn) subtractPointsBtn.click();
+                }
+            });
+        });
+        
+        // 表格中的快速加减分
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.quick-add')) {
+                const button = e.target.closest('.quick-add');
+                const studentId = parseInt(button.getAttribute('data-id'));
+                const change = parseInt(button.getAttribute('data-change'));
+                
+                const student = students.find(s => s.id === studentId);
+                if (student) {
+                    const reason = prompt(`为 ${student.name} 加 ${change} 分，请输入原因：`, '好人好事');
+                    if (reason !== null) {
+                        student.score += change;
+                        addHistoryRecord(studentId, change, reason);
+                        renderStudentTable();
+                        renderRanking();
+                    }
+                }
+            }
+            
+            if (e.target.closest('.quick-subtract')) {
+                const button = e.target.closest('.quick-subtract');
+                const studentId = parseInt(button.getAttribute('data-id'));
+                const change = parseInt(button.getAttribute('data-change'));
+                
+                const student = students.find(s => s.id === studentId);
+                if (student) {
+                    const reason = prompt(`为 ${student.name} 扣 ${change} 分，请输入原因：`, '不交作业');
+                    if (reason !== null) {
+                        student.score -= change;
+                        addHistoryRecord(studentId, -change, reason);
+                        renderStudentTable();
+                        renderRanking();
+                    }
+                }
+            }
+        });
+        
+        // 积分变动快捷按钮
+        document.querySelectorAll('.score-controls button[data-change]').forEach(button => {
+            button.addEventListener('click', function() {
+                const input = document.getElementById('pointsChange');
+                if (input) {
+                    const change = parseInt(this.getAttribute('data-change'));
+                    input.value = change;
+                }
+            });
+        });
+        
+        // 确认加分按钮
+        const addPointsBtn = document.getElementById('addPointsBtn');
+        if (addPointsBtn) {
+            addPointsBtn.addEventListener('click', function() {
+                const studentSelect = document.getElementById('studentSelect');
+                const pointsChange = document.getElementById('pointsChange');
+                const reason = document.getElementById('reason');
+                
+                const studentId = parseInt(studentSelect?.value || 0);
+                const change = parseInt(pointsChange?.value || 1);
+                const reasonText = reason?.value.trim() || '';
+                
+                if (!studentId) {
+                    alert('请选择学生！');
+                    return;
+                }
+                
+                if (change <= 0) {
+                    alert('加分值必须为正数！');
+                    return;
+                }
+                
+                if (!reasonText) {
+                    alert('请输入加分原因！');
+                    return;
+                }
+                
+                const student = students.find(s => s.id === studentId);
+                if (student) {
+                    student.score += change;
+                    addHistoryRecord(studentId, change, reasonText);
+                    populateStudentSelect();
+                    renderStudentTable();
+                    renderRanking();
+                    
+                    // 重置表单
+                    if (pointsChange) {
+                        pointsChange.value = 1;
+                    }
+                    if (reason) {
+                        reason.value = '';
+                    }
+                    
+                    alert(`已为 ${student.name} 加 ${change} 分！`);
+                }
+            });
+        }
+        
+        // 确认扣分按钮
+        const subtractPointsBtn = document.getElementById('subtractPointsBtn');
+        if (subtractPointsBtn) {
+            subtractPointsBtn.addEventListener('click', function() {
+                const studentSelect = document.getElementById('studentSelect');
+                const pointsChange = document.getElementById('pointsChange');
+                const reason = document.getElementById('reason');
+                
+                const studentId = parseInt(studentSelect?.value || 0);
+                const change = parseInt(pointsChange?.value || 1);
+                const reasonText = reason?.value.trim() || '';
+                
+                if (!studentId) {
+                    alert('请选择学生！');
+                    return;
+                }
+                
+                if (change <= 0) {
+                    alert('扣分值必须为正数！');
+                    return;
+                }
+                
+                if (!reasonText) {
+                    alert('请输入扣分原因！');
+                    return;
+                }
+                
+                const student = students.find(s => s.id === studentId);
+                if (student) {
+                    student.score -= change;
+                    addHistoryRecord(studentId, -change, reasonText);
+                    populateStudentSelect();
+                    renderStudentTable();
+                    renderRanking();
+                    
+                    // 重置表单
+                    if (pointsChange) {
+                        pointsChange.value = 1;
+                    }
+                    if (reason) {
+                        reason.value = '';
+                    }
+                    
+                    alert(`已为 ${student.name} 扣 ${change} 分！`);
+                }
+            });
+        }
+        
+        // 重置表单按钮
+        const resetFormBtn = document.getElementById('resetFormBtn');
+        if (resetFormBtn) {
+            resetFormBtn.addEventListener('click', function() {
+                const studentSelect = document.getElementById('studentSelect');
+                const pointsChange = document.getElementById('pointsChange');
+                const reason = document.getElementById('reason');
+                
+                if (studentSelect) studentSelect.value = '';
+                if (pointsChange) pointsChange.value = 1;
+                if (reason) reason.value = '';
+            });
+        }
+        
+        // 搜索框
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', renderStudentTable);
+        }
+        
+        // 历史记录过滤器
+        const historyFilter = document.getElementById('historyFilter');
+        if (historyFilter) {
+            historyFilter.addEventListener('change', renderHistory);
+        }
+        
+        // 本周不扣分奖励按钮
+        const applyWeekBonusBtn = document.getElementById('applyWeekBonus');
+        if (applyWeekBonusBtn) {
+            applyWeekBonusBtn.addEventListener('click', function() {
+                const allWeekCheck = document.getElementById('allWeekCheck');
+                const allWeekChecked = allWeekCheck ? allWeekCheck.checked : false;
+                let eligibleStudents = [];
+                
+                if (allWeekChecked) {
+                    eligibleStudents = students.filter(student => student.weekDeductions === 0);
+                } else {
+                    eligibleStudents = students;
+                }
+                
+                if (eligibleStudents.length === 0) {
+                    alert('没有符合条件的学生！');
+                    return;
+                }
+                
+                if (confirm(`确定要为 ${eligibleStudents.length} 名学生应用本周不扣分奖励吗？`)) {
+                    eligibleStudents.forEach(student => {
+                        student.score += 2;
+                        addHistoryRecord(student.id, 2, '本周不扣分奖励');
+                    });
+                    
+                    // 标记本周奖励已应用
+                    settings.lastWeekBonusApplied = new Date().toISOString();
+                    
+                    saveData();
+                    renderStudentTable();
+                    renderRanking();
+                    alert(`已为 ${eligibleStudents.length} 名学生添加本周不扣分奖励！`);
+                }
+            });
+        }
+        
+        // 重置本周扣分记录按钮
+        const resetWeekDeductionsBtn = document.getElementById('resetWeekDeductions');
+        if (resetWeekDeductionsBtn) {
+            resetWeekDeductionsBtn.addEventListener('click', function() {
+                if (confirm('确定要重置本周扣分记录吗？这将把所有学生的本周扣分计数清零。')) {
+                    resetWeekDeductions();
+                    saveData();
+                    renderStudentTable();
+                    alert('本周扣分记录已重置！');
+                }
+            });
+        }
+        
+        // 清空所有积分按钮
+        const clearAllPointsBtn = document.getElementById('clearAllPoints');
+        if (clearAllPointsBtn) {
+            clearAllPointsBtn.addEventListener('click', function() {
+                if (confirm('确定要清空所有学生的积分吗？此操作不可撤销！')) {
+                    students.forEach(student => {
+                        student.score = 0;
+                        student.weekDeductions = 0;
+                        student.homeworkBonus = 0;
+                    });
+                    
+                    history = [];
+                    homeworkHistory = [];
+                    exchangeHistory = [];
+                    settings.todayChanges = 0;
+                    settings.todayHomeworkBonus = 0;
+                    settings.totalHomeworkBonus = 0;
+                    
+                    // 重置所有科目游戏状态
+                    const subjects = ["语文", "数学", "英语", "科学", "社会", "道法"];
+                    subjects.forEach(subject => {
+                        gameState.subjects[subject].completedStudents = [];
+                        gameState.subjects[subject].subjectBonus = 0;
+                        gameState.subjects[subject].isActive = false;
+                    });
+                    
+                    // 重置奖品库存
+                    const initialPrizes = [
+                        { id: 1, name: "月饼", description: "传统广式月饼，莲蓉蛋黄口味", cost: 10, icon: "fas fa-moon", category: "pastry", stock: 20 },
+                        { id: 2, name: "麻花", description: "天津麻花，香脆可口", cost: 5, icon: "fas fa-cookie-bite", category: "pastry", stock: 30 },
+                        { id: 3, name: "龙须酥", description: "传统手工龙须酥，入口即化", cost: 8, icon: "fas fa-cloud", category: "pastry", stock: 15 },
+                        { id: 4, name: "绿豆糕", description: "清凉解暑，口感细腻", cost: 6, icon: "fas fa-leaf", category: "pastry", stock: 25 },
+                        { id: 5, name: "花生糖", description: "香甜酥脆，传统手工制作", cost: 4, icon: "fas fa-candy-cane", category: "candy", stock: 40 },
+                        { id: 6, name: "芝麻糖", description: "芝麻香气浓郁，甜而不腻", cost: 5, icon: "fas fa-seedling", category: "candy", stock: 35 },
+                        { id: 7, name: "冰糖葫芦", description: "山楂冰糖葫芦，酸甜可口", cost: 7, icon: "fas fa-apple-alt", category: "candy", stock: 20 },
+                        { id: 8, name: "瓜子", description: "五香瓜子，休闲必备", cost: 3, icon: "fas fa-seedling", category: "nut", stock: 50 },
+                        { id: 9, name: "核桃仁", description: "椒盐核桃仁，营养丰富", cost: 8, icon: "fas fa-tree", category: "nut", stock: 25 },
+                        { id: 10, name: "炒花生", description: "盐炒花生，香脆美味", cost: 4, icon: "fas fa-peanut", category: "nut", stock: 40 },
+                        { id: 11, name: "杏仁", description: "甜杏仁，健康零食", cost: 7, icon: "fas fa-seedling", category: "nut", stock: 30 },
+                        { id: 12, name: "桂花糕", description: "传统桂花糕，清香软糯", cost: 9, icon: "fas fa-birthday-cake", category: "pastry", stock: 20 },
+                        { id: 13, name: "酸梅汤", description: "传统酸梅汤，消暑解渴", cost: 6, icon: "fas fa-glass-whiskey", category: "drink", stock: 25 },
+                        { id: 14, name: "姜糖", description: "驱寒暖胃，传统姜糖", cost: 5, icon: "fas fa-fire", category: "candy", stock: 30 },
+                        { id: 15, name: "茯苓饼", description: "北京特产茯苓饼", cost: 8, icon: "fas fa-cookie", category: "pastry", stock: 20 },
+                        { id: 16, name: "大麦茶", description: "传统大麦茶，香气浓郁", cost: 4, icon: "fas fa-mug-hot", category: "drink", stock: 35 }
+                    ];
+                    
+                    traditionalPrizes = initialPrizes;
+                    
+                    saveData();
+                    renderStudentTable();
+                    renderStudentGrid();
+                    renderSubjectProgressSummary();
+                    updateGameStats();
+                    updateSubjectProgress();
+                    renderHistory();
+                    renderRanking();
+                    renderPrizeGrid();
+                    renderExchangeHistory();
+                    alert('所有积分已清空！');
+                }
+            });
+        }
+        
+        // 导出数据按钮
+        const exportDataBtn = document.getElementById('exportDataBtn');
+        if (exportDataBtn) {
+            exportDataBtn.addEventListener('click', exportData);
+        }
+        
+        // 导入数据按钮
+        const importDataBtn = document.getElementById('importDataBtn');
+        const importFileInput = document.getElementById('importFile');
+        if (importDataBtn && importFileInput) {
+            importDataBtn.addEventListener('click', function() {
+                importFileInput.click();
+            });
+            
+            importFileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                loadFromFile(file).then(importedData => {
+                    if (confirm('确定要导入数据吗？这将覆盖当前所有数据！')) {
+                        if (importedData.students) students = importedData.students;
+                        if (importedData.history) history = importedData.history;
+                        if (importedData.homeworkHistory) homeworkHistory = importedData.homeworkHistory;
+                        if (importedData.gameState) gameState = importedData.gameState;
+                        if (importedData.settings) settings = importedData.settings;
+                        if (importedData.exchangeHistory) exchangeHistory = importedData.exchangeHistory;
+                        if (importedData.traditionalPrizes) {
+                            traditionalPrizes = importedData.traditionalPrizes;
+                        }
+                        
+                        saveData();
+                        renderStudentTable();
+                        populateStudentSelect();
+                        populateExchangeStudentSelect();
+                        renderStudentGrid();
+                        renderSubjectProgressSummary();
+                        updateGameStats();
+                        updateSubjectProgress();
+                        renderHistory();
+                        renderRanking();
+                        renderDataStats();
+                        renderPrizeGrid();
+                        renderExchangeHistory();
+                        
+                        alert('数据导入成功！');
+                    }
+                }).catch(error => {
+                    alert(error.message);
+                });
+                
+                // 重置文件输入
+                importFileInput.value = '';
+            });
+        }
+        
+        // 重置游戏数据按钮
+        const resetGameDataBtn = document.getElementById('resetGameDataBtn');
+        if (resetGameDataBtn) {
+            resetGameDataBtn.addEventListener('click', function() {
+                if (confirm('确定要重置游戏数据吗？这将重置所有科目的游戏进度，但学生积分保持不变。')) {
+                    const subjects = ["语文", "数学", "英语", "科学", "社会", "道法"];
+                    subjects.forEach(subject => {
+                        gameState.subjects[subject].completedStudents = [];
+                        gameState.subjects[subject].subjectBonus = 0;
+                        gameState.subjects[subject].isActive = false;
+                    });
+                    
+                    gameState.currentSubject = "英语";
+                    
+                    saveData();
+                    renderStudentGrid();
+                    renderSubjectProgressSummary();
+                    updateGameStats();
+                    updateSubjectProgress();
+                    
+                    alert('游戏数据已重置！');
+                }
+            });
+        }
+        
+        // 重置所有数据按钮
+        const resetAllDataBtn = document.getElementById('resetAllDataBtn');
+        if (resetAllDataBtn) {
+            resetAllDataBtn.addEventListener('click', function() {
+                if (confirm('确定要重置所有数据吗？这将恢复系统到初始状态，所有数据将被清空！')) {
+                    students = JSON.parse(JSON.stringify(initialStudents));
+                    history = [];
+                    homeworkHistory = [];
+                    exchangeHistory = [];
+                    settings = getDefaultSettings();
+                    
+                    // 重置游戏状态
+                    gameState = getDefaultGameState();
+                    
+                    // 重置早读状态
+                    morningReading = {
+                        isActive: false,
+                        audioContext: null,
+                        analyser: null,
+                        microphone: null,
+                        animationId: null,
+                        startTime: null,
+                        timerInterval: null,
+                        maxVolume: 0,
+                        activeStudents: [],
+                        sensitivity: 50,
+                        currentVolume: 0,
+                        balls: [],
+                        colors: morningReading.colors // 保留颜色数组
+                    };
+                    
+                    // 重置奖品库存
+                    traditionalPrizes = [
+                        { id: 1, name: "月饼", description: "传统广式月饼，莲蓉蛋黄口味", cost: 10, icon: "fas fa-moon", category: "pastry", stock: 20 },
+                        { id: 2, name: "麻花", description: "天津麻花，香脆可口", cost: 5, icon: "fas fa-cookie-bite", category: "pastry", stock: 30 },
+                        { id: 3, name: "龙须酥", description: "传统手工龙须酥，入口即化", cost: 8, icon: "fas fa-cloud", category: "pastry", stock: 15 },
+                        { id: 4, name: "绿豆糕", description: "清凉解暑，口感细腻", cost: 6, icon: "fas fa-leaf", category: "pastry", stock: 25 },
+                        { id: 5, name: "花生糖", description: "香甜酥脆，传统手工制作", cost: 4, icon: "fas fa-candy-cane", category: "candy", stock: 40 },
+                        { id: 6, name: "芝麻糖", description: "芝麻香气浓郁，甜而不腻", cost: 5, icon: "fas fa-seedling", category: "candy", stock: 35 },
+                        { id: 7, name: "冰糖葫芦", description: "山楂冰糖葫芦，酸甜可口", cost: 7, icon: "fas fa-apple-alt", category: "candy", stock: 20 },
+                        { id: 8, name: "瓜子", description: "五香瓜子，休闲必备", cost: 3, icon: "fas fa-seedling", category: "nut", stock: 50 },
+                        { id: 9, name: "核桃仁", description: "椒盐核桃仁，营养丰富", cost: 8, icon: "fas fa-tree", category: "nut", stock: 25 },
+                        { id: 10, name: "炒花生", description: "盐炒花生，香脆美味", cost: 4, icon: "fas fa-peanut", category: "nut", stock: 40 },
+                        { id: 11, name: "杏仁", description: "甜杏仁，健康零食", cost: 7, icon: "fas fa-seedling", category: "nut", stock: 30 },
+                        { id: 12, name: "桂花糕", description: "传统桂花糕，清香软糯", cost: 9, icon: "fas fa-birthday-cake", category: "pastry", stock: 20 },
+                        { id: 13, name: "酸梅汤", description: "传统酸梅汤，消暑解渴", cost: 6, icon: "fas fa-glass-whiskey", category: "drink", stock: 25 },
+                        { id: 14, name: "姜糖", description: "驱寒暖胃，传统姜糖", cost: 5, icon: "fas fa-fire", category: "candy", stock: 30 },
+                        { id: 15, name: "茯苓饼", description: "北京特产茯苓饼", cost: 8, icon: "fas fa-cookie", category: "pastry", stock: 20 },
+                        { id: 16, name: "大麦茶", description: "传统大麦茶，香气浓郁", cost: 4, icon: "fas fa-mug-hot", category: "drink", stock: 35 }
+                    ];
+                    
+                    // 重置兑换选择
+                    selectedPrize = null;
+                    selectedStudentId = null;
+                    
+                    saveData();
+                    renderStudentTable();
+                    populateStudentSelect();
+                    populateExchangeStudentSelect();
+                    renderStudentGrid();
+                    renderSubjectProgressSummary();
+                    updateGameStats();
+                    updateSubjectProgress();
+                    renderHistory();
+                    renderRanking();
+                    renderDataStats();
+                    renderPrizeGrid();
+                    renderExchangeHistory();
+                    renderBouncingBalls();
+                    
+                    alert('所有数据已重置！');
                 }
             });
         }
