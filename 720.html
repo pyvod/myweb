@@ -2018,7 +2018,7 @@
             <div class="header-top">
                 <div class="header-info">
                     <h1><i class="fas fa-trophy"></i> 720班积分管理系统</h1>
-                    <div class="subtitle">2025学年第一学期 · 共46名学生 · 早读模式已就绪</div>
+                    <div class="subtitle">2025学年第一学期 · 共46名学生 · 云端存储已启用</div>
                 </div>
                 <div class="stats-summary">
                     <div class="stat-item">
@@ -2626,8 +2626,8 @@
         </div>
         
         <footer>
-            <p>720班积分管理系统 &copy; 2025 | 数据保存于本地文件，避免清除浏览器数据丢失</p>
-            <p style="font-size: 0.8rem; margin-top: 5px;">最后保存时间：<span id="lastSaveTime">-</span> | 今日作业奖励：<span id="homeworkBonusTodayFooter">0</span>次 | 早读活跃：<span id="morningReadingActive">0</span>人</p>
+            <p>720班积分管理系统 &copy; 2025 | 数据存储于腾讯云COS，云端同步</p>
+            <p style="font-size: 0.8rem; margin-top: 5px;">最后保存时间：<span id="lastSaveTime">-</span> | 今日作业奖励：<span id="homeworkBonusTodayFooter">0</span>次 | 早读活跃：<span id="morningReadingActive">0</span>人 | 存储状态：<span id="storageStatus">正在连接云端...</span></p>
         </footer>
     </div>
 
@@ -2789,25 +2789,11 @@
         try {
             console.log('开始上传数据到COS...');
             
-            // 创建要上传的数据对象
-            const allData = {
-                students: students,
-                history: history,
-                homeworkHistory: homeworkHistory,
-                exchangeHistory: exchangeHistory,
-                settings: settings,
-                gameState: gameState,
-                traditionalPrizes: traditionalPrizes,
-                morningReadingState: {
-                    activeStudents: morningReading.activeStudents,
-                    lastUpdate: new Date().toISOString()
-                }
-            };
+            // 更新最后保存时间
+            settings.lastUpdate = new Date().toLocaleString('zh-CN');
+            settings.lastCosSync = new Date().toISOString();
             
-            // 上传到单个文件（也可以分文件上传，这里使用单个文件简化）
-            await uploadToCOS('all_data.json', allData);
-            
-            // 同时保持分文件上传（可选）
+            // 上传所有文件到COS
             await Promise.all([
                 uploadToCOS(COS_FILES.STUDENTS, students),
                 uploadToCOS(COS_FILES.HISTORY, history),
@@ -2822,12 +2808,28 @@
                 })
             ]);
             
+            // 同时上传一个合并的文件，便于备份
+            const allData = {
+                students: students,
+                history: history,
+                homeworkHistory: homeworkHistory,
+                exchangeHistory: exchangeHistory,
+                settings: settings,
+                gameState: gameState,
+                traditionalPrizes: traditionalPrizes,
+                morningReadingState: {
+                    activeStudents: morningReading.activeStudents,
+                    lastUpdate: new Date().toISOString()
+                },
+                exportDate: new Date().toISOString()
+            };
+            
+            await uploadToCOS('all_data.json', allData);
+            
             console.log('所有数据上传到COS成功');
-            showGameMessage('数据已同步到云端');
             return true;
         } catch (error) {
             console.error('上传数据到COS失败:', error);
-            showGameMessage('云端同步失败，数据保存到本地');
             return false;
         }
     }
@@ -2837,13 +2839,16 @@
         try {
             console.log('开始从COS加载数据...');
             
-            // 尝试从单个文件加载
+            // 首先尝试加载合并文件
             const allData = await downloadFromCOS('all_data.json');
             if (allData) {
+                console.log('从合并文件加载数据成功');
                 return allData;
             }
             
-            // 如果单个文件不存在，尝试从分文件加载
+            console.log('合并文件不存在，尝试加载分文件...');
+            
+            // 如果合并文件不存在，尝试从分文件加载
             const [
                 cosStudents,
                 cosHistory,
@@ -2907,10 +2912,10 @@
     }
 
     // ============================================
-    // 数据存储与初始化（修改版）
+    // 数据存储与初始化
     // ============================================
 
-    // 初始学生数据（保持不变）
+    // 初始学生数据
     const initialStudents = [
         { id: 1, name: "刘嘉琪", score: 0, weekDeductions: 0, homeworkBonus: 0 },
         { id: 2, name: "张邹奕辕", score: 0, weekDeductions: 0, homeworkBonus: 0 },
@@ -3014,6 +3019,9 @@
     let selectedPrize = null;
     let selectedStudentId = null;
 
+    // 自动保存定时器
+    let autoSaveInterval = null;
+
     // ============================================
     // 核心工具函数
     // ============================================
@@ -3049,55 +3057,51 @@
     }
 
     // ============================================
-    // 数据管理函数（修改版）
+    // 数据管理函数（完全使用COS）
     // ============================================
 
-    // 保存数据（同时保存到本地和COS）
+    // 保存数据（只保存到COS）
     async function saveData() {
         try {
             // 更新设置
             settings.lastUpdate = new Date().toLocaleString('zh-CN');
+            settings.lastCosSync = new Date().toISOString();
             
-            // 保存到本地存储
-            localStorage.setItem('class720_students', JSON.stringify(students));
-            localStorage.setItem('class720_history', JSON.stringify(history));
-            localStorage.setItem('class720_homework', JSON.stringify(homeworkHistory));
-            localStorage.setItem('class720_exchange', JSON.stringify(exchangeHistory));
-            localStorage.setItem('class720_settings', JSON.stringify(settings));
-            localStorage.setItem('class720_gameState', JSON.stringify(gameState));
-            localStorage.setItem('class720_prizes', JSON.stringify(traditionalPrizes));
-            localStorage.setItem('class720_morningReading', JSON.stringify({
-                activeStudents: morningReading.activeStudents
-            }));
+            // 只上传到 COS
+            const success = await uploadAllDataToCOS();
             
-            // 更新页面
-            updateStatistics();
-            updateLastSaveTime();
-            renderRanking();
-            renderDataStats();
-            
-            // 尝试上传到COS
-            await uploadAllDataToCOS();
-            
-            return true;
+            if (success) {
+                // 更新页面
+                updateStatistics();
+                updateLastSaveTime();
+                updateStorageStatus('云端同步成功');
+                
+                console.log('数据保存到COS成功');
+                return true;
+            } else {
+                console.error('保存到COS失败');
+                updateStorageStatus('云端同步失败');
+                return false;
+            }
         } catch (error) {
             console.error('保存数据失败:', error);
+            updateStorageStatus('保存失败: ' + error.message);
             return false;
         }
     }
 
-    // 从本地和COS加载数据
+    // 从COS加载数据
     async function loadData() {
         try {
-            console.log('开始加载数据...');
+            console.log('开始从COS加载数据...');
             
-            // 首先尝试从COS加载
+            // 从 COS 加载数据
             const cosData = await loadAllDataFromCOS();
             
             if (cosData) {
                 console.log('从COS加载数据成功');
                 
-                // 使用COS数据
+                // 使用 COS 数据
                 students = cosData.students || JSON.parse(JSON.stringify(initialStudents));
                 history = cosData.history || [];
                 homeworkHistory = cosData.homeworkHistory || [];
@@ -3110,34 +3114,37 @@
                     morningReading.activeStudents = cosData.morningReadingState.activeStudents || [];
                 }
                 
+                // 检查数据完整性
+                validateData();
+                
+                console.log('数据加载完成');
+                updateStorageStatus('云端连接正常');
+                return true;
+                
             } else {
-                console.log('COS无数据，从本地存储加载');
+                console.log('COS 无数据，使用初始数据');
                 
-                // 从本地存储加载
-                students = JSON.parse(localStorage.getItem('class720_students')) || JSON.parse(JSON.stringify(initialStudents));
-                history = JSON.parse(localStorage.getItem('class720_history')) || [];
-                homeworkHistory = JSON.parse(localStorage.getItem('class720_homework')) || [];
-                exchangeHistory = JSON.parse(localStorage.getItem('class720_exchange')) || [];
-                settings = JSON.parse(localStorage.getItem('class720_settings')) || getDefaultSettings();
-                gameState = JSON.parse(localStorage.getItem('class720_gameState')) || getDefaultGameState();
-                traditionalPrizes = JSON.parse(localStorage.getItem('class720_prizes')) || traditionalPrizes;
+                // 使用初始数据
+                students = JSON.parse(JSON.stringify(initialStudents));
+                history = [];
+                homeworkHistory = [];
+                exchangeHistory = [];
+                settings = getDefaultSettings();
+                gameState = getDefaultGameState();
+                traditionalPrizes = traditionalPrizes;
+                morningReading.activeStudents = [];
                 
-                const morningReadingData = JSON.parse(localStorage.getItem('class720_morningReading'));
-                if (morningReadingData) {
-                    morningReading.activeStudents = morningReadingData.activeStudents || [];
-                }
+                // 立即保存初始数据到 COS
+                await saveData();
+                
+                updateStorageStatus('使用初始数据');
+                return false;
             }
             
-            // 检查数据完整性
-            validateData();
-            
-            console.log('数据加载完成');
-            return true;
-            
         } catch (error) {
-            console.error('加载数据失败:', error);
+            console.error('从COS加载数据失败:', error);
             
-            // 加载失败时使用默认数据
+            // 加载失败时使用初始数据
             students = JSON.parse(JSON.stringify(initialStudents));
             history = [];
             homeworkHistory = [];
@@ -3147,6 +3154,7 @@
             traditionalPrizes = traditionalPrizes;
             morningReading.activeStudents = [];
             
+            updateStorageStatus('云端连接失败，使用初始数据');
             return false;
         }
     }
@@ -3162,7 +3170,7 @@
             lastWeekBonusApplied: null,
             todayHomeworkBonus: 0,
             totalHomeworkBonus: 0,
-            cosEnabled: false,
+            cosEnabled: true,
             lastCosSync: null
         };
     }
@@ -3228,6 +3236,56 @@
         const lastSaveTimeElement = document.getElementById('lastSaveTime');
         if (lastSaveTimeElement) {
             lastSaveTimeElement.textContent = settings.lastUpdate || '-';
+        }
+    }
+
+    // 更新存储状态显示
+    function updateStorageStatus(status) {
+        const storageStatusElement = document.getElementById('storageStatus');
+        if (storageStatusElement) {
+            storageStatusElement.textContent = status;
+            
+            // 根据状态设置颜色
+            if (status.includes('成功') || status.includes('正常')) {
+                storageStatusElement.style.color = '#4caf50';
+            } else if (status.includes('失败')) {
+                storageStatusElement.style.color = '#f44336';
+            } else {
+                storageStatusElement.style.color = '#ff9800';
+            }
+        }
+    }
+
+    // ============================================
+    // 自动保存功能
+    // ============================================
+
+    // 启动自动保存
+    function startAutoSave() {
+        // 清除已有定时器
+        if (autoSaveInterval) {
+            clearInterval(autoSaveInterval);
+        }
+        
+        // 每30秒自动保存一次
+        autoSaveInterval = setInterval(async () => {
+            try {
+                await saveData();
+                console.log('自动保存完成');
+            } catch (error) {
+                console.error('自动保存失败:', error);
+            }
+        }, 30000); // 30秒
+        
+        console.log('自动保存已启动');
+    }
+
+    // 停止自动保存
+    function stopAutoSave() {
+        if (autoSaveInterval) {
+            clearInterval(autoSaveInterval);
+            autoSaveInterval = null;
+            console.log('自动保存已停止');
         }
     }
 
@@ -3693,6 +3751,7 @@
         // 更新当日变动计数
         settings.todayChanges = (settings.todayChanges || 0) + 1;
         
+        // 立即保存到COS
         saveData();
         renderHistory();
     }
@@ -3722,7 +3781,7 @@
         settings.totalHomeworkBonus = (settings.totalHomeworkBonus || 0) + 1;
         settings.todayChanges = (settings.todayChanges || 0) + 1;
         
-        // 保存数据
+        // 立即保存到COS
         saveData();
         
         return student.name;
@@ -3852,7 +3911,7 @@
             // 重新渲染科目进度总结
             renderSubjectProgressSummary();
             
-            // 保存数据
+            // 保存数据到COS
             saveData();
             
             showGameMessage(`${currentSubject}科目游戏已重置`);
@@ -3880,7 +3939,7 @@
             // 重新渲染科目进度总结
             renderSubjectProgressSummary();
             
-            // 保存数据
+            // 保存数据到COS
             saveData();
             
             showGameMessage('所有科目游戏已重置');
@@ -3891,7 +3950,7 @@
     // 奖品管理系统
     // ============================================
 
-    // 获取分类名称（保持不变）
+    // 获取分类名称
     function getCategoryName(category) {
         const categoryNames = {
             "candy": "糖果糕点",
@@ -4071,7 +4130,7 @@
             });
         }
         
-        // 保存数据
+        // 保存数据到COS
         saveData();
         
         // 更新UI
@@ -4104,7 +4163,7 @@
                 clearExchangeSelection();
             }
             
-            // 保存数据
+            // 保存数据到COS
             saveData();
             
             // 更新UI
@@ -4238,10 +4297,10 @@
     }
 
     // ============================================
-    // 积分兑换功能（修改版）
+    // 积分兑换功能
     // ============================================
 
-    // 执行兑换（修改版，使用prize而不是snack）
+    // 执行兑换
     function performExchange() {
         if (!selectedPrize || !selectedStudentId) {
             alert('请选择奖品和学生！');
@@ -4291,7 +4350,7 @@
             // 添加积分变动记录
             addHistoryRecord(student.id, -prize.cost, `兑换${prize.name}`);
             
-            // 保存数据
+            // 保存数据到COS
             saveData();
             
             // 更新页面
@@ -4311,7 +4370,7 @@
         }
     }
 
-    // 更新兑换摘要（修改版）
+    // 更新兑换摘要
     function updateExchangeSummary() {
         if (!selectedPrize) return;
         
@@ -4423,7 +4482,7 @@
         });
     }
 
-    // 初始化兑换功能（修改版）
+    // 初始化兑换功能
     function initExchange() {
         renderPrizeGrid();
         renderExchangeHistory();
@@ -4871,8 +4930,10 @@
             }
         });
         
-        // 更新数据
+        // 保存数据到COS
         saveData();
+        
+        // 更新页面
         renderStudentTable();
         renderRanking();
         
@@ -4978,7 +5039,7 @@
         }
     }
 
-    // 设置兑换事件监听器（修改版）
+    // 设置兑换事件监听器
     function setupExchangeEventListeners() {
         // 分类标签切换
         document.querySelectorAll('.category-btn').forEach(btn => {
@@ -5386,6 +5447,7 @@
                     // 标记本周奖励已应用
                     settings.lastWeekBonusApplied = new Date().toISOString();
                     
+                    // 保存到COS
                     saveData();
                     renderStudentTable();
                     renderRanking();
@@ -5400,6 +5462,7 @@
             resetWeekDeductionsBtn.addEventListener('click', function() {
                 if (confirm('确定要重置本周扣分记录吗？这将把所有学生的本周扣分计数清零。')) {
                     resetWeekDeductions();
+                    // 保存到COS
                     saveData();
                     renderStudentTable();
                     alert('本周扣分记录已重置！');
@@ -5455,6 +5518,7 @@
                     
                     traditionalPrizes = initialPrizes;
                     
+                    // 保存到COS
                     saveData();
                     renderStudentTable();
                     renderStudentGrid();
@@ -5500,6 +5564,7 @@
                             traditionalPrizes = importedData.traditionalPrizes;
                         }
                         
+                        // 保存到COS
                         saveData();
                         renderStudentTable();
                         populateStudentSelect();
@@ -5539,6 +5604,7 @@
                     
                     gameState.currentSubject = "英语";
                     
+                    // 保存到COS
                     saveData();
                     renderStudentGrid();
                     renderSubjectProgressSummary();
@@ -5605,6 +5671,7 @@
                     selectedPrize = null;
                     selectedStudentId = null;
                     
+                    // 保存到COS
                     saveData();
                     renderStudentTable();
                     populateStudentSelect();
@@ -5624,10 +5691,20 @@
                 }
             });
         }
+        
+        // 添加网络状态监听
+        window.addEventListener('online', () => {
+            showGameMessage('网络已恢复，正在同步数据...');
+            saveData();
+        });
+        
+        window.addEventListener('offline', () => {
+            showGameMessage('网络已断开，操作将不会被保存');
+        });
     }
 
     // ============================================
-    // 初始化函数（修改版）
+    // 初始化函数
     // ============================================
 
     // 主初始化函数
@@ -5635,56 +5712,94 @@
         try {
             console.log('系统初始化开始...');
             
+            // 更新存储状态
+            updateStorageStatus('正在连接云端...');
+            
             // 测试COS连接
             const cosConnected = await testCOSConnection();
             if (cosConnected) {
                 console.log('COS连接成功');
                 settings.cosEnabled = true;
                 settings.lastCosSync = new Date().toISOString();
+                
+                // 从COS加载数据
+                await loadData();
+                
+                // 检查日期重置
+                checkDateReset();
+                
+                // 初始化UI
+                updateLastSaveTime();
+                updateStatistics();
+                updateGameStats();
+                updateSubjectProgress();
+                renderStudentTable();
+                populateStudentSelect();
+                populateExchangeStudentSelect();
+                renderHistory();
+                renderRanking();
+                renderDataStats();
+                
+                // 初始化各功能模块
+                renderStudentGrid();
+                renderSubjectProgressSummary();
+                setupGameEventListeners();
+                initMorningReading();
+                initExchange();
+                
+                // 设置事件监听器
+                setupEventListeners();
+                
+                // 启动自动保存
+                startAutoSave();
+                
+                // 更新早读活跃人数显示
+                const morningReadingActiveElement = document.getElementById('morningReadingActive');
+                if (morningReadingActiveElement) {
+                    morningReadingActiveElement.textContent = morningReading.activeStudents.length;
+                }
+                
+                console.log('系统初始化完成');
+                showGameMessage('系统已就绪（云端存储）');
+                
             } else {
-                console.log('COS连接失败，使用本地存储');
-                settings.cosEnabled = false;
+                console.log('COS连接失败');
+                updateStorageStatus('云端连接失败');
+                
+                // 使用初始数据
+                students = JSON.parse(JSON.stringify(initialStudents));
+                settings = getDefaultSettings();
+                gameState = getDefaultGameState();
+                
+                // 初始化基础UI
+                updateLastSaveTime();
+                updateStatistics();
+                updateGameStats();
+                updateSubjectProgress();
+                renderStudentTable();
+                populateStudentSelect();
+                populateExchangeStudentSelect();
+                renderHistory();
+                renderRanking();
+                renderDataStats();
+                
+                // 初始化各功能模块
+                renderStudentGrid();
+                renderSubjectProgressSummary();
+                setupGameEventListeners();
+                initMorningReading();
+                initExchange();
+                
+                // 设置事件监听器
+                setupEventListeners();
+                
+                console.log('系统初始化完成（离线模式）');
+                showGameMessage('系统已就绪（离线模式，无法保存数据）');
             }
-            
-            // 加载数据
-            await loadData();
-            
-            // 检查日期重置
-            checkDateReset();
-            
-            // 初始化UI
-            updateLastSaveTime();
-            updateStatistics();
-            updateGameStats();
-            updateSubjectProgress();
-            renderStudentTable();
-            populateStudentSelect();
-            populateExchangeStudentSelect();
-            renderHistory();
-            renderRanking();
-            renderDataStats();
-            
-            // 初始化各功能模块
-            renderStudentGrid();
-            renderSubjectProgressSummary();
-            setupGameEventListeners();
-            initMorningReading();
-            initExchange();
-            
-            // 设置事件监听器
-            setupEventListeners();
-            
-            // 更新早读活跃人数显示
-            const morningReadingActiveElement = document.getElementById('morningReadingActive');
-            if (morningReadingActiveElement) {
-                morningReadingActiveElement.textContent = morningReading.activeStudents.length;
-            }
-            
-            console.log('系统初始化完成');
-            showGameMessage('系统已就绪' + (settings.cosEnabled ? '（云端同步已启用）' : '（使用本地存储）'));
             
         } catch (error) {
             console.error('初始化失败:', error);
+            updateStorageStatus('初始化失败');
             alert('系统初始化失败，请刷新页面重试');
         }
     }
@@ -5695,6 +5810,12 @@
 
     // 当DOM内容加载完成后初始化页面
     document.addEventListener('DOMContentLoaded', initialize);
+    
+    // 页面卸载前保存
+    window.addEventListener('beforeunload', async (event) => {
+        event.preventDefault();
+        await saveData();
+    });
     </script>
 </body>
 </html>
