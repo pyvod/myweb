@@ -2307,25 +2307,25 @@
                                         <span class="probability-label">一等奖：</span>
                                         <input type="range" min="0" max="100" value="5" class="probability-slider" data-level="1">
                                         <span class="probability-value">5%</span>
-                                        <span class="probability-points">+50积分</span>
+                                        <span class="probability-points">+10积分</span>
                                     </div>
                                     <div class="probability-item">
                                         <span class="probability-label">二等奖：</span>
                                         <input type="range" min="0" max="100" value="10" class="probability-slider" data-level="2">
                                         <span class="probability-value">10%</span>
-                                        <span class="probability-points">+20积分</span>
+                                        <span class="probability-points">+5积分</span>
                                     </div>
                                     <div class="probability-item">
                                         <span class="probability-label">三等奖：</span>
                                         <input type="range" min="0" max="100" value="20" class="probability-slider" data-level="3">
                                         <span class="probability-value">20%</span>
-                                        <span class="probability-points">+10积分</span>
+                                        <span class="probability-points">+2积分</span>
                                     </div>
                                     <div class="probability-item">
                                         <span class="probability-label">幸运奖：</span>
                                         <input type="range" min="0" max="100" value="30" class="probability-slider" data-level="4">
                                         <span class="probability-value">30%</span>
-                                        <span class="probability-points">+5积分</span>
+                                        <span class="probability-points">+1积分</span>
                                     </div>
                                     <div class="probability-item">
                                         <span class="probability-label">谢谢参与：</span>
@@ -2438,19 +2438,19 @@
                             <div class="wheel-legend">
                                 <div class="legend-item level-1">
                                     <div class="legend-color"></div>
-                                    <div class="legend-text">一等奖 +50积分</div>
+                                    <div class="legend-text">一等奖 +10积分</div>
                                 </div>
                                 <div class="legend-item level-2">
                                     <div class="legend-color"></div>
-                                    <div class="legend-text">二等奖 +20积分</div>
+                                    <div class="legend-text">二等奖 +5积分</div>
                                 </div>
                                 <div class="legend-item level-3">
                                     <div class="legend-color"></div>
-                                    <div class="legend-text">三等奖 +10积分</div>
+                                    <div class="legend-text">三等奖 +2积分</div>
                                 </div>
                                 <div class="legend-item level-4">
                                     <div class="legend-color"></div>
-                                    <div class="legend-text">幸运奖 +5积分</div>
+                                    <div class="legend-text">幸运奖 +1积分</div>
                                 </div>
                                 <div class="legend-item level-0">
                                     <div class="legend-color"></div>
@@ -2627,10 +2627,10 @@
                         <h4>积分抽奖规则</h4>
                         <ul>
                             <li>每次抽奖消耗10积分（可调整）</li>
-                            <li>一等奖：+50积分（概率可调）</li>
-                            <li>二等奖：+20积分（概率可调）</li>
-                            <li>三等奖：+10积分（概率可调）</li>
-                            <li>幸运奖：+5积分（概率可调）</li>
+                            <li>一等奖：+10积分（概率可调）</li>
+                            <li>二等奖：+5积分（概率可调）</li>
+                            <li>三等奖：+2积分（概率可调）</li>
+                            <li>幸运奖：+1积分（概率可调）</li>
                             <li>谢谢参与：0积分</li>
                             <li>教师可随时调整中奖概率和抽奖成本（需要密码）</li>
                         </ul>
@@ -3168,7 +3168,7 @@
     // 抽奖系统数据
     // ============================================
     const LOTTERY_CONFIG = {
-        currentCost: 10,  // 每次抽奖消耗积分
+        currentCost: 2,  // 每次抽奖消耗积分
         probabilities: {
             level1: 5,    // 一等奖概率
             level2: 10,   // 二等奖概率
@@ -3177,10 +3177,10 @@
             level0: 35    // 谢谢参与概率
         },
         prizes: {
-            level1: { name: "一等奖", points: 50, color: "#e91e63" },
-            level2: { name: "二等奖", points: 20, color: "#9c27b0" },
-            level3: { name: "三等奖", points: 10, color: "#3f51b5" },
-            level4: { name: "幸运奖", points: 5, color: "#03a9f4" },
+            level1: { name: "一等奖", points: 10, color: "#e91e63" },
+            level2: { name: "二等奖", points: 5, color: "#9c27b0" },
+            level3: { name: "三等奖", points: 2, color: "#3f51b5" },
+            level4: { name: "幸运奖", points: 1, color: "#03a9f4" },
             level0: { name: "谢谢参与", points: 0, color: "#9e9e9e" }
         },
         lotteryHistory: [],  // 抽奖历史记录
