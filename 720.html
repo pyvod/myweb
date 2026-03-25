@@ -993,26 +993,6 @@
             background-color: #e0e0e0;
         }
         
-        .snack-card.candy .category-badge {
-            background-color: #ffcdd2;
-            color: #c62828;
-        }
-        
-        .snack-card.pastry .category-badge {
-            background-color: #fff9c4;
-            color: #f57f17;
-        }
-        
-        .snack-card.nut .category-badge {
-            background-color: #d7ccc8;
-            color: #5d4037;
-        }
-        
-        .snack-card.drink .category-badge {
-            background-color: #bbdefb;
-            color: #1565c0;
-        }
-        
         .exchange-form {
             margin-bottom: 25px;
         }
@@ -2112,6 +2092,13 @@
                             </button>
                             <button class="btn btn-outline quick-action-btn" data-reason="在厕所扔垃圾" data-change="-5">
                                 <i class="fas fa-trash-alt"></i> 厕所扔垃圾 -5
+                            </button>
+                            <!-- 新增全班批量扣分按钮 -->
+                            <button class="btn btn-outline quick-action-btn all-deduct-btn" data-deduct="1">
+                                <i class="fas fa-users-slash"></i> 所有同学扣1分
+                            </button>
+                            <button class="btn btn-outline quick-action-btn all-deduct-btn" data-deduct="2">
+                                <i class="fas fa-users-slash"></i> 所有同学扣2分
                             </button>
                         </div>
                     </div>
@@ -4403,7 +4390,7 @@
                     <th style="padding: 10px; text-align: left;">库存</th>
                     <th style="padding: 10px; text-align: left;">分类</th>
                     <th style="padding: 10px; text-align: left;">操作</th>
-                </tr>
+                 </tr>
             </thead>
             <tbody>
                 ${traditionalPrizes.map(prize => `
@@ -4416,16 +4403,16 @@
                                     <div style="font-size: 0.8rem; color: #666;">${prize.description}</div>
                                 </div>
                             </div>
-                        </td>
+                         </td>
                         <td style="padding: 10px; font-weight: bold; color: #ff9800;">${prize.cost}</td>
                         <td style="padding: 10px;">
                             <span style="padding: 3px 8px; background-color: ${prize.stock > 10 ? '#e8f5e9' : (prize.stock > 0 ? '#fff3e0' : '#ffebee')}; border-radius: 4px; color: ${prize.stock > 10 ? '#2e7d32' : (prize.stock > 0 ? '#f57c00' : '#c62828')};">
                                 ${prize.stock}
                             </span>
-                        </td>
+                         </td>
                         <td style="padding: 10px;">
                             <span class="category-badge">${getCategoryName(prize.category)}</span>
-                        </td>
+                         </td>
                         <td style="padding: 10px;">
                             <div style="display: flex; gap: 5px;">
                                 <button class="btn-edit" data-id="${prize.id}" style="padding: 5px 10px; background-color: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer;">
@@ -4435,8 +4422,8 @@
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
-                        </td>
-                    </tr>
+                         </td>
+                     </tr>
                 `).join('')}
             </tbody>
         `;
@@ -5498,6 +5485,68 @@
     }
 
     // ============================================
+    // 新增：全班批量扣分功能
+    // ============================================
+    async function deductAllStudents(points) {
+        if (!students || students.length === 0) return;
+        const confirmMsg = `确定要对全班 ${students.length} 名学生各扣 ${points} 分吗？共扣除 ${students.length * points} 积分，每位学生积分减少 ${points} 分。`;
+        if (!confirm(confirmMsg)) return;
+        
+        const reasonText = `全班统一扣分（每人扣${points}分）`;
+        const now = new Date().toISOString();
+        const newHistoryRecords = [];
+        let maxId = history.length > 0 ? Math.max(...history.map(h => h.id || 0)) : 0;
+        
+        for (let student of students) {
+            // 扣分
+            student.score -= points;
+            // 更新本周扣分累计（扣分正数）
+            student.weekDeductions += points;
+            // 构建历史记录
+            maxId++;
+            newHistoryRecords.push({
+                id: maxId,
+                studentId: student.id,
+                studentName: student.name,
+                change: -points,
+                reason: reasonText,
+                timestamp: now
+            });
+        }
+        // 批量添加历史记录到最前
+        history.unshift(...newHistoryRecords);
+        // 限制历史记录数量
+        if (history.length > 500) history = history.slice(0, 500);
+        // 更新今日变动次数
+        settings.todayChanges = (settings.todayChanges || 0) + students.length;
+        // 刷新界面
+        renderStudentTable();
+        renderRanking();
+        updateStatistics();
+        renderHistory();
+        populateStudentSelect();
+        updateExchangeBalance();
+        await saveData();
+        showGameMessage(`已为全体 ${students.length} 名学生各扣 ${points} 分`);
+    }
+
+    // 绑定批量扣分按钮
+    function bindAllDeductButtons() {
+        const btns = document.querySelectorAll('.all-deduct-btn');
+        btns.forEach(btn => {
+            btn.removeEventListener('click', handleAllDeduct);
+            btn.addEventListener('click', handleAllDeduct);
+        });
+    }
+
+    function handleAllDeduct(e) {
+        const deductVal = parseInt(e.currentTarget.getAttribute('data-deduct'));
+        if (!isNaN(deductVal) && deductVal > 0) {
+            deductAllStudents(deductVal);
+        }
+    }
+
+    // ============================================
     // 事件监听器设置
     // ============================================
 
@@ -5766,6 +5815,8 @@
         
         // 快速操作按钮（扣分项和加分项）
         document.querySelectorAll('.quick-action-btn').forEach(button => {
+            // 跳过批量扣分按钮（它们有单独的class all-deduct-btn，且没有data-change属性）
+            if (button.classList.contains('all-deduct-btn')) return;
             button.addEventListener('click', function() {
                 const reason = this.getAttribute('data-reason');
                 const change = parseInt(this.getAttribute('data-change'));
@@ -6269,6 +6320,9 @@
                 }
             });
         }
+        
+        // 绑定批量扣分按钮
+        bindAllDeductButtons();
     }
 
     // ============================================
