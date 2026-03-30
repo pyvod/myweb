@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>720班积分管理系统 · 电子宠物盲盒版</title>
+    <title>720班积分管理系统 · 慢养成宠物版（2分喂养）</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/cos-js-sdk-v5/dist/cos-js-sdk-v5.min.js"></script>
     <style>
+        /* 完整样式（与上一版相同，确保所有功能正常） */
         :root {
             --primary-color: #4a6fa5;
             --secondary-color: #6b8cbc;
@@ -97,14 +98,13 @@
         .history-item.negative { background-color: rgba(220,53,69,0.05); border-left: 4px solid var(--danger-color); }
         .history-item.homework { background-color: rgba(23,162,184,0.05); border-left: 4px solid var(--info-color); }
         
-        /* 作业消消乐完整样式 */
+        /* 作业消消乐样式 */
         .homework-game { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); padding: 20px; border-radius: 15px; margin-bottom: 20px; }
         .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
         .game-title { display: flex; align-items: center; gap: 15px; color: #2e7d32; }
         .subject-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; justify-content: center; }
         .subject-btn { padding: 12px 20px; font-size: 1rem; border: 3px solid transparent; transition: all 0.3s; border-radius: var(--border-radius); background: white; cursor: pointer; font-weight: 500; }
         .subject-btn.active { border-color: #2e7d32; transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); background: #f1f8e9; }
-        .subject-progress { position: absolute; bottom: -5px; left: 0; height: 5px; background-color: #4caf50; border-radius: 0 0 3px 3px; transition: width 0.3s; }
         .game-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-box { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .stat-box-value { font-size: 1.8rem; font-weight: bold; color: var(--primary-color); }
@@ -151,7 +151,7 @@
         <div class="header-top">
             <div class="header-info">
                 <h1><i class="fas fa-trophy"></i> 720班积分管理系统</h1>
-                <div class="subtitle">2025学年第一学期 · 共46名学生 · 云端存储已启用 · 电子宠物盲盒版</div>
+                <div class="subtitle">2025学年第一学期 · 共46名学生 · 云端存储已启用 · 慢养成宠物版（2分喂养）</div>
             </div>
             <div class="stats-summary">
                 <div class="stat-item"><span class="stat-value" id="totalPoints">0</span><span class="stat-label">总积分</span></div>
@@ -174,7 +174,7 @@
     </header>
     
     <div class="main-content">
-        <!-- 学生列表 - 网格卡片 -->
+        <!-- 学生列表 -->
         <div class="tab-content active" id="student-list">
             <div class="card">
                 <h3 class="card-title"><i class="fas fa-users"></i> 学生列表</h3>
@@ -187,39 +187,12 @@
         <div class="tab-content" id="add-points">
             <div class="card">
                 <h3 class="card-title"><i class="fas fa-plus-minus"></i> 积分操作</h3>
-                <div class="input-group">
-                    <label for="studentSelect">选择学生</label>
-                    <select id="studentSelect"><option>请选择学生</option></select>
-                </div>
-                <div class="input-group">
-                    <label>扣分项</label>
-                    <div class="quick-actions" id="quickDeduct"></div>
-                </div>
-                <div class="input-group">
-                    <label>加分项</label>
-                    <div class="quick-actions" id="quickAdd"></div>
-                </div>
-                <div class="input-group">
-                    <label for="pointsChange">自定义积分变动</label>
-                    <div class="score-controls">
-                        <button class="btn btn-outline btn-sm" data-change="-5">-5</button>
-                        <button class="btn btn-outline btn-sm" data-change="-2">-2</button>
-                        <button class="btn btn-outline btn-sm" data-change="-1">-1</button>
-                        <input type="number" id="pointsChange" value="1" min="-50" max="50" style="width: 80px; text-align: center;">
-                        <button class="btn btn-outline btn-sm" data-change="1">+1</button>
-                        <button class="btn btn-outline btn-sm" data-change="2">+2</button>
-                        <button class="btn btn-outline btn-sm" data-change="5">+5</button>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="reason">变动原因</label>
-                    <textarea id="reason" rows="3" placeholder="请输入加分/扣分原因..."></textarea>
-                </div>
-                <div class="form-actions">
-                    <button class="btn btn-success" id="addPointsBtn"><i class="fas fa-plus-circle"></i> 确认加分</button>
-                    <button class="btn btn-danger" id="subtractPointsBtn"><i class="fas fa-minus-circle"></i> 确认扣分</button>
-                    <button class="btn btn-outline" id="resetFormBtn"><i class="fas fa-redo"></i> 重置</button>
-                </div>
+                <div class="input-group"><label for="studentSelect">选择学生</label><select id="studentSelect"><option>请选择学生</option></select></div>
+                <div class="input-group"><label>扣分项</label><div class="quick-actions" id="quickDeduct"></div></div>
+                <div class="input-group"><label>加分项</label><div class="quick-actions" id="quickAdd"></div></div>
+                <div class="input-group"><label>自定义积分变动</label><div class="score-controls"><button class="btn btn-outline btn-sm" data-change="-5">-5</button><button class="btn btn-outline btn-sm" data-change="-2">-2</button><button class="btn btn-outline btn-sm" data-change="-1">-1</button><input type="number" id="pointsChange" value="1" min="-50" max="50" style="width:80px;text-align:center;"><button class="btn btn-outline btn-sm" data-change="1">+1</button><button class="btn btn-outline btn-sm" data-change="2">+2</button><button class="btn btn-outline btn-sm" data-change="5">+5</button></div></div>
+                <div class="input-group"><label>变动原因</label><textarea id="reason" rows="3" placeholder="请输入加分/扣分原因..."></textarea></div>
+                <div class="form-actions"><button class="btn btn-success" id="addPointsBtn"><i class="fas fa-plus-circle"></i> 确认加分</button><button class="btn btn-danger" id="subtractPointsBtn"><i class="fas fa-minus-circle"></i> 确认扣分</button><button class="btn btn-outline" id="resetFormBtn"><i class="fas fa-redo"></i> 重置</button></div>
             </div>
         </div>
         
@@ -248,12 +221,12 @@
             </div>
         </div>
         
-        <!-- 电子宠物（盲盒版） -->
+        <!-- 电子宠物（2分喂养，慢养成） -->
         <div class="tab-content" id="pet">
             <div class="card">
-                <h3 class="card-title"><i class="fas fa-dog"></i> 电子宠物 · 离线不挨饿（周末不计饥饿）· 成年形态随机开盲盒</h3>
+                <h3 class="card-title"><i class="fas fa-dog"></i> 电子宠物 · 慢养成（每次喂养2分）</h3>
                 <div style="background:#e8f0fe; padding:12px; border-radius:12px; margin-bottom:20px;">
-                    <i class="fas fa-info-circle"></i> 宠物不会死亡，长期不喂会降级！<strong>周末（周六、周日）不计饥饿值</strong>。当幼崽进化到成年时，将随机变成🐟 鱼或🐔 鸡，如同开盲盒！两种成年宠物属性略有差异。
+                    <i class="fas fa-info-circle"></i> 每次喂养仅需2积分，但需要长期坚持！蛋→幼崽→成年（随机鱼或鸡），每阶段约需4~5次喂养。周末不计饥饿，工作日缓慢掉饥饿。让学生用每天的积分慢慢培养宠物，更有成就感！
                 </div>
                 <div class="pet-grid" id="petGrid"></div>
             </div>
@@ -278,11 +251,7 @@
         
         <!-- 积分历史 -->
         <div class="tab-content" id="history">
-            <div class="card">
-                <h3 class="card-title"><i class="fas fa-history"></i> 积分历史</h3>
-                <div class="input-group"><select id="historyFilter"><option value="all">全部记录</option><option value="today">今日记录</option><option value="week">本周记录</option><option value="positive">加分记录</option><option value="negative">扣分记录</option><option value="homework">作业奖励记录</option></select></div>
-                <div id="historyList"></div>
-            </div>
+            <div class="card"><h3 class="card-title"><i class="fas fa-history"></i> 积分历史</h3><select id="historyFilter"><option value="all">全部记录</option><option value="today">今日记录</option><option value="week">本周记录</option><option value="positive">加分记录</option><option value="negative">扣分记录</option><option value="homework">作业奖励记录</option></select><div id="historyList"></div></div>
         </div>
         
         <!-- 排行榜 -->
@@ -302,7 +271,7 @@
         <!-- 积分规则 -->
         <div class="tab-content" id="rules">
             <div class="card"><h3 class="card-title"><i class="fas fa-sliders-h"></i> 积分规则</h3>
-                <div><h4>加分规则</h4><ul><li>参与学校活动：+1分</li><li>获奖：+2分</li><li>好人好事：+3分</li><li>提前完成作业：+1分</li><li>作业消消乐：每完成一科作业 +1分</li><li>本周无扣分记录：+2分</li></ul><h4>扣分规则</h4><ul><li>垃圾分类不当：-1分</li><li>打扫卫生不及时：-1分</li><li>不交作业：-1分</li><li>抄作业：-2分</li><li>排队讲话：-1分</li><li>队伍不整齐：-1分</li><li>上课睡觉：-1分</li><li>上课吃零食：-1分</li><li>眼保健操不认真做：-2分</li><li>在厕所聚集：-5分</li><li>在厕所扔垃圾：-5分</li></ul><h4>作业消消乐规则</h4><ul><li>每个科目独立计算进度</li><li>点击学生卡片即可标记为完成该科目作业</li><li>每完成一科作业，学生获得+1分</li><li>所有学生完成当前科目后，可切换其他科目</li></ul><h4>电子宠物盲盒规则</h4><ul><li>蛋（🥚）→ 幼崽（🐣）→ 成年（🐟 或 🐔）随机</li><li>成年形态在进化时随机决定，一旦确定永久不变</li><li>鱼：喂食成本7分，饥饿速度0.8/小时；鸡：喂食成本9分，饥饿速度0.6/小时</li><li>周末不扣饥饿，长期不喂会降级</li></ul></div>
+                <div><h4>电子宠物慢养成规则（2分喂养）</h4><ul><li>蛋：喂食2分，+10饱腹度，初始50，需4次喂食进化（共8分）</li><li>幼崽：喂食2分，+10饱腹度，进化后重置为50，需4次喂食进化（共8分）</li><li>成年：随机鱼/鸡，鱼2分/次，鸡3分/次（更耐饿），饱腹度重置为50</li><li>自然饥饿速度：蛋1.5/小时，幼崽1.2/小时，鱼1.0/小时，鸡0.7/小时</li><li>周末不扣饥饿，长期不喂会降级</li><li>养成一只成年宠物约需20~30分，每天赚5分需4~6天，让学生享受慢慢培养的乐趣！</li></ul><h4>其他规则</h4><ul><li>作业消消乐：每完成一科 +1分</li><li>本周无扣分奖励：+2分</li><li>扣分规则：-1至-5分不等</li></ul></div>
             </div>
         </div>
     </div>
@@ -328,25 +297,27 @@
     const subjects = ["语文","数学","英语","科学","社会","道法"];
     subjects.forEach(sub => { gameState.subjects[sub] = { completedStudents: [], subjectBonus: 0, isActive: false }; });
     
-    // 宠物等级配置 (0蛋,1幼崽)
+    // 宠物等级配置（2分喂养，慢养成）
     const PET_LEVELS = {
-        0: { name:"蛋", icon:"fas fa-egg", feedCost:3, feedGain:30, hungerDecayPerHour:2.0, evolveThreshold:80, evolveTo:1, badge:"badge-egg" },
-        1: { name:"幼崽", icon:"fas fa-seedling", feedCost:5, feedGain:25, hungerDecayPerHour:1.2, evolveThreshold:80, evolveTo:2, badge:"badge-baby" }
+        0: { name:"蛋", icon:"fas fa-egg", feedCost:2, feedGain:10, hungerDecayPerHour:1.5, evolveThreshold:90, evolveTo:1, badge:"badge-egg" },
+        1: { name:"幼崽", icon:"fas fa-seedling", feedCost:2, feedGain:10, hungerDecayPerHour:1.2, evolveThreshold:90, evolveTo:2, badge:"badge-baby" }
     };
-    // 成年形态配置（两种盲盒）
+    // 成年形态配置（两种盲盒，属性差异）
     const ADULT_PETS = {
-        fish: { name:"鱼", icon:"fas fa-fish", feedCost:7, feedGain:20, hungerDecayPerHour:0.8, evolveThreshold:90, evolveTo:null, badge:"badge-adult-fish" },
-        chicken: { name:"鸡", icon:"fas fa-drumstick-bite", feedCost:9, feedGain:20, hungerDecayPerHour:0.6, evolveThreshold:90, evolveTo:null, badge:"badge-adult-chicken" }
+        fish: { name:"鱼", icon:"fas fa-fish", feedCost:2, feedGain:10, hungerDecayPerHour:1.0, evolveThreshold:90, evolveTo:null, badge:"badge-adult-fish" },
+        chicken: { name:"鸡", icon:"fas fa-drumstick-bite", feedCost:3, feedGain:10, hungerDecayPerHour:0.7, evolveThreshold:90, evolveTo:null, badge:"badge-adult-chicken" }
     };
     const ADULT_TYPES = ['fish', 'chicken'];
     
     const MAX_HUNGER = 100;
-    const INIT_HUNGER = 70;
+    const INIT_HUNGER = 50;      // 蛋初始饱腹度
+    const BABY_RESET_HUNGER = 50; // 蛋进化到幼崽后重置为50
+    const ADULT_RESET_HUNGER = 50; // 幼崽进化到成年后重置为50
     
-    // 获取宠物配置（根据等级和成年类型）
+    // 获取宠物配置
     function getPetConfig(level, adultType) {
         if (level === 2) {
-            if (!adultType || !ADULT_PETS[adultType]) adultType = 'fish'; // 降级兼容
+            if (!adultType || !ADULT_PETS[adultType]) adultType = 'fish';
             return ADULT_PETS[adultType];
         }
         return PET_LEVELS[level];
@@ -483,19 +454,19 @@
         addHistoryRecord(sid, -config.feedCost, `喂食宠物(${config.name})`);
         let newHunger = p.hunger + config.feedGain;
         let evolved = false;
-        // 进化判定（只有等级0或1且达到阈值才能进化）
+        // 进化判定
         if (p.level < 2 && newHunger >= config.evolveThreshold) {
             if (p.level === 1) { // 幼崽进化到成年，随机开盲盒
                 const randomType = ADULT_TYPES[Math.floor(Math.random() * ADULT_TYPES.length)];
                 p.adultType = randomType;
                 p.level = 2;
-                newHunger = MAX_HUNGER - 10;
+                newHunger = ADULT_RESET_HUNGER;
                 evolved = true;
                 addHistoryRecord(sid, 0, `宠物进化到${ADULT_PETS[randomType].name}（盲盒开启！）`);
                 showGameMessage(`🎉 ${s.name}的宠物进化成了${ADULT_PETS[randomType].name}！`);
             } else if (p.level === 0) { // 蛋进化到幼崽
                 p.level = 1;
-                newHunger = MAX_HUNGER - 10;
+                newHunger = BABY_RESET_HUNGER;
                 evolved = true;
                 addHistoryRecord(sid, 0, `宠物进化到幼崽`);
                 showGameMessage(`${s.name}的宠物破壳啦！现在是幼崽形态~`);
@@ -529,14 +500,14 @@
                     <div class="pet-hunger-bar"><div class="pet-hunger-fill" style="width:${percent}%; background:${percent<20?'#f44336':(percent<50?'#ff9800':'#4caf50')}"></div></div>
                     <div class="pet-stats"><span>饥饿:${Math.floor(p.hunger)}/${MAX_HUNGER}</span><span>喂食:${config.feedCost}分</span></div>
                     <button class="pet-feed-btn" data-id="${s.id}" ${!canFeed?'disabled':''}><i class="fas fa-apple-alt"></i> 喂食</button>
-                    <div style="font-size:0.65rem;">周末不掉饥饿 | ${p.level===2?(p.adultType==='fish'?'🐟 鱼 吃得少但饿得快':'🐔 鸡 吃得多但持久'):''}</div>
+                    <div style="font-size:0.65rem;">周末不掉饥饿 | ${p.level===2?(p.adultType==='fish'?'🐟 鱼 便宜但饿得快':'🐔 鸡 贵但耐饿'):''}</div>
                 </div>
             `;
         });
         document.querySelectorAll('.pet-feed-btn').forEach(btn=>btn.addEventListener('click',()=>feedPet(parseInt(btn.dataset.id))));
     }
     
-    // 作业消消乐完整功能（与之前相同，略）
+    // 作业消消乐功能（与之前相同，略写核心）
     function renderHomeworkGrid() {
         const grid = document.getElementById('homeworkGrid');
         if(!grid) return;
@@ -652,7 +623,6 @@
         for(let s of students) {
             if(!pets[s.id]) pets[s.id] = { level:0, hunger:INIT_HUNGER, lastFeedTime:new Date().toISOString(), adultType:null };
             else {
-                // 兼容旧数据：如果宠物是成年但没有adultType，随机分配一个
                 if(pets[s.id].level === 2 && !pets[s.id].adultType) {
                     pets[s.id].adultType = ADULT_TYPES[Math.floor(Math.random() * ADULT_TYPES.length)];
                 }
