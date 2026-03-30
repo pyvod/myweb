@@ -21,462 +21,107 @@
             --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s ease;
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; }
+        body { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); color: #333; line-height: 1.6; min-height: 100vh; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 25px 30px; border-radius: var(--border-radius); margin-bottom: 25px; box-shadow: var(--box-shadow); position: relative; overflow: hidden; }
+        header::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; opacity: 0.2; z-index: 0; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; position: relative; z-index: 1; }
+        .header-info h1 { font-size: 2.2rem; margin-bottom: 5px; display: flex; align-items: center; gap: 15px; }
+        .header-info .subtitle { font-size: 1.1rem; opacity: 0.9; background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px; display: inline-block; }
+        .stats-summary { display: flex; gap: 25px; background: rgba(255,255,255,0.15); padding: 15px 25px; border-radius: var(--border-radius); flex-wrap: wrap; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .stat-item { text-align: center; min-width: 120px; }
+        .stat-value { font-size: 1.8rem; font-weight: bold; display: block; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .stat-label { font-size: 0.9rem; opacity: 0.85; margin-top: 5px; }
+        .navbar { display: flex; background-color: rgba(255,255,255,0.1); border-radius: var(--border-radius); overflow-x: auto; margin-top: 15px; padding: 5px; position: relative; z-index: 1; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .navbar::-webkit-scrollbar { height: 6px; }
+        .navbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .navbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
+        .nav-item { padding: 15px 25px; cursor: pointer; font-weight: 500; white-space: nowrap; border-bottom: 3px solid transparent; transition: var(--transition); display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.9); border-radius: 8px; margin: 0 2px; }
+        .nav-item:hover { background-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
+        .nav-item.active { background-color: rgba(255,255,255,0.2); border-bottom-color: white; color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .main-content { display: grid; grid-template-columns: 1fr; gap: 25px; }
+        .card { background: white; border-radius: var(--border-radius); box-shadow: var(--box-shadow); padding: 25px; margin-bottom: 25px; transition: var(--transition); border: 1px solid rgba(0,0,0,0.05); }
+        .card:hover { box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); }
+        .card-title { font-size: 1.4rem; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0; color: var(--primary-color); display: flex; align-items: center; gap: 10px; }
+        .card-title i { color: var(--secondary-color); background: rgba(74,111,165,0.1); padding: 8px; border-radius: 8px; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-content.active { display: block; }
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            color: #333;
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        /* 头部样式 */
-        header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 25px 30px;
-            border-radius: var(--border-radius);
-            margin-bottom: 25px;
-            box-shadow: var(--box-shadow);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-            opacity: 0.2;
-            z-index: 0;
-        }
-        
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .header-info h1 {
-            font-size: 2.2rem;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .header-info .subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 5px 15px;
-            border-radius: 20px;
-            display: inline-block;
-        }
-        
-        .stats-summary {
-            display: flex;
-            gap: 25px;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 15px 25px;
-            border-radius: var(--border-radius);
-            flex-wrap: wrap;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .stat-item {
-            text-align: center;
-            min-width: 120px;
-        }
-        
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            display: block;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.85;
-            margin-top: 5px;
-        }
-        
-        /* 导航栏样式 */
-        .navbar {
-            display: flex;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: var(--border-radius);
-            overflow-x: auto;
-            margin-top: 15px;
-            padding: 5px;
-            position: relative;
-            z-index: 1;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .navbar::-webkit-scrollbar {
-            height: 6px;
-        }
-        
-        .navbar::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-        
-        .navbar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-        }
-        
-        .nav-item {
-            padding: 15px 25px;
-            cursor: pointer;
-            font-weight: 500;
-            white-space: nowrap;
-            border-bottom: 3px solid transparent;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: rgba(255, 255, 255, 0.9);
-            border-radius: 8px;
-            margin: 0 2px;
-        }
-        
-        .nav-item:hover {
-            background-color: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-        }
-        
-        .nav-item.active {
-            background-color: rgba(255, 255, 255, 0.2);
-            border-bottom-color: white;
-            color: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        
-        /* 主要内容区域 */
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 25px;
-        }
-        
-        /* 卡片样式 */
-        .card {
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 25px;
-            margin-bottom: 25px;
-            transition: var(--transition);
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-        
-        .card:hover {
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-        }
-        
-        .card-title {
-            font-size: 1.4rem;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .card-title i {
-            color: var(--secondary-color);
-            background: rgba(74, 111, 165, 0.1);
-            padding: 8px;
-            border-radius: 8px;
-        }
-        
-        /* 标签页内容 */
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.3s ease-in;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        /* 学生列表样式 */
-        .search-box {
-            margin-bottom: 20px;
-        }
-        
-        #searchInput {
-            width: 100%;
-            padding: 12px 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-        
-        #searchInput:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-        }
-        
-        th {
-            background-color: var(--primary-color);
-            color: white;
-            font-weight: 600;
-            padding: 15px;
-            text-align: left;
-            position: sticky;
-            top: 0;
-        }
-        
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
-            transition: var(--transition);
-        }
-        
-        tr:hover td {
-            background-color: rgba(74, 111, 165, 0.05);
-        }
-        
-        tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .score-display {
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
+        /* 学生网格布局 */
+        .search-box { margin-bottom: 20px; }
+        #searchInput { width: 100%; padding: 12px 20px; border: 2px solid #e0e0e0; border-radius: var(--border-radius); font-size: 1rem; transition: var(--transition); }
+        #searchInput:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(74,111,165,0.2); }
+        .student-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; margin-top: 20px; }
+        .student-card { background: linear-gradient(135deg, #fff, #f8f9fa); border-radius: 16px; padding: 16px 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); transition: all 0.2s; border: 1px solid #e9ecef; text-align: center; }
+        .student-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); border-color: var(--primary-color); }
+        .student-name { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; color: #2c3e50; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .student-score { font-size: 1.4rem; font-weight: bold; color: var(--primary-color); margin: 8px 0; }
+        .student-badges { display: flex; justify-content: center; gap: 12px; font-size: 0.75rem; color: #6c757d; margin-bottom: 12px; }
+        .student-badges span { background: #f1f3f5; padding: 2px 8px; border-radius: 20px; }
+        .student-actions { display: flex; justify-content: center; gap: 12px; margin-top: 10px; }
+        .student-actions .btn-icon { width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: #f8f9fa; border: 1px solid #dee2e6; cursor: pointer; transition: all 0.2s; font-size: 1rem; }
+        .student-actions .btn-icon.add { color: var(--success-color); }
+        .student-actions .btn-icon.add:hover { background: var(--success-color); color: white; border-color: var(--success-color); }
+        .student-actions .btn-icon.sub { color: var(--danger-color); }
+        .student-actions .btn-icon.sub:hover { background: var(--danger-color); color: white; border-color: var(--danger-color); }
+        @media (max-width: 1200px) { .student-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 800px) { .student-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 600px) { .student-grid { grid-template-columns: repeat(2, 1fr); } }
         
         /* 按钮样式 */
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: 500;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
+        .btn { padding: 10px 20px; border: none; border-radius: var(--border-radius); cursor: pointer; font-weight: 500; transition: var(--transition); display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-sm { padding: 6px 12px; font-size: 0.9rem; }
+        .btn-success { background-color: var(--success-color); color: white; }
+        .btn-success:hover { background-color: #218838; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(40,167,69,0.3); }
+        .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn-danger:hover { background-color: #c82333; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(220,53,69,0.3); }
+        .btn-warning { background-color: var(--warning-color); color: #212529; }
+        .btn-warning:hover { background-color: #e0a800; transform: translateY(-2px); }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: #3a5a8c; transform: translateY(-2px); }
+        .btn-outline { background-color: transparent; border: 2px solid #e0e0e0; color: #555; }
+        .btn-outline:hover { border-color: var(--primary-color); color: var(--primary-color); background-color: rgba(74,111,165,0.05); transform: translateY(-2px); }
+        .score-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #555; }
+        select, textarea, input[type="number"], input[type="text"] { width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: var(--border-radius); font-size: 1rem; }
+        .quick-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .form-actions { display: flex; gap: 15px; margin-top: 25px; flex-wrap: wrap; }
+        .week-check { margin: 20px 0; display: flex; align-items: center; gap: 10px; background: #f8f9fa; padding: 15px; border-radius: var(--border-radius); }
         
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 0.9rem;
-        }
+        /* 历史记录 */
+        #historyList { max-height: 500px; overflow-y: auto; margin-top: 15px; border-radius: var(--border-radius); border: 1px solid #e0e0e0; }
+        .history-item { padding: 15px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .history-item.positive { background-color: rgba(40,167,69,0.05); border-left: 4px solid var(--success-color); }
+        .history-item.negative { background-color: rgba(220,53,69,0.05); border-left: 4px solid var(--danger-color); }
+        .history-item.homework { background-color: rgba(23,162,184,0.05); border-left: 4px solid var(--info-color); }
         
-        .btn-success {
-            background-color: var(--success-color);
-            color: white;
-        }
+        /* 作业消消乐完整样式 */
+        .homework-game { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); padding: 20px; border-radius: 15px; margin-bottom: 20px; }
+        .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .game-title { display: flex; align-items: center; gap: 15px; color: #2e7d32; }
+        .subject-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        .subject-btn { padding: 12px 20px; font-size: 1rem; border: 3px solid transparent; transition: all 0.3s; border-radius: var(--border-radius); background: white; cursor: pointer; font-weight: 500; }
+        .subject-btn.active { border-color: #2e7d32; transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); background: #f1f8e9; }
+        .subject-progress { position: absolute; bottom: -5px; left: 0; height: 5px; background-color: #4caf50; border-radius: 0 0 3px 3px; transition: width 0.3s; }
+        .game-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-box { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .stat-box-value { font-size: 1.8rem; font-weight: bold; color: var(--primary-color); }
+        .student-grid-homework { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; max-height: 500px; overflow-y: auto; padding: 10px; background: rgba(255,255,255,0.7); border-radius: 10px; min-height: 300px; }
+        .homework-student-card { background: white; border-radius: 10px; padding: 15px 10px; text-align: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 2px solid transparent; }
+        .homework-student-card:hover { transform: translateY(-3px); border-color: #4caf50; }
+        .homework-student-card.completed { background: #c8e6c9; opacity: 0.7; text-decoration: line-through; pointer-events: none; }
+        .subject-progress-summary { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px; background: white; padding: 15px; border-radius: 10px; }
+        .subject-progress-item { flex: 1; min-width: 150px; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .subject-progress-item:hover { transform: translateY(-2px); background: #f5f5f5; }
+        .progress-bar { height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; margin: 5px 0; }
+        .progress-fill { height: 100%; background: #4caf50; transition: width 0.3s; }
         
-        .btn-success:hover {
-            background-color: #218838;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
-        }
-        
-        .btn-danger {
-            background-color: var(--danger-color);
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background-color: #c82333;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
-        }
-        
-        .btn-warning {
-            background-color: var(--warning-color);
-            color: #212529;
-        }
-        
-        .btn-warning:hover {
-            background-color: #e0a800;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #3a5a8c;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(74, 111, 165, 0.3);
-        }
-        
-        .btn-outline {
-            background-color: transparent;
-            border: 2px solid #e0e0e0;
-            color: #555;
-        }
-        
-        .btn-outline:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-            background-color: rgba(74, 111, 165, 0.05);
-            transform: translateY(-2px);
-        }
-        
-        .score-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        /* 表单样式 */
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #555;
-        }
-        
-        select, textarea, input[type="number"], input[type="password"], input[type="text"] {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-        
-        select:focus, textarea:focus, input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
-        }
-        
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        
-        /* 快速操作区域 */
-        .quick-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-        }
-        
-        .week-check {
-            margin: 20px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: var(--border-radius);
-        }
-        
-        /* 历史记录样式 */
-        #historyList {
-            max-height: 500px;
-            overflow-y: auto;
-            margin-top: 15px;
-            border-radius: var(--border-radius);
-            border: 1px solid #e0e0e0;
-        }
-        
-        .history-item {
-            padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .history-item.positive {
-            background-color: rgba(40, 167, 69, 0.05);
-            border-left: 4px solid var(--success-color);
-        }
-        
-        .history-item.negative {
-            background-color: rgba(220, 53, 69, 0.05);
-            border-left: 4px solid var(--danger-color);
-        }
-        
-        .history-item.homework {
-            background-color: rgba(23, 162, 184, 0.05);
-            border-left: 4px solid var(--info-color);
-        }
-        
-        /* 宠物网格布局：一排6个 */
-        .pet-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .pet-card {
-            background: linear-gradient(135deg, #fff9e6, #fff);
-            border-radius: 20px;
-            padding: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: 0.2s;
-            border: 1px solid #ffe0b5;
-            text-align: center;
-        }
+        /* 宠物网格 */
+        .pet-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; margin-top: 20px; }
+        .pet-card { background: linear-gradient(135deg, #fff9e6, #fff); border-radius: 20px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: 0.2s; border: 1px solid #ffe0b5; text-align: center; }
         .pet-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
         .pet-avatar { font-size: 3rem; margin-bottom: 8px; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2)); }
         .pet-name { font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -486,78 +131,18 @@
         .pet-stats { font-size: 0.75rem; color: #666; margin: 8px 0; display: flex; justify-content: space-between; }
         .pet-feed-btn { background: #ff9800; color: white; border: none; padding: 6px 10px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; width: 100%; margin-top: 8px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
         .pet-feed-btn:disabled { background: #ccc; cursor: not-allowed; }
-        .pet-feed-btn:hover:not(:disabled) { background: #e68900; }
         .badge-egg { background: #f9e0a0; color: #a5673f; }
         .badge-baby { background: #b3e5fc; color: #0277bd; }
         .badge-adult { background: #c8e6c9; color: #2e7d32; }
+        @media (max-width: 1200px) { .pet-grid, .student-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 800px) { .pet-grid, .student-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 600px) { .pet-grid, .student-grid { grid-template-columns: repeat(2, 1fr); } }
         
-        @media (max-width: 1200px) { .pet-grid { grid-template-columns: repeat(4, 1fr); } }
-        @media (max-width: 800px) { .pet-grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 600px) { .pet-grid { grid-template-columns: repeat(2, 1fr); } }
-        
-        /* 作业消消乐游戏界面 */
-        .homework-game {
-            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-        .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
-        .game-title { display: flex; align-items: center; gap: 15px; color: #2e7d32; }
-        .subject-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; justify-content: center; }
-        .subject-btn { padding: 12px 20px; border-radius: var(--border-radius); border: none; cursor: pointer; font-weight: 500; transition: all 0.3s; }
-        .subject-btn.active { border: 2px solid #2e7d32; transform: translateY(-2px); }
-        .game-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-box { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .stat-box-value { font-size: 1.8rem; font-weight: bold; color: var(--primary-color); }
-        .student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; max-height: 500px; overflow-y: auto; padding: 10px; background: rgba(255,255,255,0.7); border-radius: 10px; }
-        .student-card { background: white; border-radius: 10px; padding: 15px 10px; text-align: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 2px solid transparent; }
-        .student-card:hover { transform: translateY(-3px); border-color: #4caf50; }
-        .student-card.completed { opacity: 0.6; background: #c8e6c9; text-decoration: line-through; pointer-events: none; }
-        .subject-progress-summary { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px; background: white; padding: 15px; border-radius: 10px; }
-        .subject-progress-item { flex: 1; min-width: 150px; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; }
-        .progress-bar { height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; margin: 5px 0; }
-        .progress-fill { height: 100%; background: #4caf50; transition: width 0.3s; }
-        
-        /* 页脚样式 */
-        footer {
-            text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            color: #666;
-            font-size: 0.9rem;
-            border-top: 1px solid #e0e0e0;
-        }
-        
-        /* 消息提示 */
-        .game-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(46, 125, 50, 0.9);
-            color: white;
-            padding: 20px 40px;
-            border-radius: 10px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            z-index: 2000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-            backdrop-filter: blur(10px);
-        }
+        footer { text-align: center; margin-top: 30px; padding: 20px; color: #666; font-size: 0.9rem; border-top: 1px solid #e0e0e0; }
+        .game-message { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(46,125,50,0.9); color: white; padding: 20px 40px; border-radius: 10px; font-size: 1.5rem; font-weight: bold; z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(10px); }
         .game-message.show { opacity: 1; }
-        
-        /* 模态框 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; overflow: auto; }
         .modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 15px; width: 90%; max-width: 800px; max-height: 80vh; overflow-y: auto; }
-        
-        @media (max-width: 768px) {
-            .pet-grid { grid-template-columns: repeat(3, 1fr); }
-            .student-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
-            .navbar .nav-item { padding: 10px 15px; font-size: 0.9rem; }
-        }
     </style>
 </head>
 <body>
@@ -589,38 +174,81 @@
     </header>
     
     <div class="main-content">
-        <!-- 学生列表 -->
+        <!-- 学生列表 - 网格卡片 -->
         <div class="tab-content active" id="student-list">
-            <div class="card"><h3 class="card-title"><i class="fas fa-users"></i> 学生列表</h3>
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-users"></i> 学生列表</h3>
                 <div class="search-box"><input type="text" id="searchInput" placeholder="搜索学生姓名..."></div>
-                <div style="overflow-x: auto;"><table><thead><tr><th>序号</th><th>姓名</th><th>当前积分</th><th>本周扣分</th><th>作业奖励</th><th>操作</th></tr></thead><tbody id="studentTable"></tbody></table></div>
+                <div id="studentGridContainer" class="student-grid"></div>
             </div>
         </div>
         
-        <!-- 积分操作 -->
+        <!-- 积分操作 - 完整版 -->
         <div class="tab-content" id="add-points">
-            <div class="card"><h3 class="card-title"><i class="fas fa-plus-minus"></i> 积分操作</h3>
-                <div class="input-group"><label>选择学生</label><select id="studentSelect"><option>请选择学生</option></select></div>
-                <div class="input-group"><label>扣分项</label><div class="quick-actions" id="quickDeduct"></div></div>
-                <div class="input-group"><label>加分项</label><div class="quick-actions" id="quickAdd"></div></div>
-                <div class="input-group"><label>自定义积分变动</label><div class="score-controls"><button class="btn btn-outline btn-sm" data-change="-5">-5</button><button class="btn btn-outline btn-sm" data-change="-2">-2</button><button class="btn btn-outline btn-sm" data-change="-1">-1</button><input type="number" id="pointsChange" value="1" min="-50" max="50" style="width:80px;text-align:center;"><button class="btn btn-outline btn-sm" data-change="1">+1</button><button class="btn btn-outline btn-sm" data-change="2">+2</button><button class="btn btn-outline btn-sm" data-change="5">+5</button></div></div>
-                <div class="input-group"><label>变动原因</label><textarea id="reason" rows="2" placeholder="请输入原因..."></textarea></div>
-                <div class="form-actions"><button class="btn btn-success" id="addPointsBtn">确认加分</button><button class="btn btn-danger" id="subtractPointsBtn">确认扣分</button><button class="btn btn-outline" id="resetFormBtn">重置</button></div>
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-plus-minus"></i> 积分操作</h3>
+                <div class="input-group">
+                    <label for="studentSelect">选择学生</label>
+                    <select id="studentSelect"><option>请选择学生</option></select>
+                </div>
+                <div class="input-group">
+                    <label>扣分项</label>
+                    <div class="quick-actions" id="quickDeduct"></div>
+                </div>
+                <div class="input-group">
+                    <label>加分项</label>
+                    <div class="quick-actions" id="quickAdd"></div>
+                </div>
+                <div class="input-group">
+                    <label for="pointsChange">自定义积分变动</label>
+                    <div class="score-controls">
+                        <button class="btn btn-outline btn-sm" data-change="-5">-5</button>
+                        <button class="btn btn-outline btn-sm" data-change="-2">-2</button>
+                        <button class="btn btn-outline btn-sm" data-change="-1">-1</button>
+                        <input type="number" id="pointsChange" value="1" min="-50" max="50" style="width: 80px; text-align: center;">
+                        <button class="btn btn-outline btn-sm" data-change="1">+1</button>
+                        <button class="btn btn-outline btn-sm" data-change="2">+2</button>
+                        <button class="btn btn-outline btn-sm" data-change="5">+5</button>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="reason">变动原因</label>
+                    <textarea id="reason" rows="3" placeholder="请输入加分/扣分原因..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-success" id="addPointsBtn"><i class="fas fa-plus-circle"></i> 确认加分</button>
+                    <button class="btn btn-danger" id="subtractPointsBtn"><i class="fas fa-minus-circle"></i> 确认扣分</button>
+                    <button class="btn btn-outline" id="resetFormBtn"><i class="fas fa-redo"></i> 重置</button>
+                </div>
             </div>
         </div>
         
-        <!-- 作业消消乐 (简化但保留完整交互逻辑) -->
+        <!-- 作业消消乐 - 完整多科目独立版本 -->
         <div class="tab-content" id="homework-game">
-            <div class="card"><h3 class="card-title"><i class="fas fa-gamepad"></i> 作业消消乐</h3>
-                <div class="homework-game"><div class="game-header"><div class="game-title"><i class="fas fa-gamepad"></i><h3>多科目作业消消乐</h3></div><div><button class="btn btn-success" id="startHomeworkGame">开始游戏</button><button class="btn btn-warning" id="resetCurrentSubject">重置科目</button></div></div>
-                <div class="subject-selector" id="subjectSelector"></div>
-                <div class="game-stats"><div class="stat-box"><div class="stat-box-value" id="gameRemaining">0</div><div>剩余学生</div></div><div class="stat-box"><div class="stat-box-value" id="gameCompleted">0</div><div>已完成</div></div><div class="stat-box"><div class="stat-box-value" id="gameCurSubject">英语</div><div>当前科目</div></div></div>
-                <div class="student-grid" id="homeworkGrid"></div>
-                <div class="subject-progress-summary" id="subjectProgressSummary"></div></div>
+            <div class="card">
+                <div class="homework-game">
+                    <div class="game-header">
+                        <div class="game-title"><i class="fas fa-gamepad fa-2x"></i><h3>作业消消乐 - 多科目独立进度</h3></div>
+                        <div class="game-controls">
+                            <button class="btn btn-success" id="startHomeworkGame"><i class="fas fa-play-circle"></i> 开始游戏</button>
+                            <button class="btn btn-warning" id="resetCurrentSubject"><i class="fas fa-redo"></i> 重置当前科目</button>
+                            <button class="btn btn-danger" id="resetAllSubjects"><i class="fas fa-bomb"></i> 重置所有科目</button>
+                        </div>
+                    </div>
+                    <div class="subject-selector" id="subjectSelector"></div>
+                    <div class="game-stats">
+                        <div class="stat-box"><div class="stat-box-value" id="gameRemainingStudents">0</div><div class="stat-box-label">当前科目剩余学生</div></div>
+                        <div class="stat-box"><div class="stat-box-value" id="gameCompletedStudents">0</div><div class="stat-box-label">当前科目已完成</div></div>
+                        <div class="stat-box"><div class="stat-box-value" id="gameCurrentSubject">英语</div><div class="stat-box-label">当前科目</div></div>
+                        <div class="stat-box"><div class="stat-box-value" id="gameSubjectBonus">0</div><div class="stat-box-label">当前科目加分</div></div>
+                    </div>
+                    <div class="student-grid-homework" id="homeworkGrid"></div>
+                    <div class="subject-progress-summary" id="subjectProgressSummary"></div>
+                </div>
             </div>
         </div>
         
-        <!-- 电子宠物标签页 -->
+        <!-- 电子宠物 -->
         <div class="tab-content" id="pet">
             <div class="card">
                 <h3 class="card-title"><i class="fas fa-dog"></i> 电子宠物 · 离线不挨饿（周末不计饥饿）</h3>
@@ -633,16 +261,21 @@
         
         <!-- 快速操作 -->
         <div class="tab-content" id="quick-actions">
-            <div class="card"><h3 class="card-title"><i class="fas fa-bolt"></i> 快速操作</h3>
-                <div class="week-check"><input type="checkbox" id="allWeekCheck"><label>为本周没有扣分记录的所有学生加分</label></div>
-                <div class="form-actions"><button class="btn btn-success" id="applyWeekBonus">应用本周不扣分奖励 (+2分)</button></div>
-                <div class="quick-actions"><button class="btn btn-outline" id="resetWeekDeductions">重置本周扣分记录</button><button class="btn btn-danger" id="clearAllPoints">清空所有积分</button></div>
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-bolt"></i> 快速操作</h3>
+                <div class="week-check"><input type="checkbox" id="allWeekCheck"><label for="allWeekCheck">为本周没有扣分记录的所有学生加分</label></div>
+                <div class="form-actions"><button class="btn btn-success" id="applyWeekBonus"><i class="fas fa-gift"></i> 应用本周不扣分奖励 (+2分)</button></div>
+                <div class="quick-actions"><button class="btn btn-outline" id="resetWeekDeductions"><i class="fas fa-redo"></i> 重置本周扣分记录</button><button class="btn btn-danger" id="clearAllPoints"><i class="fas fa-eraser"></i> 清空所有积分</button></div>
             </div>
         </div>
         
         <!-- 积分历史 -->
         <div class="tab-content" id="history">
-            <div class="card"><h3 class="card-title"><i class="fas fa-history"></i> 积分历史</h3><select id="historyFilter"><option value="all">全部记录</option><option value="positive">加分记录</option><option value="negative">扣分记录</option></select><div id="historyList"></div></div>
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-history"></i> 积分历史</h3>
+                <div class="input-group"><select id="historyFilter"><option value="all">全部记录</option><option value="today">今日记录</option><option value="week">本周记录</option><option value="positive">加分记录</option><option value="negative">扣分记录</option><option value="homework">作业奖励记录</option></select></div>
+                <div id="historyList"></div>
+            </div>
         </div>
         
         <!-- 排行榜 -->
@@ -653,15 +286,17 @@
         <!-- 数据管理 -->
         <div class="tab-content" id="data-management">
             <div class="card"><h3 class="card-title"><i class="fas fa-database"></i> 数据管理</h3>
-                <div class="quick-actions"><button class="btn btn-success" id="exportDataBtn">导出数据</button><button class="btn btn-primary" id="importDataBtn">导入数据</button><input type="file" id="importFile" style="display:none;"></div>
-                <div class="input-group"><label>数据重置</label><div class="quick-actions"><button class="btn btn-warning" id="resetGameDataBtn">重置游戏数据</button><button class="btn btn-danger" id="resetAllDataBtn">重置所有数据</button></div></div>
+                <div class="quick-actions"><button class="btn btn-success" id="exportDataBtn"><i class="fas fa-download"></i> 导出数据</button><button class="btn btn-primary" id="importDataBtn"><i class="fas fa-upload"></i> 导入数据</button><input type="file" id="importFile" style="display:none;"></div>
+                <div class="input-group"><label>数据重置</label><div class="quick-actions"><button class="btn btn-warning" id="resetGameDataBtn"><i class="fas fa-redo"></i> 重置游戏数据</button><button class="btn btn-danger" id="resetAllDataBtn"><i class="fas fa-trash"></i> 重置所有数据</button></div></div>
                 <div id="dataStats"></div>
             </div>
         </div>
         
         <!-- 积分规则 -->
         <div class="tab-content" id="rules">
-            <div class="card"><h3 class="card-title"><i class="fas fa-sliders-h"></i> 积分规则</h3><div><h4>加分规则</h4><ul><li>参与学校活动：+1分</li><li>获奖：+2分</li><li>好人好事：+3分</li><li>提前完成作业：+1分</li><li>作业消消乐：每完成一科作业 +1分</li><li>本周无扣分记录：+2分</li></ul><h4>扣分规则</h4><ul><li>不交作业/垃圾分类等 -1分</li><li>抄作业 -2分</li><li>在厕所聚集 -5分</li></ul><h4>电子宠物规则</h4><ul><li>喂食消耗积分，周末不扣饥饿值</li><li>宠物饱腹度达到阈值可进化</li><li>长期不喂会降级</li></ul></div></div>
+            <div class="card"><h3 class="card-title"><i class="fas fa-sliders-h"></i> 积分规则</h3>
+                <div><h4>加分规则</h4><ul><li>参与学校活动：+1分</li><li>获奖：+2分</li><li>好人好事：+3分</li><li>提前完成作业：+1分</li><li>作业消消乐：每完成一科作业 +1分</li><li>本周无扣分记录：+2分</li></ul><h4>扣分规则</h4><ul><li>垃圾分类不当：-1分</li><li>打扫卫生不及时：-1分</li><li>不交作业：-1分</li><li>抄作业：-2分</li><li>排队讲话：-1分</li><li>队伍不整齐：-1分</li><li>上课睡觉：-1分</li><li>上课吃零食：-1分</li><li>眼保健操不认真做：-2分</li><li>在厕所聚集：-5分</li><li>在厕所扔垃圾：-5分</li></ul><h4>作业消消乐规则</h4><ul><li>每个科目独立计算进度</li><li>点击学生卡片即可标记为完成该科目作业</li><li>每完成一科作业，学生获得+1分</li><li>所有学生完成当前科目后，可切换其他科目</li></ul><h4>电子宠物规则</h4><ul><li>喂食消耗积分，周末不扣饥饿值</li><li>宠物饱腹度达到阈值可进化</li><li>长期不喂会降级</li></ul></div>
+            </div>
         </div>
     </div>
     <footer><p>720班积分管理系统 &copy; 2025 | 数据存储于腾讯云COS | 最后保存：<span id="lastSaveTime">-</span></p></footer>
@@ -669,22 +304,24 @@
 <div class="game-message" id="gameMessage"></div>
 
 <script>
-    // COS配置 (与原一致)
+    // COS配置（与原始文件一致）
     const cosConfig = { SecretId: 'AKIDXsyve7LJ4bu0wc4GExue8PRDvOcaIm36', SecretKey: 'tXw61g5FBsKZYIm10jDTYO4UfaGgqlQp', Bucket: 'class-homework-1257663765', Region: 'ap-beijing', Folder: 'class720/' };
     const cos = new COS({ SecretId: cosConfig.SecretId, SecretKey: cosConfig.SecretKey });
     function getCosFilePath(f) { return cosConfig.Folder + f; }
     async function uploadToCOS(f, d) { return new Promise((res,rej)=>{ cos.putObject({ Bucket:cosConfig.Bucket, Region:cosConfig.Region, Key:getCosFilePath(f), Body:JSON.stringify(d,null,2) },(err,data)=> err?rej(err):res(data)); }); }
     async function downloadFromCOS(f) { return new Promise((res)=>{ cos.getObject({ Bucket:cosConfig.Bucket, Region:cosConfig.Region, Key:getCosFilePath(f) },(err,data)=>{ if(err&&err.statusCode===404) res(null); else if(err) res(null); else try{ res(JSON.parse(data.Body.toString())); }catch(e){ res(null); } }); }); }
     
-    // 初始学生数据
-    const initialStudents = [
-        { id:1, name:"刘嘉琪", score:0, weekDeductions:0, homeworkBonus:0 },{ id:2, name:"张邹奕辕", score:0, weekDeductions:0, homeworkBonus:0 },{ id:3, name:"袁子杰", score:0, weekDeductions:0, homeworkBonus:0 },{ id:4, name:"陈紫嫣", score:0, weekDeductions:0, homeworkBonus:0 },{ id:5, name:"张梓慧", score:0, weekDeductions:0, homeworkBonus:0 },{ id:6, name:"朱可依", score:0, weekDeductions:0, homeworkBonus:0 },{ id:7, name:"陈睿熙", score:0, weekDeductions:0, homeworkBonus:0 },{ id:8, name:"陶羽辰", score:0, weekDeductions:0, homeworkBonus:0 },{ id:9, name:"何骏楠", score:0, weekDeductions:0, homeworkBonus:0 },{ id:10, name:"沈晓希", score:0, weekDeductions:0, homeworkBonus:0 },{ id:11, name:"张雨桐", score:0, weekDeductions:0, homeworkBonus:0 },{ id:12, name:"徐缪昊宇", score:0, weekDeductions:0, homeworkBonus:0 },{ id:13, name:"陆熙桐", score:0, weekDeductions:0, homeworkBonus:0 },{ id:14, name:"叶梓曦", score:0, weekDeductions:0, homeworkBonus:0 },{ id:15, name:"施睿凡", score:0, weekDeductions:0, homeworkBonus:0 },{ id:16, name:"俞郁琛", score:0, weekDeductions:0, homeworkBonus:0 },{ id:17, name:"包江涛", score:0, weekDeductions:0, homeworkBonus:0 },{ id:18, name:"孙梓欣", score:0, weekDeductions:0, homeworkBonus:0 },{ id:19, name:"梁奕涵", score:0, weekDeductions:0, homeworkBonus:0 },{ id:20, name:"摇可毓", score:0, weekDeductions:0, homeworkBonus:0 },{ id:21, name:"荀皓晨", score:0, weekDeductions:0, homeworkBonus:0 },{ id:22, name:"高亦扬", score:0, weekDeductions:0, homeworkBonus:0 },{ id:23, name:"杨紫晴", score:0, weekDeductions:0, homeworkBonus:0 },{ id:24, name:"许喆赫", score:0, weekDeductions:0, homeworkBonus:0 },{ id:25, name:"吴思童", score:0, weekDeductions:0, homeworkBonus:0 },{ id:26, name:"王翊可", score:0, weekDeductions:0, homeworkBonus:0 },{ id:27, name:"李宛谣", score:0, weekDeductions:0, homeworkBonus:0 },{ id:28, name:"李永欣", score:0, weekDeductions:0, homeworkBonus:0 },{ id:29, name:"魏思晨", score:0, weekDeductions:0, homeworkBonus:0 },{ id:30, name:"周柏钧", score:0, weekDeductions:0, homeworkBonus:0 },{ id:31, name:"张俊熙", score:0, weekDeductions:0, homeworkBonus:0 },{ id:32, name:"谭富强", score:0, weekDeductions:0, homeworkBonus:0 },{ id:33, name:"纪瑾萱", score:0, weekDeductions:0, homeworkBonus:0 },{ id:34, name:"陈兴宇", score:0, weekDeductions:0, homeworkBonus:0 },{ id:35, name:"沈潘恺宇", score:0, weekDeductions:0, homeworkBonus:0 },{ id:36, name:"杨宇康", score:0, weekDeductions:0, homeworkBonus:0 },{ id:37, name:"胡思琪", score:0, weekDeductions:0, homeworkBonus:0 },{ id:38, name:"杨静怡", score:0, weekDeductions:0, homeworkBonus:0 },{ id:39, name:"杨雨航", score:0, weekDeductions:0, homeworkBonus:0 },{ id:40, name:"何宸誉", score:0, weekDeductions:0, homeworkBonus:0 },{ id:41, name:"郎子怡", score:0, weekDeductions:0, homeworkBonus:0 },{ id:42, name:"姚金睿", score:0, weekDeductions:0, homeworkBonus:0 },{ id:43, name:"钱紫萱", score:0, weekDeductions:0, homeworkBonus:0 },{ id:44, name:"张文昊", score:0, weekDeductions:0, homeworkBonus:0 },{ id:45, name:"周博学", score:0, weekDeductions:0, homeworkBonus:0 },{ id:46, name:"邵佳毅", score:0, weekDeductions:0, homeworkBonus:0 }
-    ];
+    // 初始学生数据（46人）
+    const studentNames = ["刘嘉琪","张邹奕辕","袁子杰","陈紫嫣","张梓慧","朱可依","陈睿熙","陶羽辰","何骏楠","沈晓希","张雨桐","徐缪昊宇","陆熙桐","叶梓曦","施睿凡","俞郁琛","包江涛","孙梓欣","梁奕涵","摇可毓","荀皓晨","高亦扬","杨紫晴","许喆赫","吴思童","王翊可","李宛谣","李永欣","魏思晨","周柏钧","张俊熙","谭富强","纪瑾萱","陈兴宇","沈潘恺宇","杨宇康","胡思琪","杨静怡","杨雨航","何宸誉","郎子怡","姚金睿","钱紫萱","张文昊","周博学","邵佳毅"];
+    const initialStudents = studentNames.map((name, idx) => ({ id: idx+1, name, score: 0, weekDeductions: 0, homeworkBonus: 0 }));
     
-    let students = [], history = [], homeworkHistory = [], settings = {}, gameState = {};
-    let pets = {};  // 宠物数据 { studentId: { level, hunger, lastFeedTime } }
+    let students = [], history = [], homeworkHistory = [], settings = {};
+    let pets = {};
+    let gameState = { currentSubject: "英语", isActive: false, subjects: {} };
+    const subjects = ["语文","数学","英语","科学","社会","道法"];
+    subjects.forEach(sub => { gameState.subjects[sub] = { completedStudents: [], subjectBonus: 0, isActive: false }; });
     
-    // 宠物等级配置
+    // 宠物配置
     const PET_LEVELS = {
         0: { name:"🥚 蛋", icon:"🥚", hungerDecayPerHour:2.0, feedCost:3, feedGain:30, evolveThreshold:80, evolveTo:1 },
         1: { name:"🐣 幼崽", icon:"🐣", hungerDecayPerHour:1.2, feedCost:5, feedGain:25, evolveThreshold:80, evolveTo:2 },
@@ -693,147 +330,324 @@
     const MAX_HUNGER = 100;
     const INIT_HUNGER = 70;
     
-    // 计算工作日小时数（排除周末）
-    function getWeekdayHours(startDate, endDate) {
-        let totalHours = 0;
-        let current = new Date(startDate);
-        const end = new Date(endDate);
-        while (current < end) {
-            const day = current.getDay();
-            if (day !== 0 && day !== 6) totalHours += 1;
-            current.setHours(current.getHours() + 1);
-        }
-        return totalHours;
-    }
+    // 工具函数
+    function getWeekdayHours(start, end) { let h=0, cur=new Date(start); while(cur<end){ if(cur.getDay()!==0 && cur.getDay()!==6) h++; cur.setHours(cur.getHours()+1); } return h; }
+    function getWeekStartDate(){ let d=new Date(); let day=d.getDay(); let diff=day===0?6:day-1; let m=new Date(d); m.setDate(d.getDate()-diff); return m.toDateString(); }
+    function showGameMessage(msg) { let el=document.getElementById('gameMessage'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2000); }
     
-    // 应用离线时间扣除饥饿（仅工作日）
-    function applyOfflineTime() {
-        const now = new Date();
-        for (let student of students) {
-            let pet = pets[student.id];
-            if (!pet) continue;
-            const last = new Date(pet.lastFeedTime);
-            if (last >= now) continue;
-            const offlineHours = getWeekdayHours(last, now);
-            if (offlineHours <= 0.1) continue;
-            const config = PET_LEVELS[pet.level];
-            let hungerDrop = offlineHours * config.hungerDecayPerHour;
-            let newHunger = pet.hunger - hungerDrop;
-            let levelChanged = false;
-            while (newHunger <= 0 && pet.level > 0) {
-                pet.level--;
-                levelChanged = true;
-                newHunger = MAX_HUNGER - 20;
-            }
-            if (pet.level === 0 && newHunger <= 0) newHunger = 10;
-            pet.hunger = Math.min(MAX_HUNGER, Math.max(0, newHunger));
-            pet.lastFeedTime = now.toISOString();
-            if (levelChanged) addHistoryRecord(student.id, 0, `宠物因饥饿降级为${PET_LEVELS[pet.level].name}`);
-        }
-    }
-    
-    // 喂食宠物
-    function feedPet(studentId) {
-        const student = students.find(s => s.id === studentId);
-        if (!student) return false;
-        let pet = pets[studentId];
-        if (!pet) return false;
-        const config = PET_LEVELS[pet.level];
-        if (student.score < config.feedCost) { showGameMessage(`积分不足，喂食需要${config.feedCost}分`); return false; }
-        student.score -= config.feedCost;
-        addHistoryRecord(studentId, -config.feedCost, `喂食宠物(${config.name})`);
-        let newHunger = pet.hunger + config.feedGain;
-        let evolved = false;
-        if (pet.level < 2 && newHunger >= config.evolveThreshold && config.evolveTo !== null) {
-            pet.level = config.evolveTo;
-            newHunger = MAX_HUNGER - 10;
-            evolved = true;
-            addHistoryRecord(studentId, 0, `宠物进化到${PET_LEVELS[pet.level].name}`);
-            showGameMessage(`${student.name}的宠物进化啦！`);
-        }
-        pet.hunger = Math.min(MAX_HUNGER, newHunger);
-        pet.lastFeedTime = new Date().toISOString();
-        saveData();
-        renderPetGrid();
-        renderStudentTable(); renderRanking();
-        return true;
-    }
-    
-    // 渲染宠物网格
-    function renderPetGrid() {
-        const container = document.getElementById('petGrid');
-        if (!container) return;
-        container.innerHTML = '';
-        students.forEach(student => {
-            let pet = pets[student.id];
-            if (!pet) pet = { level:0, hunger:INIT_HUNGER, lastFeedTime:new Date().toISOString(), pets:{} };
-            const config = PET_LEVELS[pet.level];
-            const hungerPercent = (pet.hunger / MAX_HUNGER) * 100;
-            const canFeed = student.score >= config.feedCost;
-            const card = document.createElement('div'); card.className = 'pet-card';
-            card.innerHTML = `<div class="pet-avatar">${config.icon}</div><div class="pet-name">${student.name}</div><div class="pet-level ${pet.level===0?'badge-egg':(pet.level===1?'badge-baby':'badge-adult')}">${config.name}</div><div class="pet-hunger-bar"><div class="pet-hunger-fill" style="width:${hungerPercent}%; background:${hungerPercent<20?'#f44336':(hungerPercent<50?'#ff9800':'#4caf50')}"></div></div><div class="pet-stats"><span>饥饿:${Math.floor(pet.hunger)}/${MAX_HUNGER}</span><span>喂食:${config.feedCost}分</span></div><button class="pet-feed-btn" data-id="${student.id}" ${!canFeed?'disabled':''}><i class="fas fa-apple-alt"></i> 喂食</button><div style="font-size:0.65rem; margin-top:6px;">周末不掉饥饿</div>`;
-            container.appendChild(card);
-        });
-        document.querySelectorAll('.pet-feed-btn').forEach(btn => btn.addEventListener('click', (e) => feedPet(parseInt(btn.dataset.id))));
-    }
-    
-    // 辅助函数: 历史记录/显示消息等
+    // 积分操作核心
     function addHistoryRecord(sid, change, reason) {
         let student = students.find(s=>s.id===sid);
         if(!student) return;
         if(change<0) student.weekDeductions += Math.abs(change);
-        history.unshift({ id:Date.now(), studentId:sid, studentName:student.name, change, reason, timestamp:new Date().toISOString() });
+        const record = { id: Date.now(), studentId:sid, studentName:student.name, change, reason, timestamp:new Date().toISOString() };
+        history.unshift(record);
         if(history.length>500) history.pop();
         settings.todayChanges = (settings.todayChanges||0)+1;
+        if(reason.includes("作业")) settings.todayHomeworkBonus = (settings.todayHomeworkBonus||0)+1;
         saveData();
         renderHistory();
     }
-    function showGameMessage(msg) { let el=document.getElementById('gameMessage'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2000); }
-    function renderStudentTable() { let tbody=document.getElementById('studentTable'); if(tbody) tbody.innerHTML=students.map(s=>`<tr><td>${s.id}</td><td>${s.name}</td><td class="score-display">${s.score}</td><td>${s.weekDeductions}</td><td>${s.homeworkBonus}</td><td><button class="btn btn-sm btn-success quick-add" data-id="${s.id}" data-change="1">+1</button><button class="btn btn-sm btn-danger quick-subtract" data-id="${s.id}" data-change="1">-1</button></td></tr>`).join(''); attachQuickEvents(); }
+    
+    // 学生网格渲染（每行6个，加减1分）
+    function renderStudentGrid() {
+        const container = document.getElementById('studentGridContainer');
+        if(!container) return;
+        const keyword = document.getElementById('searchInput')?.value.toLowerCase() || '';
+        const filtered = students.filter(s => s.name.toLowerCase().includes(keyword));
+        container.innerHTML = filtered.map(s => `
+            <div class="student-card" data-id="${s.id}">
+                <div class="student-name">${s.name}</div>
+                <div class="student-score">${s.score} 分</div>
+                <div class="student-badges"><span>本周扣分:${s.weekDeductions}</span><span>作业奖励:${s.homeworkBonus}</span></div>
+                <div class="student-actions">
+                    <button class="btn-icon add" data-id="${s.id}" data-change="1"><i class="fas fa-plus"></i></button>
+                    <button class="btn-icon sub" data-id="${s.id}" data-change="-1"><i class="fas fa-minus"></i></button>
+                </div>
+            </div>
+        `).join('');
+        container.querySelectorAll('.btn-icon.add').forEach(btn=>btn.addEventListener('click',(e)=>{
+            e.stopPropagation();
+            const sid=parseInt(btn.dataset.id);
+            const reason=prompt('加分原因：','课堂表现');
+            if(reason) changeScore(sid,1,reason);
+        }));
+        container.querySelectorAll('.btn-icon.sub').forEach(btn=>btn.addEventListener('click',(e)=>{
+            e.stopPropagation();
+            const sid=parseInt(btn.dataset.id);
+            const reason=prompt('扣分原因：','违纪');
+            if(reason) changeScore(sid,-1,reason);
+        }));
+    }
+    function changeScore(sid, delta, reason) {
+        const student = students.find(s=>s.id===sid);
+        if(!student) return;
+        student.score += delta;
+        addHistoryRecord(sid, delta, reason);
+        renderStudentGrid();
+        renderRanking();
+        renderPetGrid();
+        populateSelect();
+        updateStatistics();
+    }
+    
+    // 宠物离线计算
+    function applyOfflineTime() {
+        const now=new Date();
+        students.forEach(s=>{
+            let p=pets[s.id];
+            if(!p) return;
+            let last=new Date(p.lastFeedTime);
+            if(last>=now) return;
+            let hours=getWeekdayHours(last,now);
+            if(hours<=0.1) return;
+            let conf=PET_LEVELS[p.level];
+            let newHunger=p.hunger - hours*conf.hungerDecayPerHour;
+            let levelChanged=false;
+            while(newHunger<=0 && p.level>0){ p.level--; levelChanged=true; newHunger=MAX_HUNGER-20; }
+            if(p.level===0 && newHunger<=0) newHunger=10;
+            p.hunger=Math.min(MAX_HUNGER,Math.max(0,newHunger));
+            p.lastFeedTime=now.toISOString();
+            if(levelChanged) addHistoryRecord(s.id,0,`宠物因饥饿降级为${PET_LEVELS[p.level].name}`);
+        });
+    }
+    function feedPet(sid){
+        let s=students.find(s=>s.id===sid); if(!s) return;
+        let p=pets[sid]; if(!p) return;
+        let conf=PET_LEVELS[p.level];
+        if(s.score<conf.feedCost){ showGameMessage(`积分不足，喂食需要${conf.feedCost}分`); return; }
+        s.score-=conf.feedCost;
+        addHistoryRecord(sid,-conf.feedCost,`喂食宠物(${conf.name})`);
+        let newHunger=p.hunger+conf.feedGain;
+        if(p.level<2 && newHunger>=conf.evolveThreshold && conf.evolveTo!==null){
+            p.level=conf.evolveTo;
+            newHunger=MAX_HUNGER-10;
+            addHistoryRecord(sid,0,`宠物进化到${PET_LEVELS[p.level].name}`);
+            showGameMessage(`${s.name}的宠物进化啦！`);
+        }
+        p.hunger=Math.min(MAX_HUNGER,newHunger);
+        p.lastFeedTime=new Date().toISOString();
+        saveData(); renderPetGrid(); renderStudentGrid(); renderRanking();
+    }
+    function renderPetGrid(){
+        let cont=document.getElementById('petGrid'); if(!cont) return;
+        cont.innerHTML='';
+        students.forEach(s=>{
+            let p=pets[s.id]||{level:0,hunger:INIT_HUNGER,lastFeedTime:new Date().toISOString()};
+            let conf=PET_LEVELS[p.level];
+            let percent=(p.hunger/MAX_HUNGER)*100;
+            let canFeed=s.score>=conf.feedCost;
+            cont.innerHTML+=`<div class="pet-card"><div class="pet-avatar">${conf.icon}</div><div class="pet-name">${s.name}</div><div class="pet-level ${p.level===0?'badge-egg':(p.level===1?'badge-baby':'badge-adult')}">${conf.name}</div><div class="pet-hunger-bar"><div class="pet-hunger-fill" style="width:${percent}%; background:${percent<20?'#f44336':(percent<50?'#ff9800':'#4caf50')}"></div></div><div class="pet-stats"><span>饥饿:${Math.floor(p.hunger)}/${MAX_HUNGER}</span><span>喂食:${conf.feedCost}分</span></div><button class="pet-feed-btn" data-id="${s.id}" ${!canFeed?'disabled':''}><i class="fas fa-apple-alt"></i> 喂食</button><div style="font-size:0.65rem;">周末不掉饥饿</div></div>`;
+        });
+        document.querySelectorAll('.pet-feed-btn').forEach(btn=>btn.addEventListener('click',()=>feedPet(parseInt(btn.dataset.id))));
+    }
+    
+    // 作业消消乐完整功能
+    function renderHomeworkGrid() {
+        const grid = document.getElementById('homeworkGrid');
+        if(!grid) return;
+        const subject = gameState.currentSubject;
+        const subjectState = gameState.subjects[subject];
+        const completed = subjectState.completedStudents;
+        const available = students.filter(s => !completed.includes(s.id));
+        grid.innerHTML = available.map(s => `<div class="homework-student-card" data-id="${s.id}"><div>${s.name}</div><div>${s.score}分</div></div>`).join('');
+        grid.querySelectorAll('.homework-student-card').forEach(card => {
+            card.addEventListener('click', () => {
+                if(!subjectState.isActive) { showGameMessage(`请先点击"开始游戏"开始${subject}科目游戏`); return; }
+                const sid = parseInt(card.dataset.id);
+                if(completed.includes(sid)) return;
+                const student = students.find(s=>s.id===sid);
+                if(student){
+                    student.score += 1;
+                    student.homeworkBonus += 1;
+                    addHistoryRecord(sid, 1, `${subject}作业奖励`);
+                    subjectState.completedStudents.push(sid);
+                    subjectState.subjectBonus += 1;
+                    renderHomeworkGrid();
+                    updateHomeworkStats();
+                    renderSubjectProgressSummary();
+                    renderStudentGrid();
+                    renderRanking();
+                    if(subjectState.completedStudents.length === students.length){
+                        showGameMessage(`🎉 ${subject}科目所有学生已完成！共加分 ${subjectState.subjectBonus} 分`);
+                        subjectState.isActive = false;
+                        updateHomeworkStats();
+                    }
+                }
+            });
+        });
+    }
+    function updateHomeworkStats(){
+        const subject = gameState.currentSubject;
+        const subjectState = gameState.subjects[subject];
+        document.getElementById('gameRemainingStudents').innerText = students.length - subjectState.completedStudents.length;
+        document.getElementById('gameCompletedStudents').innerText = subjectState.completedStudents.length;
+        document.getElementById('gameCurrentSubject').innerText = subject;
+        document.getElementById('gameSubjectBonus').innerText = subjectState.subjectBonus;
+        const startBtn = document.getElementById('startHomeworkGame');
+        if(subjectState.isActive) { startBtn.innerHTML='<i class="fas fa-play-circle"></i> 游戏中...'; startBtn.classList.remove('btn-success'); startBtn.classList.add('btn-warning'); }
+        else { startBtn.innerHTML='<i class="fas fa-play-circle"></i> 开始游戏'; startBtn.classList.remove('btn-warning'); startBtn.classList.add('btn-success'); }
+    }
+    function renderSubjectProgressSummary(){
+        const cont = document.getElementById('subjectProgressSummary');
+        if(!cont) return;
+        cont.innerHTML = subjects.map(sub => {
+            const state = gameState.subjects[sub];
+            const percent = students.length ? Math.round(state.completedStudents.length/students.length*100) : 0;
+            const isCurrent = sub === gameState.currentSubject;
+            return `<div class="subject-progress-item" data-sub="${sub}" style="${isCurrent?'border:2px solid #4caf50;background:#f1f8e9;':''}"><div>${sub} ${isCurrent?'(当前)':''}</div><div class="progress-bar"><div class="progress-fill" style="width:${percent}%"></div></div><div>${state.completedStudents.length}/${students.length} (${percent}%)</div><div style="font-size:0.8rem;">加分:${state.subjectBonus}</div></div>`;
+        }).join('');
+        document.querySelectorAll('.subject-progress-item').forEach(el => {
+            el.addEventListener('click', () => {
+                const sub = el.dataset.sub;
+                gameState.currentSubject = sub;
+                document.querySelectorAll('.subject-btn').forEach(btn => btn.classList.remove('active'));
+                const btn = document.querySelector(`.subject-btn[data-sub="${sub}"]`);
+                if(btn) btn.classList.add('active');
+                updateHomeworkStats();
+                renderHomeworkGrid();
+                renderSubjectProgressSummary();
+                showGameMessage(`已切换到 ${sub} 科目`);
+            });
+        });
+    }
+    function initHomeworkUI(){
+        const container = document.getElementById('subjectSelector');
+        if(container){
+            container.innerHTML = subjects.map(sub => `<button class="subject-btn ${sub===gameState.currentSubject?'active':''}" data-sub="${sub}">${sub}</button>`).join('');
+            document.querySelectorAll('.subject-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    gameState.currentSubject = btn.dataset.sub;
+                    document.querySelectorAll('.subject-btn').forEach(b=>b.classList.remove('active'));
+                    btn.classList.add('active');
+                    updateHomeworkStats();
+                    renderHomeworkGrid();
+                    renderSubjectProgressSummary();
+                });
+            });
+        }
+        renderHomeworkGrid();
+        updateHomeworkStats();
+        renderSubjectProgressSummary();
+    }
+    
+    // 其他渲染
     function renderRanking() { let sorted=[...students].sort((a,b)=>b.score-a.score); document.getElementById('rankingList').innerHTML=`<table><thead><tr><th>排名</th><th>姓名</th><th>积分</th></tr></thead><tbody>${sorted.map((s,i)=>`<tr><td>${i+1}</td><td>${s.name}</td><td>${s.score}</td></tr>`).join('')}</tbody></table>`; }
-    function renderHistory() { let filter=document.getElementById('historyFilter').value; let list=history.filter(r=> filter==='all'||(filter==='positive'&&r.change>0)||(filter==='negative'&&r.change<0)); document.getElementById('historyList').innerHTML=list.slice(0,100).map(r=>`<div class="history-item ${r.change>0?'positive':'negative'}"><div><b>${r.studentName}</b><br>${r.reason}<br><small>${new Date(r.timestamp).toLocaleString()}</small></div><div>${r.change>0?'+':''}${r.change}</div></div>`).join('')||'<div style="text-align:center">暂无记录</div>'; }
+    function renderHistory() {
+        let filter=document.getElementById('historyFilter').value;
+        let list=[...history];
+        if(filter==='today'){ let today=new Date().toDateString(); list=list.filter(r=>new Date(r.timestamp).toDateString()===today); }
+        else if(filter==='week'){ let weekStart=getWeekStartDate(); list=list.filter(r=>{ let d=new Date(r.timestamp); let day=d.getDay(); let diff=day===0?6:day-1; let m=new Date(d); m.setDate(d.getDate()-diff); return m.toDateString()===weekStart; }); }
+        else if(filter==='positive') list=list.filter(r=>r.change>0);
+        else if(filter==='negative') list=list.filter(r=>r.change<0);
+        else if(filter==='homework') list=list.filter(r=>r.reason && r.reason.includes('作业'));
+        document.getElementById('historyList').innerHTML=list.slice(0,100).map(r=>`<div class="history-item ${r.change>0?'positive':(r.change<0?'negative':'')}"><div><b>${r.studentName}</b><br>${r.reason}<br><small>${new Date(r.timestamp).toLocaleString()}</small></div><div>${r.change>0?'+':''}${r.change}</div></div>`).join('')||'<div style="text-align:center">暂无记录</div>';
+    }
     function updateStatistics() { let total=students.reduce((a,b)=>a+b.score,0); document.getElementById('totalPoints').innerText=total; document.getElementById('avgPoints').innerText=(total/students.length).toFixed(1); document.getElementById('todayChanges').innerText=settings.todayChanges||0; document.getElementById('homeworkBonusToday').innerText=settings.todayHomeworkBonus||0; }
-    function getWeekStartDate(){ let d=new Date(); let day=d.getDay(); let diff=day===0?6:day-1; let monday=new Date(d); monday.setDate(d.getDate()-diff); return monday.toDateString(); }
-    async function saveData() { settings.lastUpdate=new Date().toLocaleString(); await Promise.all([uploadToCOS('students.json',students), uploadToCOS('history.json',history), uploadToCOS('settings.json',settings), uploadToCOS('pets.json',pets)]); document.getElementById('lastSaveTime').innerText=settings.lastUpdate; }
+    function populateSelect(){ let sel=document.getElementById('studentSelect'); if(sel) sel.innerHTML=students.map(s=>`<option value="${s.id}">${s.name} (${s.score}分)</option>`).join(''); }
+    async function saveData() { settings.lastUpdate=new Date().toLocaleString(); await Promise.all([uploadToCOS('students.json',students), uploadToCOS('history.json',history), uploadToCOS('settings.json',settings), uploadToCOS('pets.json',pets), uploadToCOS('game_state.json',gameState)]); document.getElementById('lastSaveTime').innerText=settings.lastUpdate; }
     async function loadData() {
         students = (await downloadFromCOS('students.json')) || JSON.parse(JSON.stringify(initialStudents));
         history = (await downloadFromCOS('history.json')) || [];
         settings = (await downloadFromCOS('settings.json')) || { todayChanges:0, todayDate:new Date().toDateString(), weekStartDate:getWeekStartDate(), todayHomeworkBonus:0 };
         let petData = await downloadFromCOS('pets.json');
         pets = petData || {};
-        for(let stu of students) if(!pets[stu.id]) pets[stu.id] = { level:0, hunger:INIT_HUNGER, lastFeedTime:new Date().toISOString() };
+        let gs = await downloadFromCOS('game_state.json');
+        if(gs) gameState = gs;
+        else { subjects.forEach(sub=>{ gameState.subjects[sub]={ completedStudents:[], subjectBonus:0, isActive:false }; }); gameState.currentSubject="英语"; gameState.isActive=false; }
+        for(let s of students) if(!pets[s.id]) pets[s.id]={ level:0, hunger:INIT_HUNGER, lastFeedTime:new Date().toISOString() };
         applyOfflineTime();
-        renderStudentTable(); renderRanking(); renderHistory(); updateStatistics(); renderPetGrid(); populateSelect();
+        renderStudentGrid(); renderRanking(); renderHistory(); updateStatistics(); renderPetGrid(); populateSelect(); initHomeworkUI();
     }
-    function populateSelect(){ let sel=document.getElementById('studentSelect'); if(sel) sel.innerHTML=students.map(s=>`<option value="${s.id}">${s.name} (${s.score}分)</option>`).join(''); }
-    function attachQuickEvents(){ document.querySelectorAll('.quick-add').forEach(btn=>btn.addEventListener('click',e=>{ let sid=parseInt(btn.dataset.id); let s=students.find(s=>s.id===sid); if(s&&prompt(`为${s.name}加1分原因:`)){ s.score+=1; addHistoryRecord(sid,1,prompt('原因')); renderStudentTable(); renderPetGrid(); renderRanking(); } })); document.querySelectorAll('.quick-subtract').forEach(btn=>btn.addEventListener('click',e=>{ let sid=parseInt(btn.dataset.id); let s=students.find(s=>s.id===sid); if(s&&prompt(`为${s.name}扣1分原因:`)){ s.score-=1; addHistoryRecord(sid,-1,prompt('原因')); renderStudentTable(); renderPetGrid(); renderRanking(); } })); }
-    
-    // 作业消消乐简化（保留核心）
-    let homeworkSubjects=["语文","数学","英语","科学","社会","道法"], currentSubject="英语", completedMap={};
-    function renderHomework() { let grid=document.getElementById('homeworkGrid'); if(!grid) return; let subjState=completedMap[currentSubject]||[]; let available=students.filter(s=>!subjState.includes(s.id)); grid.innerHTML=available.map(s=>`<div class="student-card" data-id="${s.id}"><div>${s.name}</div><div>${s.score}分</div></div>`).join(''); document.querySelectorAll('#homeworkGrid .student-card').forEach(c=>c.addEventListener('click',()=>{ let sid=parseInt(c.dataset.id); if(!completedMap[currentSubject]) completedMap[currentSubject]=[]; if(!completedMap[currentSubject].includes(sid)){ completedMap[currentSubject].push(sid); let stu=students.find(s=>s.id===sid); if(stu){ stu.score+=1; stu.homeworkBonus+=1; addHistoryRecord(sid,1,`${currentSubject}作业奖励`); } renderHomework(); renderSubjectSummary(); } })); }
-    function renderSubjectSummary(){ let cont=document.getElementById('subjectProgressSummary'); if(cont) cont.innerHTML=homeworkSubjects.map(sub=>{ let done=completedMap[sub]?.length||0; let pct=students.length?Math.round(done/students.length*100):0; return `<div class="subject-progress-item" data-sub="${sub}"><div>${sub}</div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div>${done}/${students.length}</div></div>`; }).join(''); document.querySelectorAll('.subject-progress-item').forEach(el=>el.addEventListener('click',()=>{ currentSubject=el.dataset.sub; renderHomework(); document.getElementById('gameCurSubject').innerText=currentSubject; })); }
-    function initHomework(){ completedMap={}; for(let sub of homeworkSubjects) completedMap[sub]=[]; renderHomework(); renderSubjectSummary(); document.getElementById('startHomeworkGame')?.addEventListener('click',()=>showGameMessage(`${currentSubject}游戏开始！`)); document.getElementById('resetCurrentSubject')?.addEventListener('click',()=>{ if(confirm(`重置${currentSubject}进度？`)){ completedMap[currentSubject]=[]; renderHomework(); renderSubjectSummary(); } }); }
     
     // 事件绑定
-    document.querySelectorAll('.nav-item').forEach(item=>{ item.addEventListener('click',()=>{ let id=item.dataset.tab; document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active')); item.classList.add('active'); document.getElementById(id)?.classList.add('active'); if(id==='pet') renderPetGrid(); if(id==='homework-game'){ if(!completedMap[currentSubject]) initHomework(); renderHomework(); } }); });
-    document.getElementById('addPointsBtn')?.addEventListener('click',()=>{ let sid=parseInt(document.getElementById('studentSelect').value); let change=parseInt(document.getElementById('pointsChange').value); let reason=document.getElementById('reason').value; if(sid&&change>0&&reason){ let s=students.find(s=>s.id===sid); if(s){ s.score+=change; addHistoryRecord(sid,change,reason); renderStudentTable(); renderPetGrid(); renderRanking(); } } });
-    document.getElementById('subtractPointsBtn')?.addEventListener('click',()=>{ let sid=parseInt(document.getElementById('studentSelect').value); let change=parseInt(document.getElementById('pointsChange').value); let reason=document.getElementById('reason').value; if(sid&&change>0&&reason){ let s=students.find(s=>s.id===sid); if(s){ s.score-=change; addHistoryRecord(sid,-change,reason); renderStudentTable(); renderPetGrid(); renderRanking(); } } });
+    document.querySelectorAll('.nav-item').forEach(item=>{
+        item.addEventListener('click',()=>{
+            let id=item.dataset.tab;
+            document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+            item.classList.add('active');
+            document.getElementById(id)?.classList.add('active');
+            if(id==='pet') renderPetGrid();
+            if(id==='homework-game') initHomeworkUI();
+            if(id==='student-list') renderStudentGrid();
+        });
+    });
+    document.getElementById('addPointsBtn')?.addEventListener('click',()=>{
+        let sid=parseInt(document.getElementById('studentSelect').value);
+        let change=parseInt(document.getElementById('pointsChange').value);
+        let reason=document.getElementById('reason').value.trim();
+        if(!sid) return alert('请选择学生');
+        if(change<=0) return alert('加分值必须为正数');
+        if(!reason) return alert('请输入加分原因');
+        let s=students.find(s=>s.id===sid);
+        if(s){ s.score+=change; addHistoryRecord(sid,change,reason); renderStudentGrid(); renderPetGrid(); renderRanking(); updateStatistics(); populateSelect(); }
+    });
+    document.getElementById('subtractPointsBtn')?.addEventListener('click',()=>{
+        let sid=parseInt(document.getElementById('studentSelect').value);
+        let change=parseInt(document.getElementById('pointsChange').value);
+        let reason=document.getElementById('reason').value.trim();
+        if(!sid) return alert('请选择学生');
+        if(change<=0) return alert('扣分值必须为正数');
+        if(!reason) return alert('请输入扣分原因');
+        let s=students.find(s=>s.id===sid);
+        if(s){ s.score-=change; addHistoryRecord(sid,-change,reason); renderStudentGrid(); renderPetGrid(); renderRanking(); updateStatistics(); populateSelect(); }
+    });
     document.getElementById('resetFormBtn')?.addEventListener('click',()=>{ document.getElementById('studentSelect').value=''; document.getElementById('pointsChange').value=1; document.getElementById('reason').value=''; });
-    document.getElementById('applyWeekBonus')?.addEventListener('click',()=>{ students.forEach(s=>{ if(s.weekDeductions===0){ s.score+=2; addHistoryRecord(s.id,2,'本周无扣分奖励'); } }); renderStudentTable(); renderPetGrid(); renderRanking(); });
-    document.getElementById('resetWeekDeductions')?.addEventListener('click',()=>{ students.forEach(s=>s.weekDeductions=0); saveData(); renderStudentTable(); });
-    document.getElementById('clearAllPoints')?.addEventListener('click',()=>{ if(confirm('清空所有积分？')){ students.forEach(s=>{ s.score=0; s.weekDeductions=0; s.homeworkBonus=0; }); history=[]; homeworkHistory=[]; pets={}; for(let s of students) pets[s.id]={ level:0, hunger:INIT_HUNGER, lastFeedTime:new Date().toISOString() }; saveData(); renderStudentTable(); renderPetGrid(); renderRanking(); renderHistory(); } });
-    document.getElementById('exportDataBtn')?.addEventListener('click',()=>{ let data={students,history,pets,settings}; let a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)])); a.download='backup.json'; a.click(); });
+    document.getElementById('applyWeekBonus')?.addEventListener('click',()=>{
+        let allWeek=document.getElementById('allWeekCheck').checked;
+        let eligible=allWeek? students.filter(s=>s.weekDeductions===0) : students;
+        if(eligible.length===0) return alert('没有符合条件的学生');
+        if(confirm(`确定要为 ${eligible.length} 名学生添加本周不扣分奖励吗？`)){
+            eligible.forEach(s=>{ s.score+=2; addHistoryRecord(s.id,2,'本周不扣分奖励'); });
+            renderStudentGrid(); renderPetGrid(); renderRanking(); updateStatistics(); populateSelect();
+        }
+    });
+    document.getElementById('resetWeekDeductions')?.addEventListener('click',()=>{ if(confirm('重置本周扣分记录？')){ students.forEach(s=>s.weekDeductions=0); saveData(); renderStudentGrid(); } });
+    document.getElementById('clearAllPoints')?.addEventListener('click',()=>{ if(confirm('清空所有积分？此操作不可撤销！')){ students.forEach(s=>{ s.score=0; s.weekDeductions=0; s.homeworkBonus=0; }); history=[]; for(let s of students) pets[s.id]={ level:0, hunger:INIT_HUNGER, lastFeedTime:new Date().toISOString() }; saveData(); renderStudentGrid(); renderPetGrid(); renderRanking(); renderHistory(); updateStatistics(); populateSelect(); } });
+    document.getElementById('exportDataBtn')?.addEventListener('click',()=>{ let data={students,history,pets,gameState,settings}; let a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)])); a.download='backup.json'; a.click(); });
     document.getElementById('importDataBtn')?.addEventListener('click',()=>document.getElementById('importFile').click());
-    document.getElementById('importFile')?.addEventListener('change',(e)=>{ let file=e.target.files[0]; if(!file) return; let reader=new FileReader(); reader.onload=ev=>{ let d=JSON.parse(ev.target.result); if(d.students) students=d.students; if(d.history) history=d.history; if(d.pets) pets=d.pets; if(d.settings) settings=d.settings; saveData(); location.reload(); }; reader.readAsText(file); });
-    document.getElementById('resetGameDataBtn')?.addEventListener('click',()=>{ if(confirm('重置游戏数据(作业进度)')){ completedMap={}; for(let sub of homeworkSubjects) completedMap[sub]=[]; renderHomework(); renderSubjectSummary(); } });
-    document.getElementById('resetAllDataBtn')?.addEventListener('click',()=>{ if(confirm('重置所有数据')){ students=JSON.parse(JSON.stringify(initialStudents)); history=[]; pets={}; for(let s of students) pets[s.id]={ level:0, hunger:INIT_HUNGER, lastFeedTime:new Date().toISOString() }; settings={ todayChanges:0, todayDate:new Date().toDateString(), weekStartDate:getWeekStartDate() }; saveData(); location.reload(); } });
+    document.getElementById('importFile')?.addEventListener('change',(e)=>{ let file=e.target.files[0]; if(!file) return; let reader=new FileReader(); reader.onload=ev=>{ let d=JSON.parse(ev.target.result); if(d.students) students=d.students; if(d.history) history=d.history; if(d.pets) pets=d.pets; if(d.gameState) gameState=d.gameState; if(d.settings) settings=d.settings; saveData(); location.reload(); }; reader.readAsText(file); });
+    document.getElementById('resetGameDataBtn')?.addEventListener('click',()=>{ if(confirm('重置游戏数据（作业进度）')){ subjects.forEach(sub=>{ gameState.subjects[sub]={ completedStudents:[], subjectBonus:0, isActive:false }; }); gameState.currentSubject="英语"; saveData(); initHomeworkUI(); } });
+    document.getElementById('resetAllDataBtn')?.addEventListener('click',()=>{ if(confirm('重置所有数据')){ students=JSON.parse(JSON.stringify(initialStudents)); history=[]; pets={}; for(let s of students) pets[s.id]={ level:0, hunger:INIT_HUNGER, lastFeedTime:new Date().toISOString() }; settings={ todayChanges:0, todayDate:new Date().toDateString(), weekStartDate:getWeekStartDate(), todayHomeworkBonus:0 }; subjects.forEach(sub=>{ gameState.subjects[sub]={ completedStudents:[], subjectBonus:0, isActive:false }; }); gameState.currentSubject="英语"; saveData(); location.reload(); } });
     document.querySelectorAll('.score-controls button[data-change]').forEach(btn=>btn.addEventListener('click',()=>{ document.getElementById('pointsChange').value=parseInt(btn.dataset.change); }));
-    let qd=document.getElementById('quickDeduct'); if(qd){ let list=[{n:'垃圾分类',v:-1},{n:'不交作业',v:-1},{n:'抄作业',v:-2},{n:'上课睡觉',v:-1},{n:'在厕所聚集',v:-5}]; list.forEach(i=>{ let b=document.createElement('button'); b.className='btn btn-outline'; b.innerText=`${i.n} ${i.v}`; b.onclick=()=>{ document.getElementById('reason').value=i.n; document.getElementById('pointsChange').value=Math.abs(i.v); document.getElementById('subtractPointsBtn').click(); }; qd.appendChild(b); }); }
-    let qa=document.getElementById('quickAdd'); if(qa){ let list=[{n:'好人好事',v:3},{n:'获奖',v:2},{n:'提前完成作业',v:1}]; list.forEach(i=>{ let b=document.createElement('button'); b.className='btn btn-outline'; b.innerText=`${i.n} +${i.v}`; b.onclick=()=>{ document.getElementById('reason').value=i.n; document.getElementById('pointsChange').value=i.v; document.getElementById('addPointsBtn').click(); }; qa.appendChild(b); }); }
+    // 快捷扣分加分项（完整列表）
+    const deductList=[{name:"垃圾分类",val:-1},{name:"打扫卫生不及时",val:-1},{name:"不交作业",val:-1},{name:"抄作业",val:-2},{name:"排队讲话",val:-1},{name:"队伍不整齐",val:-1},{name:"上课睡觉",val:-1},{name:"上课吃零食",val:-1},{name:"眼保健操不认真做",val:-2},{name:"在厕所聚集",val:-5},{name:"在厕所扔垃圾",val:-5}];
+    const addList=[{name:"参与学校活动",val:1},{name:"获奖",val:2},{name:"好人好事",val:3},{name:"提前完成作业",val:1}];
+    let qd=document.getElementById('quickDeduct'); if(qd){ deductList.forEach(i=>{ let b=document.createElement('button'); b.className='btn btn-outline'; b.innerHTML=`<i class="fas fa-trash"></i> ${i.name} ${i.val}`; b.onclick=()=>{ document.getElementById('reason').value=i.name; document.getElementById('pointsChange').value=Math.abs(i.val); document.getElementById('subtractPointsBtn').click(); }; qd.appendChild(b); }); }
+    let qa=document.getElementById('quickAdd'); if(qa){ addList.forEach(i=>{ let b=document.createElement('button'); b.className='btn btn-outline'; b.innerHTML=`<i class="fas fa-plus"></i> ${i.name} +${i.val}`; b.onclick=()=>{ document.getElementById('reason').value=i.name; document.getElementById('pointsChange').value=i.val; document.getElementById('addPointsBtn').click(); }; qa.appendChild(b); }); }
     document.getElementById('historyFilter')?.addEventListener('change',()=>renderHistory());
-    document.getElementById('searchInput')?.addEventListener('input',()=>renderStudentTable());
+    document.getElementById('searchInput')?.addEventListener('input',()=>renderStudentGrid());
+    document.getElementById('startHomeworkGame')?.addEventListener('click',()=>{
+        let sub=gameState.currentSubject;
+        let state=gameState.subjects[sub];
+        if(state.completedStudents.length===students.length){ showGameMessage(`${sub}科目已全部完成，请切换到其他科目`); return; }
+        state.isActive=true;
+        updateHomeworkStats();
+        showGameMessage(`${sub}科目游戏开始！`);
+    });
+    document.getElementById('resetCurrentSubject')?.addEventListener('click',()=>{
+        let sub=gameState.currentSubject;
+        if(confirm(`确定要重置${sub}科目的游戏进度吗？已完成的加分将保留，但游戏进度会重置。`)){
+            gameState.subjects[sub]={ completedStudents:[], subjectBonus:0, isActive:false };
+            renderHomeworkGrid();
+            updateHomeworkStats();
+            renderSubjectProgressSummary();
+            saveData();
+        }
+    });
+    document.getElementById('resetAllSubjects')?.addEventListener('click',()=>{
+        if(confirm('确定要重置所有科目的游戏进度吗？')){
+            subjects.forEach(sub=>{ gameState.subjects[sub]={ completedStudents:[], subjectBonus:0, isActive:false }; });
+            renderHomeworkGrid();
+            updateHomeworkStats();
+            renderSubjectProgressSummary();
+            saveData();
+            showGameMessage('所有科目游戏已重置');
+        }
+    });
     
-    loadData().then(()=>{ initHomework(); populateSelect(); setInterval(saveData,30000); });
+    loadData().then(()=>{ setInterval(saveData,30000); });
 </script>
 </body>
 </html>
