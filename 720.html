@@ -265,7 +265,17 @@
                 <h3 class="card-title"><i class="fas fa-bolt"></i> 快速操作</h3>
                 <div class="week-check"><input type="checkbox" id="allWeekCheck"><label for="allWeekCheck">为本周没有扣分记录的所有学生加分</label></div>
                 <div class="form-actions"><button class="btn btn-success" id="applyWeekBonus"><i class="fas fa-gift"></i> 应用本周不扣分奖励 (+2分)</button></div>
-                <div class="quick-actions"><button class="btn btn-outline" id="resetWeekDeductions"><i class="fas fa-redo"></i> 重置本周扣分记录</button><button class="btn btn-danger" id="clearAllPoints"><i class="fas fa-eraser"></i> 清空所有积分</button></div>
+                
+                <!-- 新增：全班批量扣分按钮 -->
+                <div class="quick-actions" style="margin-top: 20px;">
+                    <button class="btn btn-danger" id="allDeduct1Btn"><i class="fas fa-users-slash"></i> 所有同学扣1分</button>
+                    <button class="btn btn-danger" id="allDeduct2Btn"><i class="fas fa-users-slash"></i> 所有同学扣2分</button>
+                </div>
+                
+                <div class="quick-actions" style="margin-top: 20px;">
+                    <button class="btn btn-outline" id="resetWeekDeductions"><i class="fas fa-redo"></i> 重置本周扣分记录</button>
+                    <button class="btn btn-danger" id="clearAllPoints"><i class="fas fa-eraser"></i> 清空所有积分</button>
+                </div>
             </div>
         </div>
         
@@ -389,6 +399,41 @@
         renderPetGrid();
         populateSelect();
         updateStatistics();
+    }
+    
+    // 全班批量扣分
+    function deductAllStudents(points) {
+        if (!students.length) return;
+        if (confirm(`确定要对全班 ${students.length} 名学生各扣 ${points} 分吗？每位学生积分减少 ${points} 分。`)) {
+            const reason = `全班统一扣分（每人扣${points}分）`;
+            const now = new Date().toISOString();
+            const newRecords = [];
+            let maxId = history.length > 0 ? Math.max(...history.map(h => h.id || 0)) : 0;
+            for (let student of students) {
+                student.score -= points;
+                student.weekDeductions += points;
+                maxId++;
+                newRecords.push({
+                    id: maxId,
+                    studentId: student.id,
+                    studentName: student.name,
+                    change: -points,
+                    reason: reason,
+                    timestamp: now
+                });
+            }
+            history.unshift(...newRecords);
+            if (history.length > 500) history = history.slice(0, 500);
+            settings.todayChanges = (settings.todayChanges || 0) + students.length;
+            saveData();
+            renderStudentGrid();
+            renderRanking();
+            renderPetGrid();
+            populateSelect();
+            updateStatistics();
+            renderHistory();
+            showGameMessage(`已为全体 ${students.length} 名学生各扣 ${points} 分`);
+        }
     }
     
     // 宠物离线计算
@@ -603,6 +648,11 @@
             renderStudentGrid(); renderPetGrid(); renderRanking(); updateStatistics(); populateSelect();
         }
     });
+    
+    // 新增批量扣分事件
+    document.getElementById('allDeduct1Btn')?.addEventListener('click', () => deductAllStudents(1));
+    document.getElementById('allDeduct2Btn')?.addEventListener('click', () => deductAllStudents(2));
+    
     document.getElementById('resetWeekDeductions')?.addEventListener('click',()=>{ if(confirm('重置本周扣分记录？')){ students.forEach(s=>s.weekDeductions=0); saveData(); renderStudentGrid(); } });
     document.getElementById('clearAllPoints')?.addEventListener('click',()=>{ if(confirm('清空所有积分？此操作不可撤销！')){ students.forEach(s=>{ s.score=0; s.weekDeductions=0; s.homeworkBonus=0; }); history=[]; for(let s of students) pets[s.id]={ level:0, hunger:INIT_HUNGER, lastFeedTime:new Date().toISOString() }; saveData(); renderStudentGrid(); renderPetGrid(); renderRanking(); renderHistory(); updateStatistics(); populateSelect(); } });
     document.getElementById('exportDataBtn')?.addEventListener('click',()=>{ let data={students,history,pets,gameState,settings}; let a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)])); a.download='backup.json'; a.click(); });
